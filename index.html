@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -11,83 +10,56 @@
 <style>
   html, body {
     margin: 0; padding: 0; width: 100%; height: 100%;
-    background: #10131a;
-    overflow: hidden;
-    touch-action: none;
+    background: #10131a; overflow: hidden; touch-action: none;
     -webkit-user-select: none; user-select: none;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
     font-synthesis: none;
   }
   #stage { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
   #canvasWrap { position: relative; line-height: 0; }
-  #game {
-    background: #10131a;
-    box-shadow: 0 0 0 4px #000, 0 0 24px rgba(0,0,0,0.6);
-    cursor: pointer;
-    display: block;
-  }
+  #game { background: #10131a; box-shadow: 0 0 0 4px #000, 0 0 24px rgba(0,0,0,0.6); cursor: pointer; display: block; }
   #hud { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
   .lbl {
-    position: absolute;
-    pointer-events: none;
+    position: absolute; pointer-events: none;
     font-family: 'Pretendard', 'Consolas', 'Malgun Gothic', monospace;
-    font-weight: 700;
-    white-space: pre;
-    line-height: 1;
-    letter-spacing: 0.02em;
-    text-shadow:
-      -1.5px -1.5px 0 rgba(0,0,0,0.9), 1.5px -1.5px 0 rgba(0,0,0,0.9),
-      -1.5px 1.5px 0 rgba(0,0,0,0.9), 1.5px 1.5px 0 rgba(0,0,0,0.9),
-      0 0 5px rgba(0,0,0,0.5);
+    font-weight: 700; white-space: pre; line-height: 1; letter-spacing: 0.02em;
+    text-shadow: -1.5px -1.5px 0 rgba(0,0,0,0.9), 1.5px -1.5px 0 rgba(0,0,0,0.9),
+                 -1.5px 1.5px 0 rgba(0,0,0,0.9), 1.5px 1.5px 0 rgba(0,0,0,0.9), 0 0 5px rgba(0,0,0,0.5);
   }
   #hint {
-    position: fixed; bottom: 6px; left: 0; right: 0;
-    text-align: center; color: #6b7280; font: 11px 'Pretendard', monospace;
-    pointer-events: none;
+    position: fixed; bottom: 6px; left: 0; right: 0; text-align: center;
+    color: #6b7280; font: 11px 'Pretendard', monospace; pointer-events: none;
   }
-
   .setup-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(8,10,16,0.82);
-    z-index: 20;
+    display: none; position: fixed; inset: 0; background: rgba(8,10,16,0.82); z-index: 20;
     align-items: center; justify-content: center;
     font-family: 'Pretendard', 'Segoe UI', 'Malgun Gothic', sans-serif;
   }
   .setup-card {
-    background: linear-gradient(#20242e, #14161d);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 10px;
-    padding: 20px 24px;
-    width: min(92vw, 640px);
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    background: linear-gradient(#20242e, #14161d); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px; padding: 20px 24px; width: min(94vw, 680px);
+    max-height: 90vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.5);
   }
   .setup-card h2 { color: #f0c95c; text-align: center; margin: 0 0 16px; font-size: 20px; letter-spacing: 0.03em; }
   .setup-players { display: flex; gap: 12px; flex-wrap: wrap; }
   .setup-player {
-    flex: 1 1 170px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px;
-    padding: 10px 12px;
+    flex: 1 1 165px; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px;
   }
   .setup-player-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
   .setup-player label { display: block; color: #8a8878; font-size: 11px; margin: 8px 0 4px; }
   .nick-input {
-    width: 100%; box-sizing: border-box;
-    background: #1a1c24; border: 1px solid rgba(255,255,255,0.15); border-radius: 5px;
+    width: 100%; box-sizing: border-box; background: #1a1c24;
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 5px;
     color: #e8e4d8; font-size: 14px; padding: 6px 8px; font-family: inherit;
   }
   .nick-input:focus { outline: none; border-color: #f0c95c; }
-  .swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 5px; }
   .swatch {
-    width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
     border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3); transition: transform 0.1s;
   }
-  .swatch:hover { transform: scale(1.1); }
+  .swatch:hover { transform: scale(1.12); }
   .swatch.selected { border-color: #fff; box-shadow: 0 0 0 2px #f0c95c; }
   .swatch.disabled { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
   .shapes { display: flex; gap: 6px; }
@@ -113,10 +85,10 @@
   .map-btn span { font-size: 10px; color: #b8b6a8; }
   .map-btn.selected { border-color: #f0c95c; box-shadow: 0 0 0 2px rgba(240,201,92,0.35); }
   .map-btn.selected span { color: #f0c95c; font-weight: 700; }
-  .size-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .size-grid { display: flex; flex-wrap: wrap; gap: 6px; }
   .size-btn {
     background: #1a1c24; border: 2px solid rgba(255,255,255,0.15); border-radius: 6px;
-    color: #b8b6a8; font-size: 12px; padding: 8px 14px; cursor: pointer; font-family: inherit;
+    color: #b8b6a8; font-size: 12px; padding: 7px 12px; cursor: pointer; font-family: inherit;
   }
   .size-btn:hover { background: #23262f; }
   .size-btn.selected { border-color: #f0c95c; background: rgba(240,201,92,0.12); color: #f0c95c; font-weight: 700; }
@@ -132,11 +104,12 @@
   .setup-btn.ghost { background: transparent; border-color: rgba(255,255,255,0.2); color: #b8b6a8; }
   .setup-btn.ghost:hover:not(:disabled) { background: rgba(255,255,255,0.06); }
   .opt-label { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: #b8b6a8; cursor: pointer; }
+  .warn-note { margin-top: 8px; font-size: 11px; color: #ffb27a; }
 
   #lobbyList { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
   .lobby-chip {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: #1a1c24; border: 1px solid rgba(255,255,255,0.15); border-radius: 14px;
+    display: inline-flex; align-items: center; gap: 6px; background: #1a1c24;
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 14px;
     padding: 4px 10px 4px 6px; font-size: 12px; color: #e8e4d8;
   }
   .lobby-dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4); }
@@ -157,16 +130,15 @@
   }
   .tc-group { display: flex; gap: 10px; pointer-events: auto; }
   .tc-btn {
-    width: 50px; height: 50px; border-radius: 50%;
-    background: rgba(20,22,30,0.55); border: 2px solid rgba(255,255,255,0.25);
-    color: #f0ece0; font-size: 19px; font-family: inherit;
-    -webkit-user-select: none; user-select: none; touch-action: none;
+    width: 50px; height: 50px; border-radius: 50%; background: rgba(20,22,30,0.55);
+    border: 2px solid rgba(255,255,255,0.25); color: #f0ece0; font-size: 19px;
+    font-family: inherit; -webkit-user-select: none; user-select: none; touch-action: none;
   }
   .tc-btn:active { background: rgba(240,201,92,0.4); border-color: #f0c95c; }
   .tc-weapon {
-    width: 44px; height: 32px; border-radius: 16px;
-    background: rgba(20,22,30,0.55); border: 2px solid rgba(255,255,255,0.25);
-    color: #f0ece0; font-size: 11px; font-weight: 700; font-family: inherit; touch-action: none;
+    width: 44px; height: 32px; border-radius: 16px; background: rgba(20,22,30,0.55);
+    border: 2px solid rgba(255,255,255,0.25); color: #f0ece0; font-size: 11px;
+    font-weight: 700; font-family: inherit; touch-action: none;
   }
   .tc-fire {
     pointer-events: auto; width: 74px; height: 74px; border-radius: 50%;
@@ -176,8 +148,7 @@
   .tc-fire:active { background: rgba(255,90,70,0.8); }
   @media (hover: hover) and (pointer: fine) { #touchControls { display: none; } }
   .topbtn {
-    position: fixed; top: 8px; z-index: 20;
-    width: 32px; height: 32px; border-radius: 50%;
+    position: fixed; top: 8px; z-index: 20; width: 32px; height: 32px; border-radius: 50%;
     background: rgba(20,22,30,0.55); border: 2px solid rgba(255,255,255,0.25);
     color: #f0ece0; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
     -webkit-user-select: none; user-select: none;
@@ -187,20 +158,18 @@
   #statsBtn { right: 48px; }
   #howtoBtn { left: 8px; }
   #menuBtn {
-    display: none;
-    position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 20;
-    height: 32px; padding: 0 14px; border-radius: 16px;
-    background: rgba(20,22,30,0.55); border: 2px solid rgba(255,255,255,0.25);
-    color: #f0ece0; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+    display: none; position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 20;
+    height: 32px; padding: 0 14px; border-radius: 16px; background: rgba(20,22,30,0.55);
+    border: 2px solid rgba(255,255,255,0.25); color: #f0ece0; font-size: 12px;
+    font-weight: 700; cursor: pointer; font-family: inherit;
     -webkit-user-select: none; user-select: none;
   }
   #menuBtn:active { background: rgba(240,201,92,0.4); border-color: #f0c95c; }
   #passBtn {
-    display: none;
-    position: fixed; top: 46px; left: 50%; transform: translateX(-50%); z-index: 20;
-    height: 26px; padding: 0 12px; border-radius: 13px;
-    background: rgba(20,22,30,0.5); border: 2px solid rgba(255,255,255,0.2);
-    color: #d8d6c8; font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit;
+    display: none; position: fixed; top: 46px; left: 50%; transform: translateX(-50%); z-index: 20;
+    height: 26px; padding: 0 12px; border-radius: 13px; background: rgba(20,22,30,0.5);
+    border: 2px solid rgba(255,255,255,0.2); color: #d8d6c8; font-size: 11px;
+    font-weight: 700; cursor: pointer; font-family: inherit;
     -webkit-user-select: none; user-select: none;
   }
   #passBtn:active { background: rgba(240,201,92,0.4); border-color: #f0c95c; color: #f0ece0; }
@@ -209,9 +178,9 @@
   .howto-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #e8e4d8; padding: 3px 0; }
   .howto-key {
     display: inline-flex; align-items: center; justify-content: center;
-    min-width: 22px; height: 22px; padding: 0 6px;
-    background: #1a1c24; border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 4px; font-size: 11px; font-weight: 700; color: #f0ece0; flex-shrink: 0;
+    min-width: 22px; height: 22px; padding: 0 6px; background: #1a1c24;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;
+    font-size: 11px; font-weight: 700; color: #f0ece0; flex-shrink: 0;
   }
 </style>
 </head>
@@ -225,53 +194,48 @@
 <button type="button" id="passBtn">턴 넘기기 ▶</button>
 
 <div id="howtoScreen" class="setup-overlay" style="display:flex;z-index:21;">
-  <div class="setup-card" style="width:min(92vw, 440px);">
+  <div class="setup-card" style="width:min(94vw, 450px);">
     <h2>🎮 조작 방법</h2>
-
     <div class="howto-section">
       <div class="howto-section-title">🎯 목표</div>
       <div class="howto-row">상대 탱크를 맞춰서 HP를 먼저 0으로 만들면 승리! (팀전은 상대 팀 전멸)</div>
     </div>
-
     <div class="howto-section">
-      <div class="howto-section-title">⌨ PC 조작</div>
+      <div class="howto-section-title">⌨️ PC 조작</div>
       <div class="howto-row"><span class="howto-key">◀ ▶</span> 좌우 이동</div>
       <div class="howto-row"><span class="howto-key">▲ ▼</span> 대포 각도 조절</div>
       <div class="howto-row"><span class="howto-key">SPACE</span> 누르고 있으면 파워 충전, 떼면 발사</div>
-      <div class="howto-row"><span class="howto-key">1 ~ 7</span> 무기 선택</div>
-      <div class="howto-row"><span class="howto-key">F</span> 좌우 방향 전환</div>
+      <div class="howto-row"><span class="howto-key">1 ~ 7</span> 무기 선택 　 <span class="howto-key">F</span> 방향 전환</div>
       <div class="howto-row"><span class="howto-key">ESC</span> 대전 중 나가기 메뉴 열기</div>
     </div>
-
     <div class="howto-section">
       <div class="howto-section-title">💣 무기</div>
-      <div class="howto-row">기본포(무제한) · 강력포 ×3 · 지진탄 ×2(넓게 파임)</div>
+      <div class="howto-row">기본포(무제한) · 강력포 ×3 · 지진탄 ×2</div>
       <div class="howto-row">분열탄 ×2: 착탄 후 4개로 흩어져 다시 폭발</div>
-      <div class="howto-row">연막탄 ×2: 한 바퀴 동안 그 자리 탱크가 안 보임</div>
+      <div class="howto-row">연막탄 ×2: 아주 넓게 퍼져서 한 바퀴 동안 안 보임</div>
       <div class="howto-row">회복탄 ×2: 범위 안 탱크(나 포함) HP 회복</div>
-      <div class="howto-row">핵폭탄 ×1: 아주 크게 터짐. 아껴두세요!</div>
+      <div class="howto-row"><b style="color:#ff8a7a">핵폭탄</b>: 기본으로 없어요! 탄약상자를 주워야만 얻습니다. 엄청나게 크게 터져요.</div>
     </div>
-
     <div class="howto-section">
       <div class="howto-section-title">🎁 아이템</div>
       <div class="howto-row">가끔 하늘에서 상자가 떨어져요. 이동해서 밟으면 획득!</div>
-      <div class="howto-row">❤ 구급상자 HP+30 · ⛽ 연료통 연료 충전 · 📦 탄약상자 특수무기+1 · 🛡 방어막 다음 피해 절반</div>
-      <div class="howto-row">폭발 범위 안의 상자는 부서져요.</div>
+      <div class="howto-row">❤ HP+30 · ⛽ 연료 충전 · 📦 특수무기+1(가끔 핵!) · 🛡 다음 피해 절반</div>
     </div>
-
+    <div class="howto-section">
+      <div class="howto-section-title">💨 바람 읽기</div>
+      <div class="howto-row">오른쪽 위 6칸 게이지가 바람이에요. 가운데에서 멀수록 강해요.</div>
+      <div class="howto-row">회색 눈금은 <b>지난 턴</b>의 바람이라, 얼마나 바뀌었는지 바로 알 수 있어요.</div>
+      <div class="howto-row">바람은 매 턴 반드시 바뀝니다!</div>
+    </div>
+    <div class="howto-section">
+      <div class="howto-section-title">🎯 조준 도우미</div>
+      <div class="howto-row">직전에 쐈던 각도는 <b>점선 포신</b>, 파워는 게이지의 <b>흰 눈금</b>으로 남아요.</div>
+      <div class="howto-row">빗나갔으면 그 눈금보다 살짝 더/덜 주면 됩니다.</div>
+    </div>
     <div class="howto-section">
       <div class="howto-section-title">📱 모바일 조작</div>
-      <div class="howto-row"><span class="howto-key">◀ ▶</span> 좌우 이동 　 <span class="howto-key">▲ ▼</span> 각도</div>
-      <div class="howto-row"><span class="howto-key">발사</span> 꾹 눌러 파워 충전 후 떼면 발사</div>
-      <div class="howto-row"><span class="howto-key">무기</span> 누를 때마다 다음 무기 　 <span class="howto-key">⇄</span> 방향 전환</div>
+      <div class="howto-row"><span class="howto-key">◀ ▶</span> 이동 　 <span class="howto-key">▲ ▼</span> 각도 　 <span class="howto-key">무기</span> 무기 바꾸기</div>
     </div>
-
-    <div class="howto-section">
-      <div class="howto-section-title">💨 참고</div>
-      <div class="howto-row">화면 위쪽 화살표는 바람 방향과 세기예요. 포탄이 바람에 밀려요!</div>
-      <div class="howto-row">🏆 버튼에서 닉네임별 전적을 볼 수 있어요. (P1 같은 기본 이름은 기록 안 됨)</div>
-    </div>
-
     <div class="setup-actions">
       <button type="button" class="setup-btn primary" id="howtoCloseBtn">확인, 시작할게요</button>
     </div>
@@ -279,7 +243,7 @@
 </div>
 
 <div id="statsScreen" class="setup-overlay" style="z-index:21;">
-  <div class="setup-card" style="width:min(92vw, 420px);">
+  <div class="setup-card" style="width:min(94vw, 420px);">
     <h2>🏆 명예의 전당</h2>
     <div id="statsBody" style="min-height:60px;color:#b8b6a8;font-size:12px;">불러오는 중...</div>
     <div class="setup-actions">
@@ -339,7 +303,7 @@
             <span id="lobbyWaitMsg" style="font-size:12px;color:#8a8878;"></span>
           </div>
         </div>
-        <div style="margin-top:8px;font-size:11px;color:#8a8878;">방장이 아래 설정(맵/최대 인원/팀/아이템)을 정하고 방을 만들면, 참가자는 자기 탱크(닉네임/색/모양)만 정하고 코드를 입력하면 돼요. 최대 8명.</div>
+        <div style="margin-top:8px;font-size:11px;color:#8a8878;">방장이 아래 설정을 정하고 방을 만들면, 참가자는 자기 탱크만 정하고 코드를 입력하면 돼요. 최대 20명.</div>
       </div>
     </div>
     <div class="map-section">
@@ -350,12 +314,10 @@
       <div class="map-section-title">맵 크기</div>
       <div class="size-grid" id="sizeGrid"></div>
       <label class="opt-label">
-        <input type="checkbox" id="fogModeCheck">
-        안개 모드 (상대가 화면에 안 보임 · 미니맵 없이 감으로 조준)
+        <input type="checkbox" id="fogModeCheck"> 안개 모드 (상대가 화면에 안 보임 · 감으로 조준)
       </label>
       <label class="opt-label">
-        <input type="checkbox" id="itemDropCheck" checked>
-        아이템 드롭 (가끔 상자가 떨어짐 · 밟으면 획득)
+        <input type="checkbox" id="itemDropCheck" checked> 아이템 드롭 (핵폭탄은 여기서만 나와요)
       </label>
     </div>
     <div class="map-section">
@@ -372,8 +334,9 @@
     <div class="map-section">
       <div class="map-section-title" id="countTitle">인원 수</div>
       <div class="size-grid" id="countGrid"></div>
+      <div id="countWarn" class="warn-note"></div>
       <div id="teamRow" style="margin-top:10px;">
-        <div style="font-size:11px;color:#8a8878;margin-bottom:6px;">팀 구성 (입장 순서대로 번갈아 배정: A, B, A, B…)</div>
+        <div style="font-size:11px;color:#8a8878;margin-bottom:6px;">팀 구성 (입장 순서대로 번갈아 배정)</div>
         <div class="size-grid" id="teamGrid"></div>
       </div>
     </div>
@@ -387,15 +350,19 @@
 
 <script>
 /* =========================================================================
-   온라인 포트리스 v3 - 로컬 핫싯(2~8인) + AI + Firebase 온라인 대전(2~8인, 팀전)
-   + 7가지 무기 + 아이템 드롭
+   온라인 포트리스 v4
+   - 로컬/AI/온라인(최대 20인, 팀전)
+   - 무기 7종 (핵폭탄은 아이템 드롭 전용)
+   - 아이템 드롭 4종
+   - 지형: 픽셀 마스크 기반 → 층/동굴/공중섬 같은 다층 구조 지원
+   - 바람: 6단계 이산값 + 이전 턴 잔상 표시
+   - 직전 발사 제원(각도/파워) 잔상 표시
 
-   - 모든 상태 변경은 applyAction(action) 한 곳에서만 일어납니다.
-     액션 종류: fire / pass / pickup(아이템 획득)
-   - 온라인은 rooms/{code}/actions 에 액션만 push 하고, 모두가 재생합니다.
-   - 지형·바람·분열탄 흩어짐·아이템 스폰 등 랜덤은 전부 시드 PRNG로 계산합니다.
-   - 액션에 turn 번호를 붙여서, 뒤처진 화면에 도착한 액션은 큐에 넣었다가
-     그 턴이 됐을 때 적용합니다.
+   동기화 원칙(중요):
+   * 게임 상태를 바꾸는 건 오직 applyAction() 하나 (fire / pass / pickup)
+   * 랜덤이 필요한 모든 것(지형, 바람, 아이템, 분열탄)은 시드 PRNG로 계산
+     → 모든 참가자 화면이 항상 같은 결과를 냄
+   * 물리는 고정 타임스텝(1/60)으로만 진행
    ========================================================================= */
 
   const canvas = document.getElementById('game');
@@ -410,6 +377,7 @@
   let fogMode = false;
   let itemDrops = true;
   const FOG_EXTRA_SCALE = 2.4;
+  const MAX_MAP_SCALE = 3.6; // 메모리 상한 (1728x972 정도)
   let camX = 0, camY = 0;
   canvas.width = W; canvas.height = H;
 
@@ -427,17 +395,16 @@
   fitCanvas();
 
   // ---------------------------------------------------------------------
-  // HUD 오버레이
+  // HUD 라벨
   // ---------------------------------------------------------------------
   const hudSeen = new Set();
-  function lbl(id, text, x, y, sizePx, color, align, vAlign) {
+  function lbl(id, text, x, y, sizePx, color, align, vAlign, opacity) {
     align = align || 'left';
     hudSeen.add(id);
     let el = document.getElementById('lbl-' + id);
     if (!el) {
       el = document.createElement('div');
-      el.id = 'lbl-' + id;
-      el.className = 'lbl';
+      el.id = 'lbl-' + id; el.className = 'lbl';
       hud.appendChild(el);
     }
     if (text === null || text === undefined || text === '') { el.style.display = 'none'; return; }
@@ -447,6 +414,7 @@
     el.style.top = (y / H * 100) + '%';
     el.style.fontSize = Math.max(6, Math.round(sizePx * uiScale)) + 'px';
     el.style.color = color;
+    el.style.opacity = (opacity === undefined ? 1 : opacity);
     const tx = align === 'center' ? '-50%' : (align === 'right' ? '-100%' : '0%');
     const ty = vAlign === 'middle' ? '-50%' : '-68%';
     el.style.transform = `translate(${tx}, ${ty})`;
@@ -473,6 +441,15 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const deg2rad = d => d * Math.PI / 180;
+  function hexToRgb(hex) {
+    const h = hex.replace('#', '');
+    return [parseInt(h.substr(0, 2), 16), parseInt(h.substr(2, 2), 16), parseInt(h.substr(4, 2), 16)];
+  }
+  function shadeHex(hex, amt) {
+    const [r, g, b] = hexToRgb(hex);
+    const f = v => amt >= 0 ? Math.round(v + (255 - v) * amt) : Math.round(v * (1 + amt));
+    return '#' + [f(r), f(g), f(b)].map(v => clamp(v, 0, 255).toString(16).padStart(2, '0')).join('');
+  }
 
   // ---------------------------------------------------------------------
   // 팔레트 / 테마
@@ -486,12 +463,9 @@
     uiBorder: 'rgba(255,255,255,0.12)', uiAccent: '#f0c95c',
     fire: '#ffcf5c', fire2: '#ff7a3c', fire3: '#ff3c2e',
     smoke: 'rgba(90,90,100,0.55)', spark: '#fff6c8',
-    heal: '#7cf29a', healLight: '#d8ffe4', shield: '#7ae0ff'
+    heal: '#7cf29a', healLight: '#d8ffe4', shield: '#7ae0ff',
+    ghost: 'rgba(255,255,255,0.55)'
   };
-  function hexToRgb(hex) {
-    const h = hex.replace('#', '');
-    return [parseInt(h.substr(0, 2), 16), parseInt(h.substr(2, 2), 16), parseInt(h.substr(4, 2), 16)];
-  }
   const THEMES = {
     hills: { sky: { top: '#2b3a67', mid: '#3f5a8f', bot: '#7fa8d4' }, mountainFar: '#26314f', mountainNear: '#1c2540',
       rim: '#c8f28a', surfA: '#8fd35c', surfB: '#7dbf4a', deepFrom: '#a9723f', deepTo: '#5a3820',
@@ -507,50 +481,70 @@
       grassDark: '#c8823e', dirtLight: '#a85c30', dirtMid: '#833f20', dirtDark: '#522410' },
     steps: { sky: { top: '#3a4a68', mid: '#5a7898', bot: '#a8c8dc' }, mountainFar: '#24303f', mountainNear: '#16202a',
       rim: '#d0f0ff', surfA: '#8cb8d0', surfB: '#6f9db8', deepFrom: '#3f5868', deepTo: '#1c2830',
-      grassDark: '#6f9db8', dirtLight: '#4f6f80', dirtMid: '#3a5766', dirtDark: '#263c46' }
+      grassDark: '#6f9db8', dirtLight: '#4f6f80', dirtMid: '#3a5766', dirtDark: '#263c46' },
+    // ---- 새 맵 테마 ----
+    layers: { sky: { top: '#12263f', mid: '#1e4468', bot: '#5f93bd' }, mountainFar: '#16283c', mountainNear: '#0e1a28',
+      rim: '#e6f6ff', surfA: '#a8d4ec', surfB: '#84b8d8', deepFrom: '#3f6f92', deepTo: '#14283c',
+      grassDark: '#84b8d8', dirtLight: '#4a7b9e', dirtMid: '#33586f', dirtDark: '#1e3648' },
+    cave: { sky: { top: '#100d18', mid: '#241b30', bot: '#4a3a56' }, mountainFar: '#1a1424', mountainNear: '#0e0a16',
+      rim: '#c8a878', surfA: '#8a6a48', surfB: '#6f5438', deepFrom: '#5a4430', deepTo: '#1c1610',
+      grassDark: '#6f5438', dirtLight: '#7a5c40', dirtMid: '#54402c', dirtDark: '#2e241a' },
+    pillars: { sky: { top: '#5a3a2a', mid: '#a8663a', bot: '#f0c07a' }, mountainFar: '#4a2e22', mountainNear: '#2e1c14',
+      rim: '#ffe0a8', surfA: '#d8a86a', surfB: '#bc8c50', deepFrom: '#8a6038', deepTo: '#3a2614',
+      grassDark: '#bc8c50', dirtLight: '#9a6c3e', dirtMid: '#74502c', dirtDark: '#402c18' },
+    islands: { sky: { top: '#2a5a8f', mid: '#5a94c8', bot: '#c8e8f5' }, mountainFar: '#3a6a96', mountainNear: '#2a4e72',
+      rim: '#d8ffa0', surfA: '#96dc64', surfB: '#7ac04c', deepFrom: '#8a6a48', deepTo: '#3a2c1c',
+      grassDark: '#7ac04c', dirtLight: '#9a7450', dirtMid: '#70543a', dirtDark: '#443428' },
+    bunker: { sky: { top: '#2a3038', mid: '#48525c', bot: '#8a969e' }, mountainFar: '#2a3138', mountainNear: '#1a2026',
+      rim: '#c8d0d4', surfA: '#96a0a6', surfB: '#7c868c', deepFrom: '#5c666c', deepTo: '#242a2e',
+      grassDark: '#7c868c', dirtLight: '#6a747a', dirtMid: '#4e565c', dirtDark: '#2e3438' }
   };
   let currentTheme = THEMES.hills;
+  let currentMapKey = 'hills';
 
   // ---------------------------------------------------------------------
-  // 플레이어 설정 (최대 8명)
+  // 플레이어 (최대 20명)
   // ---------------------------------------------------------------------
-  const MAX_PLAYERS = 8;
-  const COLOR_PRESETS = [
-    { key: 'red', color: '#e6483c', dark: '#a82e26', light: '#ff8a7a' },
-    { key: 'blue', color: '#3c86e6', dark: '#265ba8', light: '#7ab4ff' },
-    { key: 'green', color: '#5cb83c', dark: '#397a26', light: '#a0e87c' },
-    { key: 'yellow', color: '#e6c13c', dark: '#a8862a', light: '#ffe98c' },
-    { key: 'purple', color: '#9450d6', dark: '#61319c', light: '#c8a0ff' },
-    { key: 'orange', color: '#e6813c', dark: '#a8571f', light: '#ffb27a' },
-    { key: 'teal', color: '#3cc4c1', dark: '#278482', light: '#8ff0ee' },
-    { key: 'pink', color: '#e65ca0', dark: '#a83a72', light: '#ff9cc8' }
+  const MAX_PLAYERS = 20;
+  const RAW_COLORS = [
+    { key: 'red', hex: '#e6483c' },     { key: 'blue', hex: '#3c86e6' },
+    { key: 'green', hex: '#5cb83c' },   { key: 'yellow', hex: '#e6c13c' },
+    { key: 'purple', hex: '#9450d6' },  { key: 'orange', hex: '#e6813c' },
+    { key: 'teal', hex: '#3cc4c1' },    { key: 'pink', hex: '#e65ca0' },
+    { key: 'lime', hex: '#a8e04a' },    { key: 'cyan', hex: '#4ad6f0' },
+    { key: 'indigo', hex: '#6a5cf0' },  { key: 'magenta', hex: '#d64ae6' },
+    { key: 'brown', hex: '#a5703c' },   { key: 'mint', hex: '#5ce8b0' },
+    { key: 'coral', hex: '#ff7a5c' },   { key: 'navy', hex: '#3a5ad6' },
+    { key: 'olive', hex: '#9aa83c' },   { key: 'rose', hex: '#f05c7a' },
+    { key: 'violet', hex: '#7a4ad6' },  { key: 'slate', hex: '#7a8a9a' }
   ];
+  const COLOR_PRESETS = RAW_COLORS.map(c => ({
+    key: c.key, color: c.hex, dark: shadeHex(c.hex, -0.38), light: shadeHex(c.hex, 0.42)
+  }));
   const SHAPES = [
-    { key: 'classic', label: '클래식' },
-    { key: 'wedge', label: '웨지' },
-    { key: 'round', label: '라운드' }
+    { key: 'classic', label: '클래식' }, { key: 'wedge', label: '웨지' }, { key: 'round', label: '라운드' }
   ];
   const playerConfig = [];
   for (let i = 0; i < MAX_PLAYERS; i++) playerConfig.push({ name: 'P' + (i + 1), colorKey: COLOR_PRESETS[i].key, shape: 'classic' });
-  const PLAYER_COUNTS = [2, 3, 4, 5, 6, 7, 8];
+  const PLAYER_COUNTS = [2, 3, 4, 5, 6, 8, 10, 12, 16, 20];
   let selectedPlayerCount = 2;
 
   const TEAM_OPTIONS = [
-    { key: 0, label: '개인전' },
-    { key: 2, label: '2팀 (A vs B)' },
-    { key: 4, label: '4팀 (A/B/C/D)' }
+    { key: 0, label: '개인전' }, { key: 2, label: '2팀' }, { key: 3, label: '3팀' }, { key: 4, label: '4팀' }
   ];
   const TEAM_KEYS = ['A', 'B', 'C', 'D'];
+  const TEAM_COLORS = ['#ff8a7a', '#7ab4ff', '#a0e87c', '#ffe98c'];
   let teamCount = 0;
   function isTeamMode() { return teamCount > 0; }
   function teamOf(i) { return teamCount > 0 ? TEAM_KEYS[i % teamCount] : null; }
   function normalizeTeamCount() {
-    if (teamCount === 4 && selectedPlayerCount < 4) teamCount = 2;
-    if (teamCount === 2 && selectedPlayerCount < 2) teamCount = 0;
+    if (teamCount > 0 && selectedPlayerCount < teamCount * 2) {
+      teamCount = selectedPlayerCount >= 4 ? 2 : 0;
+    }
   }
 
   // ---------------------------------------------------------------------
-  // 맵 프리셋
+  // 맵
   // ---------------------------------------------------------------------
   const MAPS = [
     { key: 'random',    label: '랜덤' },
@@ -558,129 +552,281 @@
     { key: 'plains',    label: '평원' },
     { key: 'mountains', label: '산악' },
     { key: 'canyon',    label: '협곡' },
-    { key: 'steps',     label: '계단' }
+    { key: 'steps',     label: '계단' },
+    { key: 'layers',    label: '층층이' },
+    { key: 'cave',      label: '동굴' },
+    { key: 'pillars',   label: '기둥' },
+    { key: 'islands',   label: '공중섬' },
+    { key: 'bunker',    label: '벙커' }
   ];
+  const LAYERED_KEYS = ['layers', 'cave', 'pillars', 'islands', 'bunker'];
   let selectedMapKey = 'random';
   const MAP_SIZES = [
-    { key: 'small',  label: '좁게',       scale: 0.8 },
-    { key: 'normal', label: '보통',       scale: 1.0 },
-    { key: 'large',  label: '넓게',       scale: 1.25 },
+    { key: 'small',  label: '좁게',   scale: 0.8 },
+    { key: 'normal', label: '보통',   scale: 1.0 },
+    { key: 'large',  label: '넓게',   scale: 1.25 },
     { key: 'huge',   label: '매우 넓게', scale: 1.5 },
-    { key: 'giant',  label: '초대형(8인용)', scale: 2.0 }
+    { key: 'giant',  label: '초대형', scale: 2.0 },
+    { key: 'mega',   label: '초대형+ (12인↑)', scale: 2.6 }
   ];
   let selectedMapSize = 'normal';
   const SHOT_SPEEDS = [
-    { key: 'slow',   label: '느리게',     scale: 0.7 },
-    { key: 'normal', label: '보통',       scale: 1.0 },
-    { key: 'fast',   label: '빠르게',     scale: 1.35 },
+    { key: 'slow',   label: '느리게', scale: 0.7 },
+    { key: 'normal', label: '보통',   scale: 1.0 },
+    { key: 'fast',   label: '빠르게', scale: 1.35 },
     { key: 'ultra',  label: '매우 빠르게', scale: 1.7 }
   ];
   let selectedShotSpeed = 'slow';
   function resolveShotSpeedScale() {
-    const preset = SHOT_SPEEDS.find(s => s.key === selectedShotSpeed) || SHOT_SPEEDS[1];
-    return preset.scale;
+    return (SHOT_SPEEDS.find(s => s.key === selectedShotSpeed) || SHOT_SPEEDS[1]).scale;
   }
   let windStrengthPct = 100;
   function resolveWindForce() { return 9 * (windStrengthPct / 100); }
 
   // ---------------------------------------------------------------------
-  // 지형
+  // 지형 마스크 생성
+  //   모든 맵을 "solid/empty 픽셀 마스크"로 통일해서 만든다.
+  //   이렇게 하면 높이맵으로는 못 만드는 층/동굴/공중섬도 표현 가능하고,
+  //   미리보기도 실제 지형과 똑같이 그릴 수 있다.
   // ---------------------------------------------------------------------
-  let terrain = null;
+  function mFill(mask, w, h, x0, y0, x1, y1) {
+    x0 = Math.max(0, Math.floor(x0)); x1 = Math.min(w, Math.ceil(x1));
+    y0 = Math.max(0, Math.floor(y0)); y1 = Math.min(h, Math.ceil(y1));
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) mask[y * w + x] = 1;
+  }
+  function mCarveEllipse(mask, w, h, cx, cy, rx, ry) {
+    const x0 = Math.max(0, Math.floor(cx - rx)), x1 = Math.min(w - 1, Math.ceil(cx + rx));
+    const y0 = Math.max(0, Math.floor(cy - ry)), y1 = Math.min(h - 1, Math.ceil(cy + ry));
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+      const dx = (x - cx) / rx, dy = (y - cy) / ry;
+      if (dx * dx + dy * dy <= 1) mask[y * w + x] = 0;
+    }
+  }
+  function mFillEllipse(mask, w, h, cx, cy, rx, ry) {
+    const x0 = Math.max(0, Math.floor(cx - rx)), x1 = Math.min(w - 1, Math.ceil(cx + rx));
+    const y0 = Math.max(0, Math.floor(cy - ry)), y1 = Math.min(h - 1, Math.ceil(cy + ry));
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+      const dx = (x - cx) / rx, dy = (y - cy) / ry;
+      if (dx * dx + dy * dy <= 1) mask[y * w + x] = 1;
+    }
+  }
+  function mCarveTunnel(mask, w, h, x0, y0, x1, y1, r) {
+    const steps = Math.max(6, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / (r * 0.5)));
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      mCarveEllipse(mask, w, h, x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, r, r * 0.8);
+    }
+  }
 
+  // 기존 높이맵 방식 맵들
   function computeHeights(mapKey, rnd, w, h) {
     const heights = new Float32Array(w);
+    const sc = h / BASE_H; // 맵 크기가 달라져도 굴곡 비율이 유지되도록
     switch (mapKey) {
       case 'plains': {
         const baseline = h * (0.62 + rnd() * 0.05);
-        const amp1 = 6 + rnd() * 5, freq1 = 0.006 + rnd() * 0.005, phase1 = rnd() * 10;
-        const amp2 = 3 + rnd() * 3, freq2 = 0.02 + rnd() * 0.01, phase2 = rnd() * 10;
-        for (let x = 0; x < w; x++) heights[x] = baseline + Math.sin(x * freq1 + phase1) * amp1 + Math.sin(x * freq2 + phase2) * amp2;
+        const a1 = (6 + rnd() * 5) * sc, f1 = (0.006 + rnd() * 0.005) / (w / BASE_W), p1 = rnd() * 10;
+        const a2 = (3 + rnd() * 3) * sc, f2 = (0.02 + rnd() * 0.01) / (w / BASE_W), p2 = rnd() * 10;
+        for (let x = 0; x < w; x++) heights[x] = baseline + Math.sin(x * f1 + p1) * a1 + Math.sin(x * f2 + p2) * a2;
         break;
       }
       case 'mountains': {
         const baseline = h * (0.5 + rnd() * 0.08);
-        const amp1 = 32 + rnd() * 20, freq1 = 0.018 + rnd() * 0.014, phase1 = rnd() * 10;
-        const amp2 = 14 + rnd() * 10, freq2 = 0.05 + rnd() * 0.025, phase2 = rnd() * 10;
-        const amp3 = 6 + rnd() * 5, freq3 = 0.09 + rnd() * 0.03, phase3 = rnd() * 10;
-        for (let x = 0; x < w; x++) heights[x] = baseline + Math.sin(x * freq1 + phase1) * amp1 + Math.sin(x * freq2 + phase2) * amp2 + Math.sin(x * freq3 + phase3) * amp3;
+        const a1 = (32 + rnd() * 20) * sc, f1 = (0.018 + rnd() * 0.014) / (w / BASE_W), p1 = rnd() * 10;
+        const a2 = (14 + rnd() * 10) * sc, f2 = (0.05 + rnd() * 0.025) / (w / BASE_W), p2 = rnd() * 10;
+        const a3 = (6 + rnd() * 5) * sc, f3 = (0.09 + rnd() * 0.03) / (w / BASE_W), p3 = rnd() * 10;
+        for (let x = 0; x < w; x++) heights[x] = baseline + Math.sin(x * f1 + p1) * a1 + Math.sin(x * f2 + p2) * a2 + Math.sin(x * f3 + p3) * a3;
         break;
       }
       case 'canyon': {
-        const rim = h * (0.36 + rnd() * 0.05);
-        const floor = h * (0.76 + rnd() * 0.05);
-        const noiseAmp = 5 + rnd() * 4, noiseFreq = 0.05 + rnd() * 0.03, noisePhase = rnd() * 10;
+        const rim = h * (0.36 + rnd() * 0.05), floor = h * (0.76 + rnd() * 0.05);
+        const na = (5 + rnd() * 4) * sc, nf = (0.05 + rnd() * 0.03) / (w / BASE_W), np = rnd() * 10;
         for (let x = 0; x < w; x++) {
           const t = x / (w - 1);
-          const valley = Math.pow(Math.sin(Math.PI * t), 1.4);
-          heights[x] = rim + (floor - rim) * valley + Math.sin(x * noiseFreq + noisePhase) * noiseAmp;
+          heights[x] = rim + (floor - rim) * Math.pow(Math.sin(Math.PI * t), 1.4) + Math.sin(x * nf + np) * na;
         }
         break;
       }
       case 'steps': {
         const baseline = h * (0.4 + rnd() * 0.05);
-        const stepH = 14 + rnd() * 6, stepW = 34 + rnd() * 16;
-        const noiseAmp = 2 + rnd() * 2, noiseFreq = 0.12 + rnd() * 0.05, noisePhase = rnd() * 10;
+        const stepH = (14 + rnd() * 6) * sc, stepW = (34 + rnd() * 16) * (w / BASE_W);
+        const na = (2 + rnd() * 2) * sc, nf = (0.12 + rnd() * 0.05) / (w / BASE_W), np = rnd() * 10;
         for (let x = 0; x < w; x++) {
-          const distFromCenter = Math.abs(x - w / 2);
-          const stepIndex = Math.floor(distFromCenter / stepW);
-          heights[x] = baseline + stepIndex * stepH + Math.sin(x * noiseFreq + noisePhase) * noiseAmp;
+          const stepIndex = Math.floor(Math.abs(x - w / 2) / stepW);
+          heights[x] = baseline + stepIndex * stepH + Math.sin(x * nf + np) * na;
         }
         break;
       }
       default: {
         const baseline = h * (0.60 + rnd() * 0.08);
-        const amp1 = 20 + rnd() * 14, freq1 = 0.015 + rnd() * 0.01, phase1 = rnd() * 10;
-        const amp2 = 10 + rnd() * 8, freq2 = 0.03 + rnd() * 0.02, phase2 = rnd() * 10;
-        for (let x = 0; x < w; x++) heights[x] = baseline + Math.sin(x * freq1 + phase1) * amp1 + Math.sin(x * freq2 + phase2) * amp2;
+        const a1 = (20 + rnd() * 14) * sc, f1 = (0.015 + rnd() * 0.01) / (w / BASE_W), p1 = rnd() * 10;
+        const a2 = (10 + rnd() * 8) * sc, f2 = (0.03 + rnd() * 0.02) / (w / BASE_W), p2 = rnd() * 10;
+        for (let x = 0; x < w; x++) heights[x] = baseline + Math.sin(x * f1 + p1) * a1 + Math.sin(x * f2 + p2) * a2;
       }
     }
     return heights;
   }
 
+  // 다층 구조 맵 생성기들 (전부 w,h 비율로 작성 → 맵 크기가 달라져도 모양 유지)
+  const LAYERED_GENERATORS = {
+    // 층층이: 가로로 뻗은 선반 3층 + 군데군데 뚫린 구멍
+    layers(mask, rnd, w, h) {
+      mFill(mask, w, h, 0, h * 0.94, w, h); // 바닥
+      const bands = 3;
+      for (let b = 0; b < bands; b++) {
+        const baseY = h * (0.28 + b * 0.21);
+        const thick = h * (0.05 + rnd() * 0.03);
+        const amp = h * (0.015 + rnd() * 0.02);
+        const freq = (0.008 + rnd() * 0.01) / (w / BASE_W);
+        const phase = rnd() * 10;
+        const gaps = [];
+        const gapCount = 2 + Math.floor(rnd() * 2);
+        for (let g = 0; g < gapCount; g++) {
+          const gc = w * (0.12 + rnd() * 0.76), gw = w * (0.04 + rnd() * 0.06);
+          gaps.push([gc - gw / 2, gc + gw / 2]);
+        }
+        for (let x = 0; x < w; x++) {
+          let inGap = false;
+          for (const g of gaps) if (x >= g[0] && x <= g[1]) { inGap = true; break; }
+          if (inGap) continue;
+          const y0 = baseY + Math.sin(x * freq + phase) * amp;
+          mFill(mask, w, h, x, y0, x + 1, y0 + thick);
+        }
+      }
+    },
+    // 동굴: 두꺼운 땅속에 빈 공간들 + 지상으로 통하는 수직굴
+    cave(mask, rnd, w, h) {
+      const amp = h * 0.05, freq = (0.01 + rnd() * 0.008) / (w / BASE_W), phase = rnd() * 10;
+      const amp2 = h * 0.025, freq2 = (0.03 + rnd() * 0.02) / (w / BASE_W), phase2 = rnd() * 10;
+      for (let x = 0; x < w; x++) {
+        const sy = h * 0.30 + Math.sin(x * freq + phase) * amp + Math.sin(x * freq2 + phase2) * amp2;
+        mFill(mask, w, h, x, sy, x + 1, h);
+      }
+      const n = 3 + Math.floor(rnd() * 3);
+      const rooms = [];
+      for (let i = 0; i < n; i++) {
+        const cx = w * (0.12 + 0.76 * (i + 0.5) / n + (rnd() - 0.5) * 0.06);
+        const cy = h * (0.52 + rnd() * 0.28);
+        mCarveEllipse(mask, w, h, cx, cy, w * (0.055 + rnd() * 0.05), h * (0.07 + rnd() * 0.06));
+        rooms.push({ cx, cy });
+      }
+      for (let i = 0; i < rooms.length - 1; i++)
+        mCarveTunnel(mask, w, h, rooms[i].cx, rooms[i].cy, rooms[i + 1].cx, rooms[i + 1].cy, h * 0.022);
+      for (let k = 0; k < 2 + Math.floor(rnd() * 2); k++) {
+        const r = rooms[Math.floor(rnd() * rooms.length)];
+        mCarveTunnel(mask, w, h, r.cx + (rnd() - 0.5) * w * 0.05, h * 0.22, r.cx, r.cy, h * 0.018);
+      }
+    },
+    // 기둥: 기둥 위에서 대치. 밑동을 파면 무너짐
+    pillars(mask, rnd, w, h) {
+      mFill(mask, w, h, 0, h * 0.88, w, h);
+      const count = 5 + Math.floor(rnd() * 3);
+      for (let i = 0; i < count; i++) {
+        const cx = w * ((i + 0.5) / count + (rnd() - 0.5) * 0.03);
+        const pw = w * (0.045 + rnd() * 0.03);
+        const top = h * (0.24 + rnd() * 0.34);
+        mFill(mask, w, h, cx - pw / 2, top, cx + pw / 2, h * 0.89);
+        // 기둥 머리를 살짝 넓게 (착지하기 좋게)
+        mFill(mask, w, h, cx - pw * 0.75, top, cx + pw * 0.75, top + h * 0.03);
+      }
+    },
+    // 공중섬: 떠 있는 섬 + 얇은 바닥
+    islands(mask, rnd, w, h) {
+      mFill(mask, w, h, 0, h * 0.955, w, h);
+      const count = 4 + Math.floor(rnd() * 3);
+      for (let i = 0; i < count; i++) {
+        const cx = w * (0.10 + 0.80 * (i / Math.max(1, count - 1)) + (rnd() - 0.5) * 0.06);
+        const cy = h * (0.28 + rnd() * 0.42);
+        const rx = w * (0.055 + rnd() * 0.05);
+        const ryTop = h * 0.012, ryBot = h * (0.05 + rnd() * 0.04);
+        for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
+          if (x < 0 || x >= w) continue;
+          const t = (x - cx) / rx;
+          if (Math.abs(t) > 1) continue;
+          const k = Math.sqrt(Math.max(0, 1 - t * t));
+          mFill(mask, w, h, x, cy - ryTop * k, x + 1, cy + ryBot * Math.pow(k, 0.55));
+        }
+      }
+    },
+    // 벙커: 콘크리트 덩어리 속 방과 통로
+    bunker(mask, rnd, w, h) {
+      const amp = h * 0.03, freq = (0.012 + rnd() * 0.01) / (w / BASE_W), phase = rnd() * 10;
+      for (let x = 0; x < w; x++) {
+        const sy = h * 0.26 + Math.sin(x * freq + phase) * amp;
+        mFill(mask, w, h, x, sy, x + 1, h);
+      }
+      const roomCount = 3 + Math.floor(rnd() * 2);
+      const rooms = [];
+      for (let i = 0; i < roomCount; i++) {
+        const cx = w * (0.14 + 0.72 * (i + 0.5) / roomCount);
+        const cy = h * (0.5 + rnd() * 0.26);
+        const rw = w * (0.07 + rnd() * 0.05), rh = h * (0.09 + rnd() * 0.05);
+        for (let y = Math.floor(cy - rh); y < cy + rh; y++)
+          for (let x = Math.floor(cx - rw); x < cx + rw; x++)
+            if (x >= 0 && x < w && y >= 0 && y < h) mask[y * w + x] = 0;
+        rooms.push({ cx, cy });
+      }
+      for (let i = 0; i < rooms.length - 1; i++)
+        mCarveTunnel(mask, w, h, rooms[i].cx, rooms[i].cy, rooms[i + 1].cx, rooms[i + 1].cy, h * 0.018);
+      for (let k = 0; k < 2; k++) {
+        const r = rooms[Math.floor(rnd() * rooms.length)];
+        mCarveTunnel(mask, w, h, r.cx, h * 0.2, r.cx, r.cy, h * 0.016);
+      }
+    }
+  };
+
+  function buildSolidMask(mapKey, seed, w, h) {
+    const rnd = mulberry32(seed);
+    const mask = new Uint8Array(w * h);
+    if (LAYERED_GENERATORS[mapKey]) {
+      LAYERED_GENERATORS[mapKey](mask, rnd, w, h);
+    } else {
+      const heights = computeHeights(mapKey, rnd, w, h);
+      const passes = mapKey === 'steps' ? 0 : 2;
+      for (let p = 0; p < passes; p++) {
+        const copy = heights.slice();
+        for (let x = 1; x < w - 1; x++) heights[x] = (copy[x - 1] + copy[x] * 2 + copy[x + 1]) / 4;
+      }
+      for (let x = 0; x < w; x++) {
+        const sy = Math.round(clamp(heights[x], h * 0.12, h * 0.92));
+        for (let y = sy; y < h; y++) mask[y * w + x] = 1;
+      }
+    }
+    return mask;
+  }
+
+  let terrain = null;
   function generateTerrain(seed, mapKey) {
     mapKey = mapKey || 'hills';
-    const rnd = mulberry32(seed);
-    const w = mapW, h = mapH;
-    const data = new Uint8ClampedArray(w * h * 4);
-    const heights = computeHeights(mapKey, rnd, w, h);
-    const smoothPasses = mapKey === 'steps' ? 0 : 2;
-    for (let pass = 0; pass < smoothPasses; pass++) {
-      const copy = heights.slice();
-      for (let x = 1; x < w - 1; x++) heights[x] = (copy[x - 1] + copy[x] * 2 + copy[x + 1]) / 4;
-    }
-    for (let x = 0; x < w; x++) heights[x] = clamp(heights[x], h * 0.12, h * 0.92);
-
+    currentMapKey = mapKey;
     currentTheme = THEMES[mapKey] || THEMES.hills;
+    const w = mapW, h = mapH;
+    const mask = buildSolidMask(mapKey, seed, w, h);
+    const rnd = mulberry32((seed ^ 0x9e3779b9) >>> 0);
+    const data = new Uint8ClampedArray(w * h * 4);
     const rimRGB = hexToRgb(currentTheme.rim);
-    const surfARGB = hexToRgb(currentTheme.surfA);
-    const surfBRGB = hexToRgb(currentTheme.surfB);
-    const deepFromRGB = hexToRgb(currentTheme.deepFrom);
-    const deepToRGB = hexToRgb(currentTheme.deepTo);
-
+    const sA = hexToRgb(currentTheme.surfA), sB = hexToRgb(currentTheme.surfB);
+    const dF = hexToRgb(currentTheme.deepFrom), dT = hexToRgb(currentTheme.deepTo);
     for (let x = 0; x < w; x++) {
-      const surfaceY = Math.round(heights[x]);
+      let depth = 0; // 각 solid 덩어리의 윗면부터 센 깊이 → 층마다 윗면에 하이라이트가 생김
       for (let y = 0; y < h; y++) {
-        const idx = (y * w + x) * 4;
-        if (y < surfaceY) continue;
-        const depth = y - surfaceY;
+        const mi = y * w + x;
+        if (!mask[mi]) { depth = 0; continue; }
+        const d = depth++;
+        const idx = mi * 4;
         let r, g, b;
-        if (depth === 0) { r = rimRGB[0]; g = rimRGB[1]; b = rimRGB[2]; }
-        else if (depth < 3) {
-          const noise = rnd() < 0.5;
-          r = noise ? surfARGB[0] : surfBRGB[0]; g = noise ? surfARGB[1] : surfBRGB[1]; b = noise ? surfARGB[2] : surfBRGB[2];
+        if (d === 0) { r = rimRGB[0]; g = rimRGB[1]; b = rimRGB[2]; }
+        else if (d < 3) {
+          const n = rnd() < 0.5;
+          r = n ? sA[0] : sB[0]; g = n ? sA[1] : sB[1]; b = n ? sA[2] : sB[2];
         } else {
-          const shade = clamp(depth / 40, 0, 1);
-          const noise = (rnd() - 0.5) * 14;
-          r = lerp(deepFromRGB[0], deepToRGB[0], shade) + noise;
-          g = lerp(deepFromRGB[1], deepToRGB[1], shade) + noise;
-          b = lerp(deepFromRGB[2], deepToRGB[2], shade) + noise;
+          const sh = clamp(d / 40, 0, 1), n = (rnd() - 0.5) * 14;
+          r = lerp(dF[0], dT[0], sh) + n; g = lerp(dF[1], dT[1], sh) + n; b = lerp(dF[2], dT[2], sh) + n;
         }
         data[idx] = clamp(r, 0, 255); data[idx + 1] = clamp(g, 0, 255); data[idx + 2] = clamp(b, 0, 255); data[idx + 3] = 255;
       }
     }
-    terrain = { data, w, h, heights };
-    return heights;
+    terrain = { data, w, h };
   }
 
   function terrainSolid(x, y) {
@@ -706,9 +852,10 @@
     const x0 = Math.floor(cx - r), x1 = Math.ceil(cx + r), y0 = Math.floor(cy - r), y1 = Math.ceil(cy + r);
     const r2 = r * r;
     for (let y = Math.max(0, y0); y <= Math.min(terrain.h - 1, y1); y++) {
+      const dy = y - cy, dy2 = dy * dy;
       for (let x = Math.max(0, x0); x <= Math.min(terrain.w - 1, x1); x++) {
-        const dx = x - cx, dy = y - cy;
-        if (dx * dx + dy * dy <= r2) terrain.data[(y * terrain.w + x) * 4 + 3] = 0;
+        const dx = x - cx;
+        if (dx * dx + dy2 <= r2) terrain.data[(y * terrain.w + x) * 4 + 3] = 0;
       }
     }
     markDirty(x0, y0, x1, y1);
@@ -731,62 +878,76 @@
   }
 
   // ---------------------------------------------------------------------
-  // 무기 정의
+  // 무기 (핵폭탄: 기본 탄약 0 → 아이템으로만 획득)
   // ---------------------------------------------------------------------
   const WEAPONS = [
-    { name: '기본포', kind: 'normal', ammo: Infinity, radius: 20, dmg: 40, glowColor: '#ffcf5c', coreColor: '#5a5a5f', highlightColor: '#f0d080', icon: 'ball' },
-    { name: '강력포', kind: 'normal', ammo: 3, radius: 34, dmg: 65, glowColor: '#c88cff', coreColor: '#7a3fc4', highlightColor: '#e0b8ff', icon: 'ball' },
-    { name: '지진탄', kind: 'normal', ammo: 2, radius: 48, dmg: 32, glowColor: '#ffb15c', coreColor: '#a5501f', highlightColor: '#ffcf8c', icon: 'spike' },
-    { name: '분열탄', kind: 'cluster', ammo: 2, radius: 12, dmg: 15, glowColor: '#ffe27a', coreColor: '#b08a2a', highlightColor: '#fff2b0', icon: 'cluster',
+    { name: '기본포', kind: 'normal', ammo: Infinity, dropWeight: 0, radius: 20, dmg: 40,
+      glowColor: '#ffcf5c', coreColor: '#5a5a5f', highlightColor: '#f0d080', icon: 'ball' },
+    { name: '강력포', kind: 'normal', ammo: 3, dropWeight: 4, radius: 34, dmg: 65,
+      glowColor: '#c88cff', coreColor: '#7a3fc4', highlightColor: '#e0b8ff', icon: 'ball' },
+    { name: '지진탄', kind: 'normal', ammo: 2, dropWeight: 4, radius: 48, dmg: 32,
+      glowColor: '#ffb15c', coreColor: '#a5501f', highlightColor: '#ffcf8c', icon: 'spike' },
+    { name: '분열탄', kind: 'cluster', ammo: 2, dropWeight: 4, radius: 12, dmg: 15,
+      glowColor: '#ffe27a', coreColor: '#b08a2a', highlightColor: '#fff2b0', icon: 'cluster',
       sub: { kind: 'normal', radius: 14, dmg: 18 }, subCount: 4 },
-    { name: '연막탄', kind: 'smoke', ammo: 2, radius: 0, dmg: 0, glowColor: '#d0d4dc', coreColor: '#6a6f7a', highlightColor: '#f0f2f5', icon: 'smoke', cloudRadius: 44 },
-    { name: '회복탄', kind: 'heal', ammo: 2, radius: 30, dmg: 0, glowColor: '#7cf29a', coreColor: '#2f8a4a', highlightColor: '#d8ffe4', icon: 'heal', healAmt: 35 },
-    { name: '핵폭탄', kind: 'nuke', ammo: 1, radius: 64, dmg: 95, glowColor: '#ff5a3c', coreColor: '#3a3a3a', highlightColor: '#ffcf5c', icon: 'nuke' }
+    // 연막탄: 범위 2배 (44 → 88)
+    { name: '연막탄', kind: 'smoke', ammo: 2, dropWeight: 4, radius: 0, dmg: 0, cloudRadius: 88,
+      glowColor: '#d0d4dc', coreColor: '#6a6f7a', highlightColor: '#f0f2f5', icon: 'smoke' },
+    { name: '회복탄', kind: 'heal', ammo: 2, dropWeight: 4, radius: 30, dmg: 0, healAmt: 35,
+      glowColor: '#7cf29a', coreColor: '#2f8a4a', highlightColor: '#d8ffe4', icon: 'heal' },
+    // 핵폭탄: 범위 4배 (64 → 256), 기본 적재 0. 숫자를 줄이려면 radius 값만 바꾸세요.
+    { name: '핵폭탄', kind: 'nuke', ammo: 0, dropWeight: 1, radius: 256, dmg: 95,
+      glowColor: '#ff5a3c', coreColor: '#3a3a3a', highlightColor: '#ffcf5c', icon: 'nuke' }
   ];
+  const NUKE_IDX = 6;
 
   // ---------------------------------------------------------------------
-  // 아이템 정의
+  // 아이템
   // ---------------------------------------------------------------------
   const ITEM_TYPES = [
-    { key: 'hp',     label: '구급상자', weight: 3, color: '#ff6a5c', desc: 'HP +30' },
-    { key: 'fuel',   label: '연료통',   weight: 2, color: '#5cb8ff', desc: '연료 충전' },
-    { key: 'ammo',   label: '탄약상자', weight: 3, color: '#ffd24a', desc: '특수무기 +1' },
-    { key: 'shield', label: '방어막',   weight: 2, color: '#7ae0ff', desc: '다음 피해 절반' }
+    { key: 'hp',     label: '구급상자', weight: 3, color: '#ff6a5c' },
+    { key: 'fuel',   label: '연료통',   weight: 2, color: '#5cb8ff' },
+    { key: 'ammo',   label: '탄약상자', weight: 3, color: '#ffd24a' },
+    { key: 'shield', label: '방어막',   weight: 2, color: '#7ae0ff' }
   ];
   const ITEM_SPAWN_CHANCE = 0.35;
-  const ITEM_MAX_ON_MAP = 4;
   const ITEM_PICK_RADIUS = 11;
-  let items = [];       // { id, type, x, y, weaponIdx, falling, bob }
+  let items = [];
   let nextItemId = 1;
-  let itemPopups = [];  // 획득 시 떠오르는 텍스트 { x, y, text, color, life }
+  let itemPopups = [];
 
-  function pickWeightedItem(rnd) {
-    const total = ITEM_TYPES.reduce((a, t) => a + t.weight, 0);
+  function itemMaxOnMap() { return clamp(2 + Math.floor(players.length / 2), 4, 10); }
+  function pickWeighted(list, rnd, wkey) {
+    const total = list.reduce((a, t) => a + (t[wkey] || 0), 0);
     let r = rnd() * total;
-    for (const t of ITEM_TYPES) { r -= t.weight; if (r <= 0) return t; }
-    return ITEM_TYPES[0];
+    for (const t of list) { r -= (t[wkey] || 0); if (r <= 0) return t; }
+    return list[0];
   }
 
-  // 턴 시작 시 호출. rnd는 바람 계산에 쓴 것과 같은 시드 PRNG(이어서 사용)라 모든 화면에서 동일.
   function maybeSpawnItem(rnd) {
-    if (!itemDrops) return;
-    if (items.length >= ITEM_MAX_ON_MAP) { rnd(); rnd(); rnd(); return; }
+    // rnd 호출 횟수를 항상 동일하게 유지해야 모든 화면이 같은 상태를 유지함
     const roll = rnd();
-    const type = pickWeightedItem(rnd);
+    const type = pickWeighted(ITEM_TYPES, rnd, 'weight');
     let x = 20 + rnd() * (mapW - 40);
+    const wRoll = rnd();
+    for (let i = 0; i < 6; i++) x = (i === 0) ? x : 20 + rnd() * (mapW - 40);
+    if (!itemDrops) return;
+    if (items.length >= itemMaxOnMap()) return;
     if (roll > ITEM_SPAWN_CHANCE) return;
-    // 탱크 바로 위에는 안 떨어지게 (너무 쉽게 먹지 않도록)
-    for (let tries = 0; tries < 6; tries++) {
-      const tooClose = players.some(p => p.alive && Math.abs(p.x - x) < 26 * mapScale);
-      if (!tooClose) break;
-      x = 20 + rnd() * (mapW - 40);
+    // 탱크 바로 위는 피함
+    let tries = 0;
+    while (tries < 8 && players.some(p => p.alive && Math.abs(p.x - x) < 26 * mapScale)) {
+      x = 20 + ((x * 7.31 + 137) % (mapW - 40)); tries++;
     }
     let weaponIdx = 0;
     if (type.key === 'ammo') {
-      const specials = WEAPONS.map((w, i) => i).filter(i => i > 0);
-      weaponIdx = specials[Math.floor(rnd() * specials.length)];
+      const specials = WEAPONS.map((w, i) => ({ i, dropWeight: w.dropWeight })).filter(o => o.dropWeight > 0);
+      const total = specials.reduce((a, o) => a + o.dropWeight, 0);
+      let r = wRoll * total;
+      weaponIdx = specials[0].i;
+      for (const o of specials) { r -= o.dropWeight; if (r <= 0) { weaponIdx = o.i; break; } }
     }
-    items.push({ id: nextItemId++, type: type.key, x: Math.round(x), y: -10, weaponIdx, falling: true, bob: rnd() * 10 });
+    items.push({ id: nextItemId++, type: type.key, x: Math.round(x), y: -10, weaponIdx, falling: true, bob: wRoll * 10 });
   }
 
   function applyItemGravity(it, dt) {
@@ -794,7 +955,6 @@
     if (it.y < groundY - 0.5) { it.falling = true; it.y = Math.min(groundY, it.y + 90 * mapScale * dt); }
     else { it.falling = false; it.y = groundY; }
   }
-
   function findItemUnderTank(p) {
     for (const it of items) {
       if (it.falling) continue;
@@ -802,7 +962,6 @@
     }
     return null;
   }
-
   function applyItemEffect(p, it) {
     const type = ITEM_TYPES.find(t => t.key === it.type) || ITEM_TYPES[0];
     let text = '';
@@ -811,24 +970,21 @@
     else if (it.type === 'ammo') {
       const wi = WEAPONS[it.weaponIdx] ? it.weaponIdx : 1;
       p.ammo[wi] = (p.ammo[wi] || 0) + 1;
-      text = `${WEAPONS[wi].name} +1`; sfxPickup();
+      text = (wi === NUKE_IDX ? '☢ 핵폭탄 획득!!' : `${WEAPONS[wi].name} +1`);
+      if (wi === NUKE_IDX) { sfxNukeGet(); flash = Math.max(flash, 0.6); } else sfxPickup();
     }
     else if (it.type === 'shield') { p.shield = true; text = '방어막!'; sfxPickup(); }
-    itemPopups.push({ x: it.x, y: it.y - 12, text, color: type.color, life: 1.3, maxLife: 1.3 });
+    itemPopups.push({ x: it.x, y: it.y - 12, text, color: type.color, life: 1.5, maxLife: 1.5 });
     spawnPickupSparkle(it.x, it.y, type.color);
   }
-
   function destroyItemsInRadius(x, y, r) {
-    const before = items.length;
     items = items.filter(it => Math.hypot(it.x - x, it.y - y) > r + 4);
-    return before - items.length;
   }
 
   // ---------------------------------------------------------------------
   // 사운드
   // ---------------------------------------------------------------------
-  let audioCtx = null;
-  let audioMuted = false;
+  let audioCtx = null, audioMuted = false;
   try { audioMuted = localStorage.getItem('fortressMuted') === '1'; } catch (e) {}
   function ensureAudio() {
     if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; } }
@@ -836,44 +992,45 @@
   }
   window.addEventListener('keydown', ensureAudio, { once: true });
   window.addEventListener('pointerdown', ensureAudio, { once: true });
-  function sfxTone(opt) {
+  function sfxTone(o) {
     if (audioMuted || !audioCtx) return;
-    const { freq, freqEnd = null, dur = 0.15, type = 'sine', vol = 0.25, delay = 0 } = opt;
+    const { freq, freqEnd = null, dur = 0.15, type = 'sine', vol = 0.25, delay = 0 } = o;
     const t0 = audioCtx.currentTime + delay;
-    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
     osc.type = type; osc.frequency.setValueAtTime(freq, t0);
     if (freqEnd !== null) osc.frequency.exponentialRampToValueAtTime(Math.max(1, freqEnd), t0 + dur);
     gain.gain.setValueAtTime(vol, t0); gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
     osc.connect(gain).connect(audioCtx.destination); osc.start(t0); osc.stop(t0 + dur + 0.02);
   }
-  function sfxNoise(opt) {
+  function sfxNoise(o) {
     if (audioMuted || !audioCtx) return;
-    const { dur = 0.3, vol = 0.3, filterFreq = 800, filterType = 'lowpass', delay = 0 } = opt;
+    const { dur = 0.3, vol = 0.3, filterFreq = 800, filterType = 'lowpass', delay = 0 } = o;
     const t0 = audioCtx.currentTime + delay;
-    const bufferSize = Math.max(1, Math.floor(audioCtx.sampleRate * dur));
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-    const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
-    const filter = audioCtx.createBiquadFilter(); filter.type = filterType; filter.frequency.setValueAtTime(filterFreq, t0);
-    const gain = audioCtx.createGain(); gain.gain.setValueAtTime(vol, t0); gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
-    noise.connect(filter).connect(gain).connect(audioCtx.destination); noise.start(t0); noise.stop(t0 + dur + 0.02);
+    const n = Math.max(1, Math.floor(audioCtx.sampleRate * dur));
+    const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = audioCtx.createBufferSource(); src.buffer = buf;
+    const f = audioCtx.createBiquadFilter(); f.type = filterType; f.frequency.setValueAtTime(filterFreq, t0);
+    const g = audioCtx.createGain(); g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    src.connect(f).connect(g).connect(audioCtx.destination); src.start(t0); src.stop(t0 + dur + 0.02);
   }
   function sfxFire() { sfxTone({ freq: 190, freqEnd: 55, dur: 0.13, type: 'sawtooth', vol: 0.18 }); sfxNoise({ dur: 0.09, vol: 0.16, filterFreq: 2200 }); }
-  function sfxExplosion(radius) {
-    const big = radius >= 30;
+  function sfxExplosion(r) {
+    const big = r >= 30;
     sfxNoise({ dur: big ? 0.55 : 0.32, vol: big ? 0.45 : 0.32, filterFreq: big ? 260 : 480 });
     sfxTone({ freq: big ? 85 : 130, freqEnd: big ? 28 : 45, dur: big ? 0.5 : 0.3, type: 'sine', vol: big ? 0.32 : 0.24 });
   }
   function sfxNuke() {
-    sfxNoise({ dur: 1.2, vol: 0.6, filterFreq: 180 });
-    sfxTone({ freq: 60, freqEnd: 18, dur: 1.1, type: 'sine', vol: 0.4 });
-    sfxTone({ freq: 900, freqEnd: 120, dur: 0.6, type: 'sawtooth', vol: 0.12 });
+    sfxNoise({ dur: 1.8, vol: 0.65, filterFreq: 150 });
+    sfxTone({ freq: 55, freqEnd: 15, dur: 1.6, type: 'sine', vol: 0.45 });
+    sfxTone({ freq: 900, freqEnd: 90, dur: 0.8, type: 'sawtooth', vol: 0.14 });
+    sfxNoise({ dur: 1.0, vol: 0.3, filterFreq: 400, delay: 0.5 });
   }
+  function sfxNukeGet() { [330, 415, 494, 660, 880].forEach((f, i) => sfxTone({ freq: f, dur: 0.22, type: 'sawtooth', vol: 0.16, delay: i * 0.08 })); }
   function sfxHeal() { [440, 554, 659, 880].forEach((f, i) => sfxTone({ freq: f, dur: 0.18, type: 'triangle', vol: 0.14, delay: i * 0.07 })); }
   function sfxPickup() { sfxTone({ freq: 660, dur: 0.08, type: 'square', vol: 0.12 }); sfxTone({ freq: 990, dur: 0.12, type: 'square', vol: 0.12, delay: 0.08 }); }
   function sfxShieldBlock() { sfxTone({ freq: 1200, freqEnd: 500, dur: 0.22, type: 'triangle', vol: 0.2 }); }
-  function sfxSmoke() { sfxNoise({ dur: 0.5, vol: 0.2, filterFreq: 1200, filterType: 'bandpass' }); }
+  function sfxSmoke() { sfxNoise({ dur: 0.7, vol: 0.24, filterFreq: 1100, filterType: 'bandpass' }); }
   function sfxHit() { sfxTone({ freq: 340, freqEnd: 120, dur: 0.16, type: 'square', vol: 0.2 }); }
   function sfxTurn() { sfxTone({ freq: 520, dur: 0.09, type: 'sine', vol: 0.1 }); sfxTone({ freq: 700, dur: 0.09, type: 'sine', vol: 0.1, delay: 0.09 }); }
   function sfxClick() { sfxTone({ freq: 700, dur: 0.05, type: 'square', vol: 0.1 }); }
@@ -899,26 +1056,23 @@
   });
   let menuBtnShown = false;
   function syncMenuBtnVisibility() {
-    const shouldShow = (state === 'aiming' || state === 'firing' || state === 'resolving' || state === 'resolving-miss');
-    if (shouldShow !== menuBtnShown) { menuBtnShown = shouldShow; menuBtn.style.display = shouldShow ? 'block' : 'none'; }
+    const s = (state === 'aiming' || state === 'firing' || state === 'resolving' || state === 'resolving-miss');
+    if (s !== menuBtnShown) { menuBtnShown = s; menuBtn.style.display = s ? 'block' : 'none'; }
   }
-
   const passBtn = document.getElementById('passBtn');
-  function passTurn() {
+  passBtn.addEventListener('click', () => {
     if (state !== 'aiming') return;
     if (onlineMode && current !== myPlayerIndex) return;
     const p = players[current];
     if (!p || p.isAI || p.charging) return;
     NetworkHooks.sendAction({ type: 'pass', player: current, turn: turnCount });
-  }
-  passBtn.addEventListener('click', passTurn);
+  });
   let passBtnShown = false;
   function syncPassBtnVisibility() {
     const p = players[current];
-    const shouldShow = state === 'aiming' && p && !p.isAI && !p.charging && (!onlineMode || current === myPlayerIndex);
-    if (shouldShow !== passBtnShown) { passBtnShown = shouldShow; passBtn.style.display = shouldShow ? 'block' : 'none'; }
+    const s = state === 'aiming' && p && !p.isAI && !p.charging && (!onlineMode || current === myPlayerIndex);
+    if (s !== passBtnShown) { passBtnShown = s; passBtn.style.display = s ? 'block' : 'none'; }
   }
-
   document.addEventListener('click', e => { if (e.target.closest('button, .swatch')) sfxClick(); });
 
   // ---------------------------------------------------------------------
@@ -927,70 +1081,75 @@
   let state = 'title';
   let players = [];
   let current = 0;
-  let wind = 0;
+  let wind = 0;               // 실제 물리에 쓰는 값
+  let windLevel = 0;          // -3 ~ 3 (0 제외, 바람세기 0%일 때만 0)
+  let prevWindLevel = 0;      // 지난 턴 값 (게이지 잔상용)
+  const WIND_STEPS = 3;
   let turnCount = 0;
   let projectiles = [];
   let currentShot = null;
   let smokeClouds = [];
   let particles = [];
-  let shake = 0;
-  let flash = 0;
+  let shake = 0, flash = 0;
   let turnMsgTimer = 0;
-  const TURN_TIME_LIMIT = 25;
-  let turnTimeLeft = TURN_TIME_LIMIT;
+  let turnTimeLimit = 25;
+  let turnTimeLeft = 25;
   let turnOverdue = 0;
-  let missMsg = '';
-  let missMsgTimer = 0;
+  let missMsg = '', missMsgTimer = 0;
   let resolveTimer = 0;
-  let winner = -1;
-  let winnerTeam = null;
+  let winner = -1, winnerTeam = null;
   let mapSeed = 1;
   let pendingActions = [];
+  let pickupSentIds = new Set();
 
-  let matchWins = [];
-  let matchWinsTeam = {};
-  let matchDraws = 0;
+  let matchWins = [], matchWinsTeam = {}, matchDraws = 0;
   function resetMatchWins() { matchWins = new Array(selectedPlayerCount).fill(0); matchWinsTeam = {}; matchDraws = 0; }
-  function recordMatchResult(winnerIdx, winnerTeamKey) {
-    if (winnerTeamKey) matchWinsTeam[winnerTeamKey] = (matchWinsTeam[winnerTeamKey] || 0) + 1;
-    else if (winnerIdx >= 0 && matchWins[winnerIdx] !== undefined) matchWins[winnerIdx]++;
+  function recordMatchResult(wIdx, wTeam) {
+    if (wTeam) matchWinsTeam[wTeam] = (matchWinsTeam[wTeam] || 0) + 1;
+    else if (wIdx >= 0 && matchWins[wIdx] !== undefined) matchWins[wIdx]++;
     else matchDraws++;
-    recordStatsToCloud(winnerIdx, winnerTeamKey);
+    recordStatsToCloud(wIdx, wTeam);
   }
   function buildTallyText() {
     if (isTeamMode()) {
       const keys = TEAM_KEYS.slice(0, teamCount);
       const total = keys.reduce((a, k) => a + (matchWinsTeam[k] || 0), 0) + matchDraws;
       if (total === 0) return '';
-      let parts = keys.map(k => `Team ${k} ${matchWinsTeam[k] || 0}승`);
-      if (matchDraws > 0) parts.push(`무승부 ${matchDraws}`);
+      const parts = keys.map(k => `${k}팀 ${matchWinsTeam[k] || 0}승`);
+      if (matchDraws > 0) parts.push(`무 ${matchDraws}`);
       return '전적  ' + parts.join('  ·  ');
     }
     const total = matchWins.reduce((a, b) => a + b, 0) + matchDraws;
     if (total === 0 || !players.length) return '';
-    let parts = players.map((p, i) => `${p.name} ${matchWins[i] || 0}승`);
-    if (matchDraws > 0) parts.push(`무승부 ${matchDraws}`);
+    let idxs = players.map((p, i) => i);
+    if (players.length > 8) {
+      idxs = idxs.filter(i => (matchWins[i] || 0) > 0).sort((a, b) => matchWins[b] - matchWins[a]).slice(0, 4);
+      if (!idxs.length) return '';
+    }
+    const parts = idxs.map(i => `${players[i].name} ${matchWins[i] || 0}승`);
+    if (matchDraws > 0) parts.push(`무 ${matchDraws}`);
     return '전적  ' + parts.join('  ·  ');
   }
 
-  function newTank(px, color, colorDark, colorLight, name, facing, shape) {
+  function newTank(px, c, name, facing, shape) {
     return {
-      x: px, y: 0, hp: 100, name, color, colorDark, colorLight, facing, shape: shape || 'classic',
+      x: px, y: 0, hp: 100, name, color: c.color, colorDark: c.dark, colorLight: c.light,
+      facing, shape: shape || 'classic',
       angle: 55, power: 0, charging: false, chargeDir: 1,
-      fuel: 100, ammo: WEAPONS.map(w => w.ammo), weapon: 0,
+      fuel: 100, ammo: WEAPONS.map(w => w.ammo === Infinity ? Infinity : w.ammo), weapon: 0,
       alive: true, recoil: 0, treadPhase: 0, hitFlash: 0, healFlash: 0, bob: Math.random() * 10,
-      falling: false, fallStartY: 0, team: null, isAI: false, shield: false
+      falling: false, fallStartY: 0, team: null, isAI: false, shield: false,
+      lastShot: null // { elev, power } — 직전 발사 제원(잔상)
     };
   }
   function toAbsoluteAngle(p) { return p.facing > 0 ? p.angle : 180 - p.angle; }
 
-  // 피해 적용 단일 창구 (방어막 처리 포함)
   function damageTank(pl, dmg) {
     if (dmg <= 0) return 0;
     if (pl.shield) {
       pl.shield = false;
       dmg = Math.round(dmg / 2);
-      itemPopups.push({ x: pl.x, y: pl.y - 16, text: '방어막! 피해 절반', color: PAL.shield, life: 1.3, maxLife: 1.3 });
+      itemPopups.push({ x: pl.x, y: pl.y - 16, text: '방어막! 절반', color: PAL.shield, life: 1.4, maxLife: 1.4 });
       sfxShieldBlock();
     }
     pl.hp = clamp(pl.hp - dmg, 0, 100);
@@ -1005,9 +1164,10 @@
   }
 
   function applyMapSize(baseScale) {
-    mapScale = baseScale * (fogMode ? FOG_EXTRA_SCALE : 1);
-    mapW = Math.round(BASE_W * mapScale);
-    mapH = Math.round(BASE_H * mapScale);
+    let s = baseScale * (fogMode ? FOG_EXTRA_SCALE : 1);
+    s = Math.min(s, MAX_MAP_SCALE);
+    mapScale = s;
+    mapW = Math.round(BASE_W * s); mapH = Math.round(BASE_H * s);
     W = fogMode ? BASE_W : mapW;
     H = fogMode ? BASE_H : mapH;
     canvas.width = W; canvas.height = H;
@@ -1019,27 +1179,21 @@
 
   function checkGameOver() {
     if (isTeamMode()) {
-      const aliveTeams = [...new Set(players.filter(p => p.alive).map(p => p.team))];
-      if (aliveTeams.length <= 1) return { over: true, winnerIdx: -1, winnerTeam: aliveTeams.length === 1 ? aliveTeams[0] : null };
+      const t = [...new Set(players.filter(p => p.alive).map(p => p.team))];
+      if (t.length <= 1) return { over: true, winnerIdx: -1, winnerTeam: t.length === 1 ? t[0] : null };
       return { over: false };
     }
-    const aliveList = players.filter(p => p.alive);
-    if (aliveList.length <= 1) return { over: true, winnerIdx: aliveList.length === 1 ? players.indexOf(aliveList[0]) : -1, winnerTeam: null };
+    const a = players.filter(p => p.alive);
+    if (a.length <= 1) return { over: true, winnerIdx: a.length === 1 ? players.indexOf(a[0]) : -1, winnerTeam: null };
     return { over: false };
   }
-  function finishGame(result) {
-    winner = result.winnerIdx;
-    winnerTeam = result.winnerTeam;
+  function finishGame(r) {
+    winner = r.winnerIdx; winnerTeam = r.winnerTeam;
     state = 'gameover';
     recordMatchResult(winner, winnerTeam);
-    spawnConfetti();
-    sfxVictory();
+    spawnConfetti(); sfxVictory();
   }
-  function endGameIfOver() {
-    if (state === 'gameover') return;
-    const result = checkGameOver();
-    if (result.over) finishGame(result);
-  }
+  function endGameIfOver() { if (state !== 'gameover') { const r = checkGameOver(); if (r.over) finishGame(r); } }
 
   const FALL_DAMAGE_THRESHOLD = 40;
   function applyTankGravity(pl, dt) {
@@ -1050,48 +1204,64 @@
       pl.y = Math.min(groundY, pl.y + 200 * mapScale * dt);
     } else if (pl.falling) {
       pl.falling = false;
-      const fallDist = (groundY - pl.fallStartY) / mapScale;
-      if (fallDist > FALL_DAMAGE_THRESHOLD) {
-        const dmg = clamp(Math.round((fallDist - FALL_DAMAGE_THRESHOLD) * 0.5), 0, 35);
-        if (dmg > 0) {
-          damageTank(pl, dmg); sfxHit();
-          if (pl.hp <= 0) { pl.alive = false; endGameIfOver(); }
-        }
+      const dist = (groundY - pl.fallStartY) / mapScale;
+      if (dist > FALL_DAMAGE_THRESHOLD) {
+        const dmg = clamp(Math.round((dist - FALL_DAMAGE_THRESHOLD) * 0.5), 0, 35);
+        if (dmg > 0) { damageTank(pl, dmg); sfxHit(); if (pl.hp <= 0) { pl.alive = false; endGameIfOver(); } }
       }
       pl.y = groundY;
     }
   }
 
+  // 다층 맵에서는 스폰 지점 주변에서 가장 높은 발판을 찾아 올려준다
+  function findSpawnX(x0) {
+    if (!LAYERED_KEYS.includes(currentMapKey)) return x0;
+    let best = x0, bestY = surfaceYAt(x0);
+    const range = 44 * mapScale;
+    for (let dx = -range; dx <= range; dx += 4) {
+      const x = clamp(Math.round(x0 + dx), 8, mapW - 8);
+      const y = surfaceYAt(x);
+      if (y < bestY) { bestY = y; best = x; }
+    }
+    return best;
+  }
+
+  function computeTurnTimeLimit(n) {
+    if (n >= 13) return 14;
+    if (n >= 9) return 18;
+    return 25;
+  }
+
   function startGame() {
-    const sizePreset = MAP_SIZES.find(s => s.key === selectedMapSize) || MAP_SIZES[1];
-    applyMapSize(sizePreset.scale);
+    const sp = MAP_SIZES.find(s => s.key === selectedMapSize) || MAP_SIZES[1];
+    applyMapSize(sp.scale);
     if (!onlineMode) mapSeed = (Date.now() % 100000) + Math.floor(Math.random() * 100000);
     generateTerrain(mapSeed, resolveMapKey());
     normalizeTeamCount();
 
     const n = selectedPlayerCount;
-    const margin = n <= 4 ? 0.12 : 0.07;
+    const margin = n <= 4 ? 0.12 : (n <= 8 ? 0.07 : 0.045);
     players = [];
     for (let i = 0; i < n; i++) {
       const t = n === 1 ? 0.5 : margin + (1 - margin * 2) * (i / (n - 1));
-      const px = Math.round(mapW * t);
       const cfg = playerConfig[i];
       const c = COLOR_PRESETS.find(cc => cc.key === cfg.colorKey) || COLOR_PRESETS[i % COLOR_PRESETS.length];
       const facing = i < n / 2 ? 1 : -1;
-      const tank = newTank(px, c.color, c.dark, c.light, cfg.name || ('P' + (i + 1)), facing, cfg.shape);
+      const tank = newTank(findSpawnX(Math.round(mapW * t)), c, cfg.name || ('P' + (i + 1)), facing, cfg.shape);
       tank.team = teamOf(i);
       tank.isAI = (soloMode && i === 1);
       players.push(tank);
     }
     players.forEach(p => { p.y = surfaceYAt(p.x) - 6; });
-    current = 0;
-    turnCount = 0;
+    turnTimeLimit = computeTurnTimeLimit(n);
+    current = 0; turnCount = 0;
     winner = -1; winnerTeam = null;
     aiPlan = null;
     projectiles = []; currentShot = null;
     smokeClouds = []; particles = [];
     items = []; nextItemId = 1; itemPopups = [];
-    pendingActions = [];
+    pendingActions = []; pickupSentIds = new Set();
+    prevWindLevel = 0;
     nextTurnSetup(true);
     pushTerrainToCanvas(true);
     state = 'aiming';
@@ -1101,6 +1271,9 @@
   // 설정 화면
   // ---------------------------------------------------------------------
   const setupScreen = document.getElementById('setupScreen');
+  const previewCanvas = document.createElement('canvas');
+  previewCanvas.width = BASE_W; previewCanvas.height = BASE_H;
+  const previewCtx = previewCanvas.getContext('2d');
 
   function drawMapPreview(canvasEl, mapKey) {
     const pctx = canvasEl.getContext('2d');
@@ -1110,28 +1283,37 @@
       const sky = pctx.createLinearGradient(0, 0, 0, ph);
       sky.addColorStop(0, '#3f5a8f'); sky.addColorStop(1, '#7fa8d4');
       pctx.fillStyle = sky; pctx.fillRect(0, 0, pw, ph);
-      pctx.fillStyle = '#f0c95c'; pctx.font = 'bold 16px monospace'; pctx.textAlign = 'center'; pctx.textBaseline = 'middle';
+      pctx.fillStyle = '#f0c95c'; pctx.font = 'bold 16px monospace';
+      pctx.textAlign = 'center'; pctx.textBaseline = 'middle';
       pctx.fillText('?', pw / 2, ph / 2 + 1);
       return;
     }
-    const theme = THEMES[mapKey] || THEMES.hills;
-    const sky = pctx.createLinearGradient(0, 0, 0, ph);
-    sky.addColorStop(0, theme.sky.top); sky.addColorStop(0.55, theme.sky.mid); sky.addColorStop(1, theme.sky.bot);
-    pctx.fillStyle = sky; pctx.fillRect(0, 0, pw, ph);
-    const rnd = mulberry32(2024);
-    const pw2 = BASE_W, ph2 = BASE_H;
-    const heights = computeHeights(mapKey, rnd, pw2, ph2);
-    pctx.fillStyle = theme.grassDark;
-    pctx.beginPath(); pctx.moveTo(0, ph);
-    for (let x = 0; x < pw2; x += 3) pctx.lineTo((x / pw2) * pw, (clamp(heights[x], ph2 * 0.1, ph2 * 0.95) / ph2) * ph);
-    pctx.lineTo(pw, (clamp(heights[pw2 - 1], ph2 * 0.1, ph2 * 0.95) / ph2) * ph);
-    pctx.lineTo(pw, ph); pctx.closePath(); pctx.fill();
-    pctx.strokeStyle = theme.rim; pctx.lineWidth = 1; pctx.beginPath();
-    for (let x = 0; x < pw2; x += 3) {
-      const px = (x / pw2) * pw, py = (clamp(heights[x], ph2 * 0.1, ph2 * 0.95) / ph2) * ph;
-      if (x === 0) pctx.moveTo(px, py); else pctx.lineTo(px, py);
+    const th = THEMES[mapKey] || THEMES.hills;
+    const mask = buildSolidMask(mapKey, 2024, BASE_W, BASE_H);
+    const img = previewCtx.createImageData(BASE_W, BASE_H);
+    const skyTop = hexToRgb(th.sky.top), skyBot = hexToRgb(th.sky.bot);
+    const rim = hexToRgb(th.rim), body = hexToRgb(th.grassDark), deep = hexToRgb(th.deepTo);
+    for (let x = 0; x < BASE_W; x++) {
+      let depth = 0;
+      for (let y = 0; y < BASE_H; y++) {
+        const mi = y * BASE_W + x, idx = mi * 4;
+        if (!mask[mi]) {
+          depth = 0;
+          const t = y / BASE_H;
+          img.data[idx] = lerp(skyTop[0], skyBot[0], t);
+          img.data[idx + 1] = lerp(skyTop[1], skyBot[1], t);
+          img.data[idx + 2] = lerp(skyTop[2], skyBot[2], t);
+          img.data[idx + 3] = 255;
+          continue;
+        }
+        const d = depth++;
+        const c = d === 0 ? rim : (d < 8 ? body : deep);
+        img.data[idx] = c[0]; img.data[idx + 1] = c[1]; img.data[idx + 2] = c[2]; img.data[idx + 3] = 255;
+      }
     }
-    pctx.stroke();
+    previewCtx.putImageData(img, 0, 0);
+    pctx.imageSmoothingEnabled = true;
+    pctx.drawImage(previewCanvas, 0, 0, pw, ph);
   }
 
   function readNickInputs() {
@@ -1146,83 +1328,54 @@
     if (mapGrid.childElementCount === 0) {
       MAPS.forEach(m => {
         const btn = document.createElement('div'); btn.className = 'map-btn'; btn.dataset.key = m.key;
-        const prevCanvas = document.createElement('canvas'); prevCanvas.width = 60; prevCanvas.height = 34;
-        btn.appendChild(prevCanvas);
-        const span = document.createElement('span'); span.textContent = m.label; btn.appendChild(span);
+        const pv = document.createElement('canvas'); pv.width = 60; pv.height = 34; btn.appendChild(pv);
+        const sp = document.createElement('span'); sp.textContent = m.label; btn.appendChild(sp);
         btn.addEventListener('click', () => { selectedMapKey = m.key; refreshSetupSelection(); });
         mapGrid.appendChild(btn);
-        drawMapPreview(prevCanvas, m.key);
+        drawMapPreview(pv, m.key);
       });
     }
-    const sizeGrid = document.getElementById('sizeGrid');
-    if (sizeGrid.childElementCount === 0) {
-      MAP_SIZES.forEach(s => {
-        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'size-btn'; btn.textContent = s.label; btn.dataset.key = s.key;
-        btn.addEventListener('click', () => { selectedMapSize = s.key; refreshSetupSelection(); });
-        sizeGrid.appendChild(btn);
+    const mk = (grid, list, keyName, onPick, labelFn) => {
+      const g = document.getElementById(grid);
+      if (g.childElementCount) return;
+      list.forEach(s => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'size-btn';
+        b.textContent = labelFn ? labelFn(s) : s.label; b.dataset[keyName] = (s.key !== undefined ? s.key : s);
+        b.addEventListener('click', () => onPick(s));
+        g.appendChild(b);
       });
-    }
-    const shotSpeedGrid = document.getElementById('shotSpeedGrid');
-    if (shotSpeedGrid.childElementCount === 0) {
-      SHOT_SPEEDS.forEach(s => {
-        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'size-btn'; btn.textContent = s.label; btn.dataset.key = s.key;
-        btn.addEventListener('click', () => { selectedShotSpeed = s.key; refreshSetupSelection(); });
-        shotSpeedGrid.appendChild(btn);
-      });
-    }
-    const countGrid = document.getElementById('countGrid');
-    if (countGrid.childElementCount === 0) {
-      PLAYER_COUNTS.forEach(n => {
-        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'size-btn'; btn.textContent = n + '인'; btn.dataset.count = n;
-        btn.addEventListener('click', () => { selectedPlayerCount = n; normalizeTeamCount(); rebuildPlayerCards(); });
-        countGrid.appendChild(btn);
-      });
-    }
-    const teamGrid = document.getElementById('teamGrid');
-    if (teamGrid.childElementCount === 0) {
-      TEAM_OPTIONS.forEach(t => {
-        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'size-btn'; btn.textContent = t.label; btn.dataset.team = t.key;
-        btn.addEventListener('click', () => { teamCount = t.key; normalizeTeamCount(); rebuildPlayerCards(); });
-        teamGrid.appendChild(btn);
-      });
-    }
+    };
+    mk('sizeGrid', MAP_SIZES, 'key', s => { selectedMapSize = s.key; refreshSetupSelection(); });
+    mk('shotSpeedGrid', SHOT_SPEEDS, 'key', s => { selectedShotSpeed = s.key; refreshSetupSelection(); });
+    mk('countGrid', PLAYER_COUNTS.map(n => ({ key: n, label: n + '인' })), 'count',
+       s => { selectedPlayerCount = s.key; normalizeTeamCount(); rebuildPlayerCards(); });
+    mk('teamGrid', TEAM_OPTIONS, 'team', s => { teamCount = s.key; normalizeTeamCount(); rebuildPlayerCards(); });
+    mk('difficultyGrid', AI_DIFFICULTIES, 'key', s => { selectedDifficulty = s.key; refreshSetupSelection(); });
+
     const fogCheck = document.getElementById('fogModeCheck');
     if (!fogCheck.dataset.bound) { fogCheck.dataset.bound = '1'; fogCheck.addEventListener('change', e => { fogMode = e.target.checked; }); }
     const itemCheck = document.getElementById('itemDropCheck');
-    if (!itemCheck.dataset.bound) { itemCheck.dataset.bound = '1'; itemCheck.addEventListener('change', e => { itemDrops = e.target.checked; }); }
-    const windSlider = document.getElementById('windStrengthSlider');
-    if (!windSlider.dataset.bound) {
-      windSlider.dataset.bound = '1';
-      windSlider.addEventListener('input', e => {
+    if (!itemCheck.dataset.bound) { itemCheck.dataset.bound = '1'; itemCheck.addEventListener('change', e => { itemDrops = e.target.checked; refreshSetupSelection(); }); }
+    const ws = document.getElementById('windStrengthSlider');
+    if (!ws.dataset.bound) {
+      ws.dataset.bound = '1';
+      ws.addEventListener('input', e => {
         windStrengthPct = Number(e.target.value);
         document.getElementById('windStrengthValue').textContent = windStrengthPct + '%';
       });
     }
-    const difficultyGrid = document.getElementById('difficultyGrid');
-    if (difficultyGrid.childElementCount === 0) {
-      AI_DIFFICULTIES.forEach(d => {
-        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'size-btn'; btn.textContent = d.label; btn.dataset.key = d.key; btn.title = d.desc;
-        btn.addEventListener('click', () => { selectedDifficulty = d.key; refreshSetupSelection(); });
-        difficultyGrid.appendChild(btn);
-      });
-    }
-    const modeLocalBtn = document.getElementById('modeLocalBtn');
-    const modeSoloBtn = document.getElementById('modeSoloBtn');
-    const modeOnlineBtn = document.getElementById('modeOnlineBtn');
-    if (!modeLocalBtn.dataset.bound) {
-      modeLocalBtn.dataset.bound = '1';
-      modeLocalBtn.addEventListener('click', () => { soloMode = false; leaveOnlineRoom(); rebuildPlayerCards(); });
-      modeSoloBtn.dataset.bound = '1';
-      modeSoloBtn.addEventListener('click', () => {
+    const mL = document.getElementById('modeLocalBtn'), mS = document.getElementById('modeSoloBtn'), mO = document.getElementById('modeOnlineBtn');
+    if (!mL.dataset.bound) {
+      mL.dataset.bound = '1';
+      mL.addEventListener('click', () => { soloMode = false; leaveOnlineRoom(); rebuildPlayerCards(); });
+      mS.addEventListener('click', () => {
         leaveOnlineRoom(); soloMode = true; selectedPlayerCount = 2; teamCount = 0;
         if (!playerConfig[1].name || playerConfig[1].name === 'P2') playerConfig[1].name = 'AI';
         rebuildPlayerCards();
       });
-      modeOnlineBtn.dataset.bound = '1';
-      modeOnlineBtn.addEventListener('click', () => {
+      mO.addEventListener('click', () => {
         soloMode = false; onlineMode = true;
-        setOnlineStatus(''); hideRoomCodeBig(); hideLobby();
-        rebuildPlayerCards();
+        setOnlineStatus(''); hideRoomCodeBig(); hideLobby(); rebuildPlayerCards();
       });
       document.getElementById('roomCreateBtn').addEventListener('click', () => { readNickInputs(); createOnlineRoom(); });
       document.getElementById('roomJoinBtn').addEventListener('click', () => { readNickInputs(); joinOnlineRoom(document.getElementById('roomCodeInput').value); });
@@ -1233,70 +1386,73 @@
   function rebuildPlayerCards() {
     const wrap = document.getElementById('playerCards');
     wrap.innerHTML = '';
-    const n = onlineMode ? 1 : selectedPlayerCount;
+    // 온라인은 자기 것만, 로컬은 최대 8명까지만 카드로 (그 이상은 자동 배정)
+    const n = onlineMode ? 1 : Math.min(selectedPlayerCount, 8);
     for (let pi = 0; pi < n; pi++) {
       const card = document.createElement('div'); card.className = 'setup-player'; card.dataset.p = pi;
       const title = document.createElement('div'); title.className = 'setup-player-title';
       const preset = COLOR_PRESETS.find(c => c.key === playerConfig[pi].colorKey) || COLOR_PRESETS[pi];
       title.style.color = preset.light;
       let ttl = onlineMode ? '내 탱크' : `Player ${pi + 1}`;
-      if (!onlineMode && isTeamMode()) ttl += ` (Team ${teamOf(pi)})`;
+      if (!onlineMode && isTeamMode()) ttl += ` (${teamOf(pi)}팀)`;
       if (soloMode && pi === 1) ttl += ' (AI)';
       title.textContent = ttl;
       card.appendChild(title);
 
-      const nickLabel = document.createElement('label'); nickLabel.textContent = '닉네임 (전적 기록용, 기본 이름은 기록 안 됨)';
-      const nickInput = document.createElement('input');
-      nickInput.type = 'text'; nickInput.className = 'nick-input'; nickInput.dataset.p = pi;
-      nickInput.maxLength = 8; nickInput.placeholder = 'P' + (pi + 1);
-      nickInput.value = playerConfig[pi].name;
-      nickInput.addEventListener('input', () => { playerConfig[pi].name = nickInput.value.trim() || ('P' + (pi + 1)); });
-      card.appendChild(nickLabel); card.appendChild(nickInput);
+      const nl = document.createElement('label'); nl.textContent = '닉네임 (전적 기록용)';
+      const ni = document.createElement('input');
+      ni.type = 'text'; ni.className = 'nick-input'; ni.dataset.p = pi;
+      ni.maxLength = 8; ni.placeholder = 'P' + (pi + 1); ni.value = playerConfig[pi].name;
+      ni.addEventListener('input', () => { playerConfig[pi].name = ni.value.trim() || ('P' + (pi + 1)); });
+      card.appendChild(nl); card.appendChild(ni);
 
-      const colorLabel = document.createElement('label'); colorLabel.textContent = '색상' + (onlineMode ? ' (이미 쓰는 사람이 있으면 자동으로 바뀜)' : '');
-      const swatchWrap = document.createElement('div'); swatchWrap.className = 'swatches'; swatchWrap.dataset.p = pi;
+      const cl = document.createElement('label'); cl.textContent = '색상';
+      const sw = document.createElement('div'); sw.className = 'swatches'; sw.dataset.p = pi;
       COLOR_PRESETS.forEach(c => {
-        const sw = document.createElement('div');
-        sw.className = 'swatch'; sw.style.background = c.color; sw.dataset.key = c.key; sw.title = c.key;
-        sw.addEventListener('click', () => {
-          const usedByOther = !onlineMode && playerConfig.some((cfg, idx) => idx !== pi && idx < selectedPlayerCount && cfg.colorKey === c.key);
-          if (usedByOther) return;
-          playerConfig[pi].colorKey = c.key;
-          refreshSetupSelection();
+        const s = document.createElement('div');
+        s.className = 'swatch'; s.style.background = c.color; s.dataset.key = c.key; s.title = c.key;
+        s.addEventListener('click', () => {
+          const used = !onlineMode && playerConfig.some((cf, idx) => idx !== pi && idx < selectedPlayerCount && cf.colorKey === c.key);
+          if (used) return;
+          playerConfig[pi].colorKey = c.key; refreshSetupSelection();
         });
-        swatchWrap.appendChild(sw);
+        sw.appendChild(s);
       });
-      card.appendChild(colorLabel); card.appendChild(swatchWrap);
+      card.appendChild(cl); card.appendChild(sw);
 
-      const shapeLabel = document.createElement('label'); shapeLabel.textContent = '모양';
-      const shapeWrap = document.createElement('div'); shapeWrap.className = 'shapes'; shapeWrap.dataset.p = pi;
+      const sl = document.createElement('label'); sl.textContent = '모양';
+      const shw = document.createElement('div'); shw.className = 'shapes'; shw.dataset.p = pi;
       SHAPES.forEach(s => {
-        const btn = document.createElement('button');
-        btn.type = 'button'; btn.className = 'shape-btn'; btn.textContent = s.label; btn.dataset.key = s.key;
-        btn.addEventListener('click', () => { playerConfig[pi].shape = s.key; refreshSetupSelection(); });
-        shapeWrap.appendChild(btn);
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'shape-btn'; b.textContent = s.label; b.dataset.key = s.key;
+        b.addEventListener('click', () => { playerConfig[pi].shape = s.key; refreshSetupSelection(); });
+        shw.appendChild(b);
       });
-      card.appendChild(shapeLabel); card.appendChild(shapeWrap);
+      card.appendChild(sl); card.appendChild(shw);
       wrap.appendChild(card);
+    }
+    // 9명 이상 로컬이면 나머지는 자동 이름/색
+    if (!onlineMode && selectedPlayerCount > 8) {
+      for (let pi = 8; pi < selectedPlayerCount; pi++) {
+        playerConfig[pi].colorKey = COLOR_PRESETS[pi % COLOR_PRESETS.length].key;
+      }
     }
     refreshSetupSelection();
   }
 
   function refreshSetupSelection() {
-    document.querySelectorAll('.map-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.key === selectedMapKey));
-    document.querySelectorAll('#sizeGrid .size-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.key === selectedMapSize));
-    document.querySelectorAll('#countGrid .size-btn').forEach(btn => btn.classList.toggle('selected', Number(btn.dataset.count) === selectedPlayerCount));
-    document.querySelectorAll('#shotSpeedGrid .size-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.key === selectedShotSpeed));
-    document.querySelectorAll('#difficultyGrid .size-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.key === selectedDifficulty));
-    document.querySelectorAll('#teamGrid .size-btn').forEach(btn => {
-      const k = Number(btn.dataset.team);
-      btn.classList.toggle('selected', k === teamCount);
-      btn.disabled = (k === 4 && selectedPlayerCount < 4);
+    document.querySelectorAll('.map-btn').forEach(b => b.classList.toggle('selected', b.dataset.key === selectedMapKey));
+    document.querySelectorAll('#sizeGrid .size-btn').forEach(b => b.classList.toggle('selected', b.dataset.key === selectedMapSize));
+    document.querySelectorAll('#countGrid .size-btn').forEach(b => b.classList.toggle('selected', Number(b.dataset.count) === selectedPlayerCount));
+    document.querySelectorAll('#shotSpeedGrid .size-btn').forEach(b => b.classList.toggle('selected', b.dataset.key === selectedShotSpeed));
+    document.querySelectorAll('#difficultyGrid .size-btn').forEach(b => b.classList.toggle('selected', b.dataset.key === selectedDifficulty));
+    document.querySelectorAll('#teamGrid .size-btn').forEach(b => {
+      const k = Number(b.dataset.team);
+      b.classList.toggle('selected', k === teamCount);
+      b.disabled = (k > 0 && selectedPlayerCount < k * 2);
     });
-    {
-      const curDiff = AI_DIFFICULTIES.find(d => d.key === selectedDifficulty);
-      document.getElementById('difficultyDesc').textContent = curDiff ? curDiff.desc : '';
-    }
+    const d = AI_DIFFICULTIES.find(x => x.key === selectedDifficulty);
+    document.getElementById('difficultyDesc').textContent = d ? d.desc : '';
     document.getElementById('windStrengthSlider').value = windStrengthPct;
     document.getElementById('windStrengthValue').textContent = windStrengthPct + '%';
     document.getElementById('fogModeCheck').checked = fogMode;
@@ -1311,117 +1467,121 @@
     document.getElementById('countGrid').style.pointerEvents = soloMode ? 'none' : '';
     document.getElementById('countGrid').style.opacity = soloMode ? '0.4' : '1';
     document.getElementById('teamRow').style.display = soloMode ? 'none' : 'block';
-    const n = onlineMode ? 1 : selectedPlayerCount;
-    for (let pi = 0; pi < n; pi++) {
-      document.querySelectorAll(`.swatches[data-p="${pi}"] .swatch`).forEach(sw => {
-        sw.classList.toggle('selected', sw.dataset.key === playerConfig[pi].colorKey);
-        const usedByOther = !onlineMode && playerConfig.some((cfg, idx) => idx !== pi && idx < selectedPlayerCount && cfg.colorKey === sw.dataset.key);
-        sw.classList.toggle('disabled', usedByOther);
+
+    // 인원수 경고
+    const warn = document.getElementById('countWarn');
+    const n = selectedPlayerCount;
+    let msg = '';
+    if (n >= 13) msg = `⚠ ${n}인은 한 바퀴에 약 ${Math.round(n * 14 / 60)}분 걸려요. 턴 제한을 14초로 줄였습니다. 맵은 '초대형+' 권장.`;
+    else if (n >= 9) msg = `${n}인은 턴 제한이 18초로 줄어요. 맵은 '초대형' 이상을 권합니다.`;
+    if (!itemDrops) msg += (msg ? ' / ' : '') + '아이템 드롭을 끄면 핵폭탄은 등장하지 않습니다.';
+    warn.textContent = msg;
+
+    const cnt = onlineMode ? 1 : Math.min(selectedPlayerCount, 8);
+    for (let pi = 0; pi < cnt; pi++) {
+      document.querySelectorAll(`.swatches[data-p="${pi}"] .swatch`).forEach(s => {
+        s.classList.toggle('selected', s.dataset.key === playerConfig[pi].colorKey);
+        const used = !onlineMode && playerConfig.some((cf, idx) => idx !== pi && idx < selectedPlayerCount && cf.colorKey === s.dataset.key);
+        s.classList.toggle('disabled', used);
       });
-      document.querySelectorAll(`.shapes[data-p="${pi}"] .shape-btn`).forEach(btn => btn.classList.toggle('selected', btn.dataset.key === playerConfig[pi].shape));
+      document.querySelectorAll(`.shapes[data-p="${pi}"] .shape-btn`).forEach(b => b.classList.toggle('selected', b.dataset.key === playerConfig[pi].shape));
     }
   }
 
   function openSetupScreen() {
-    leaveOnlineRoom();
-    buildSetupUI();
-    rebuildPlayerCards();
-    refreshSetupSelection();
-    state = 'setup';
-    setupScreen.style.display = 'flex';
+    leaveOnlineRoom(); buildSetupUI(); rebuildPlayerCards(); refreshSetupSelection();
+    state = 'setup'; setupScreen.style.display = 'flex';
   }
-
   document.getElementById('setup-start-btn').addEventListener('click', () => {
-    readNickInputs();
-    setupScreen.style.display = 'none';
-    resetMatchWins();
-    startGame();
+    readNickInputs(); setupScreen.style.display = 'none'; resetMatchWins(); startGame();
   });
   document.getElementById('setup-back-btn').addEventListener('click', () => {
     leaveOnlineRoom(); setupScreen.style.display = 'none'; state = 'title';
   });
 
+  // ---------------------------------------------------------------------
+  // 턴 진행 (바람 6단계 + 아이템 스폰)
+  // ---------------------------------------------------------------------
   function nextTurnSetup(first) {
     if (!first) {
       let tries = 0;
       do { current = (current + 1) % players.length; tries++; } while (!players[current].alive && tries <= players.length);
-      sfxTurn();
-      turnCount++;
+      sfxTurn(); turnCount++;
       smokeClouds = smokeClouds.filter(c => c.expiresTurn > turnCount);
     }
-    // 바람과 아이템 스폰을 같은 시드 PRNG에서 순서대로 뽑음 (모든 화면 동일)
+    // 바람: 6단계(좌3/우3). 매 턴 반드시 이전과 다른 값이 되도록 함.
+    prevWindLevel = windLevel;
     const turnRnd = mulberry32(mapSeed + turnCount * 7919 + 1);
-    wind = Math.round((turnRnd() * 2 - 1) * 8 * 10) / 10;
+    if (windStrengthPct <= 0) {
+      windLevel = 0;
+    } else {
+      const mag = 1 + Math.floor(turnRnd() * WIND_STEPS);       // 1..3
+      const dir = turnRnd() < 0.5 ? -1 : 1;
+      let lv = mag * dir;
+      if (lv === prevWindLevel) lv = -lv;                        // 같으면 반대편으로 → 변화가 눈에 띔
+      windLevel = lv;
+    }
+    wind = windLevel * (8 / WIND_STEPS);
     if (!first) maybeSpawnItem(turnRnd);
     players[current].fuel = 100;
     turnMsgTimer = 1.1;
-    turnTimeLeft = TURN_TIME_LIMIT;
+    turnTimeLeft = turnTimeLimit;
     turnOverdue = 0;
     aiPlan = null;
-    if (players[current].weapon > 0 && players[current].ammo[players[current].weapon] <= 0) players[current].weapon = 0;
+    pickupSentIds = new Set();
+    const p = players[current];
+    if (p.weapon > 0 && p.ammo[p.weapon] <= 0) p.weapon = 0;
   }
 
   // ---------------------------------------------------------------------
-  // Firebase 온라인 대전
+  // Firebase 온라인 대전 (최대 20인)
   // ---------------------------------------------------------------------
   const firebaseConfig = {
-  apiKey: "AIzaSyCFaL0aDTqnEImkpkHWt3Uwf-Bz75OWZb4",
-  authDomain: "fortress-6bd92.firebaseapp.com",
-  databaseURL: "https://fortress-6bd92-default-rtdb.asia-southeast1.firebasedatabase.app/",
-  projectId: "fortress-6bd92",
-  storageBucket: "fortress-6bd92.firebasestorage.app",
-  messagingSenderId: "583951735262",
-  appId: "1:583951735262:web:3a5a9f6706cf850c68a54f"
+    apiKey: "AIzaSyBfJWCTvUXzWvPfULRkLEl4XYLbtqhuOc8",
+    authDomain: "potress-b699b.firebaseapp.com",
+    databaseURL: "https://potress-b699b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "potress-b699b",
+    storageBucket: "potress-b699b.firebasestorage.app",
+    messagingSenderId: "335140567610",
+    appId: "1:335140567610:web:a323cf6fa1f7f392325303"
   };
   let db = null;
   try {
     if (window.firebase && firebaseConfig.databaseURL.indexOf('여기에') === -1) {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.database();
+      firebase.initializeApp(firebaseConfig); db = firebase.database();
     }
   } catch (e) { console.warn('Firebase 초기화 실패:', e); }
 
   const myUid = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-3);
-  let onlineMode = false;
-  let currentRoomId = null;
-  let isRoomHost = false;
-  let myPlayerIndex = 0;
-  let lastRoomData = null;
-  let myDisconnectRef = null;
+  let onlineMode = false, currentRoomId = null, isRoomHost = false;
+  let myPlayerIndex = 0, lastRoomData = null, myDisconnectRef = null;
 
   let soloMode = false;
   const AI_DIFFICULTIES = [
-    { key: 'veryeasy', label: '매우쉬움', angleStep: 14, powerStep: 26, angleError: 24, powerError: 26, thinkTime: [0.9, 1.8], moveChance: 0.2,  missChance: 0.55, missMult: 3.4, specialChance: 0, desc: '거의 항상 크게 빗나가요. 특수무기는 쓰지 않아요.' },
-    { key: 'easy',   label: '쉬움',   angleStep: 10, powerStep: 20, angleError: 15, powerError: 18, thinkTime: [0.7, 1.5], moveChance: 0.3,  missChance: 0.35, missMult: 3.0, specialChance: 0.1, desc: '자주 빗나가고, 특수무기는 가끔만 써요.' },
-    { key: 'normal', label: '보통',   angleStep: 6,  powerStep: 12, angleError: 7,  powerError: 9,  thinkTime: [0.5, 1.0], moveChance: 0.45, missChance: 0.2,  missMult: 2.4, specialChance: 0.25, desc: '적당히 정확하게 조준해요. 무난한 난이도예요.' },
-    { key: 'hard',   label: '어려움', angleStep: 3,  powerStep: 6,  angleError: 2.5, powerError: 3, thinkTime: [0.3, 0.7], moveChance: 0.55, missChance: 0.08, missMult: 2.0, specialChance: 0.4, desc: '정밀하게 조준하고 특수무기도 적극적으로 써요.' },
-    { key: 'veryhard', label: '매우어려움', angleStep: 1, powerStep: 2, angleError: 0.6, powerError: 0.8, thinkTime: [0.15, 0.4], moveChance: 0.65, missChance: 0.02, missMult: 1.6, specialChance: 0.55, desc: '거의 완벽하게 조준하고 특수무기를 매우 자주 써요. 방심은 금물이에요.' }
+    { key: 'veryeasy', label: '매우쉬움', angleStep: 14, powerStep: 26, angleError: 24, powerError: 26, thinkTime: [0.9, 1.8], moveChance: 0.2, missChance: 0.55, missMult: 3.4, specialChance: 0, desc: '거의 항상 크게 빗나가요.' },
+    { key: 'easy', label: '쉬움', angleStep: 10, powerStep: 20, angleError: 15, powerError: 18, thinkTime: [0.7, 1.5], moveChance: 0.3, missChance: 0.35, missMult: 3.0, specialChance: 0.1, desc: '자주 빗나가요.' },
+    { key: 'normal', label: '보통', angleStep: 6, powerStep: 12, angleError: 7, powerError: 9, thinkTime: [0.5, 1.0], moveChance: 0.45, missChance: 0.2, missMult: 2.4, specialChance: 0.25, desc: '적당히 정확해요.' },
+    { key: 'hard', label: '어려움', angleStep: 3, powerStep: 6, angleError: 2.5, powerError: 3, thinkTime: [0.3, 0.7], moveChance: 0.55, missChance: 0.08, missMult: 2.0, specialChance: 0.4, desc: '정밀하게 조준해요.' },
+    { key: 'veryhard', label: '매우어려움', angleStep: 1, powerStep: 2, angleError: 0.6, powerError: 0.8, thinkTime: [0.15, 0.4], moveChance: 0.65, missChance: 0.02, missMult: 1.6, specialChance: 0.55, desc: '거의 완벽해요. 방심 금물!' }
   ];
   let selectedDifficulty = 'normal';
-  let aiPlan = null;
-  let actionsUnsub = null;
-  let roomUnsub = null;
-  let gameStartedFromRoom = false;
+  let aiPlan = null, actionsUnsub = null, roomUnsub = null, gameStartedFromRoom = false;
 
   function roomRef(id) { return db.ref('rooms/' + id); }
   function actionsRef(id) { return db.ref('rooms/' + id + '/actions'); }
-  function setOnlineStatus(msg) { const el = document.getElementById('onlineStatus'); if (el) el.textContent = msg; }
-
-  const roomCodeBig = document.getElementById('roomCodeBig');
-  const roomCodeBigText = document.getElementById('roomCodeBigText');
-  function showRoomCodeBig(code) { roomCodeBigText.textContent = code; roomCodeBig.style.display = 'flex'; }
+  function setOnlineStatus(m) { const e = document.getElementById('onlineStatus'); if (e) e.textContent = m; }
+  const roomCodeBig = document.getElementById('roomCodeBig'), roomCodeBigText = document.getElementById('roomCodeBigText');
+  function showRoomCodeBig(c) { roomCodeBigText.textContent = c; roomCodeBig.style.display = 'flex'; }
   function hideRoomCodeBig() { roomCodeBig.style.display = 'none'; }
   function hideLobby() { document.getElementById('lobbyPanel').style.display = 'none'; }
   document.getElementById('roomCodeCopyBtn').addEventListener('click', async () => {
-    const code = roomCodeBigText.textContent;
-    try { await navigator.clipboard.writeText(code); setOnlineStatus(`코드 "${code}" 복사했어요! 친구들에게 알려주세요.`); }
-    catch (e) { setOnlineStatus(`복사에 실패했어요. 코드 "${code}"를 직접 알려주세요.`); }
+    const c = roomCodeBigText.textContent;
+    try { await navigator.clipboard.writeText(c); setOnlineStatus(`코드 "${c}" 복사했어요!`); }
+    catch (e) { setOnlineStatus(`복사 실패. 코드 "${c}"를 직접 알려주세요.`); }
   });
-
   function makeRoomCode() {
-    const chars = 'ACDEFHJKLMNPQRTUVWXY34790';
-    let s = '';
-    for (let i = 0; i < 4; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    const ch = 'ACDEFHJKLMNPQRTUVWXY34790';
+    let s = ''; for (let i = 0; i < 4; i++) s += ch[Math.floor(Math.random() * ch.length)];
     return s;
   }
   function myCfgForRoom() {
@@ -1430,206 +1590,151 @@
 
   async function createOnlineRoom() {
     if (!db) { setOnlineStatus('Firebase 설정이 안 되어있어요.'); return; }
-    if (currentRoomId) { setOnlineStatus('이미 만든 방이 있어요. 아래 코드를 친구들에게 알려주세요.'); showRoomCodeBig(currentRoomId); return; }
+    if (currentRoomId) { setOnlineStatus('이미 만든 방이 있어요.'); showRoomCodeBig(currentRoomId); return; }
     const btn = document.getElementById('roomCreateBtn');
     if (btn.disabled) return;
-    btn.disabled = true;
-    setOnlineStatus('방 만드는 중...');
+    btn.disabled = true; setOnlineStatus('방 만드는 중...');
     normalizeTeamCount();
     const seed = (Date.now() % 100000) + Math.floor(Math.random() * 100000);
-    const resolvedMapKey = resolveMapKey();
+    const mk = resolveMapKey();
     let roomId = makeRoomCode();
     try {
-      for (let tries = 0; tries < 5; tries++) {
-        const snap = await roomRef(roomId).once('value');
-        if (snap.val() === null) break;
+      for (let t = 0; t < 5; t++) {
+        const s = await roomRef(roomId).once('value');
+        if (s.val() === null) break;
         roomId = makeRoomCode();
       }
       const me = myCfgForRoom(); me.joinedAt = 0;
-      const players = {}; players[myUid] = me;
+      const pl = {}; pl[myUid] = me;
       await roomRef(roomId).set({
-        status: 'waiting',
-        maxPlayers: selectedPlayerCount,
-        teamCount: teamCount,
-        mapKey: resolvedMapKey,
-        mapSize: selectedMapSize,
-        shotSpeed: selectedShotSpeed,
-        windStrength: windStrengthPct,
-        fogMode: fogMode,
-        itemDrops: itemDrops,
-        mapSeed: seed,
-        hostUid: myUid,
-        players,
-        createdAt: firebase.database.ServerValue.TIMESTAMP
+        status: 'waiting', maxPlayers: selectedPlayerCount, teamCount,
+        mapKey: mk, mapSize: selectedMapSize, shotSpeed: selectedShotSpeed,
+        windStrength: windStrengthPct, fogMode, itemDrops, mapSeed: seed,
+        hostUid: myUid, players: pl, createdAt: firebase.database.ServerValue.TIMESTAMP
       });
       myDisconnectRef = roomRef(roomId).onDisconnect();
       await myDisconnectRef.remove();
-    } catch (e) {
-      setOnlineStatus('방 생성 실패: ' + e.message);
-      btn.disabled = false;
-      return;
-    }
-    onlineMode = true;
-    selectedMapKey = resolvedMapKey;
-    currentRoomId = roomId;
-    isRoomHost = true;
-    myPlayerIndex = 0;
-    gameStartedFromRoom = false;
-    setOnlineStatus('친구들이 아래 코드로 들어오면 명단에 나타나요. 2명 이상 모이면 "게임 시작"을 누르세요.');
-    showRoomCodeBig(roomId);
-    listenRoom(roomId);
-    btn.disabled = false;
+    } catch (e) { setOnlineStatus('방 생성 실패: ' + e.message); btn.disabled = false; return; }
+    onlineMode = true; selectedMapKey = mk; currentRoomId = roomId;
+    isRoomHost = true; myPlayerIndex = 0; gameStartedFromRoom = false;
+    setOnlineStatus('친구들이 코드로 들어오면 명단에 나타나요. 2명 이상이면 "게임 시작".');
+    showRoomCodeBig(roomId); listenRoom(roomId); btn.disabled = false;
   }
 
-  async function joinOnlineRoom(rawId) {
+  async function joinOnlineRoom(raw) {
     if (!db) { setOnlineStatus('Firebase 설정이 안 되어있어요.'); return; }
     hideRoomCodeBig();
-    const roomId = (rawId || '').trim().toUpperCase();
+    const roomId = (raw || '').trim().toUpperCase();
     if (roomId.length !== 4) { setOnlineStatus('방 코드 4자리를 입력해주세요.'); return; }
     if (currentRoomId) { setOnlineStatus('이미 방에 들어와 있어요.'); return; }
-    const joinBtn = document.getElementById('roomJoinBtn');
-    if (joinBtn.disabled) return;
-    joinBtn.disabled = true;
+    const jb = document.getElementById('roomJoinBtn');
+    if (jb.disabled) return;
+    jb.disabled = true;
     const ref = roomRef(roomId);
     let data;
-    try { const snap = await ref.once('value'); data = snap.val(); }
-    catch (e) { setOnlineStatus('참가 실패: ' + e.message); joinBtn.disabled = false; return; }
-    if (data === null) { setOnlineStatus(`"${roomId}" 코드의 방을 찾을 수 없어요. 코드를 다시 확인해주세요.`); joinBtn.disabled = false; return; }
-    if (data.status !== 'waiting') { setOnlineStatus('이미 게임이 시작된 방이에요.'); joinBtn.disabled = false; return; }
-    const maxPlayers = data.maxPlayers || 2;
-    const myCfg = myCfgForRoom();
-    let joined = false;
+    try { data = (await ref.once('value')).val(); }
+    catch (e) { setOnlineStatus('참가 실패: ' + e.message); jb.disabled = false; return; }
+    if (data === null) { setOnlineStatus(`"${roomId}" 방을 찾을 수 없어요.`); jb.disabled = false; return; }
+    if (data.status !== 'waiting') { setOnlineStatus('이미 시작된 방이에요.'); jb.disabled = false; return; }
+    const maxP = data.maxPlayers || 2, myCfg = myCfgForRoom();
+    let ok = false;
     try {
       const tx = await ref.child('players').transaction(cur => {
         cur = cur || {};
         const uids = Object.keys(cur);
         if (cur[myUid]) return cur;
-        if (uids.length >= maxPlayers) return;
+        if (uids.length >= maxP) return;
         const used = new Set(uids.map(u => cur[u].colorKey));
-        let colorKey = myCfg.colorKey;
-        if (used.has(colorKey)) {
-          const free = COLOR_PRESETS.find(c => !used.has(c.key));
-          colorKey = free ? free.key : colorKey;
-        }
-        cur[myUid] = { name: myCfg.name, colorKey, shape: myCfg.shape, joinedAt: Date.now() };
+        let ck = myCfg.colorKey;
+        if (used.has(ck)) { const f = COLOR_PRESETS.find(c => !used.has(c.key)); ck = f ? f.key : ck; }
+        cur[myUid] = { name: myCfg.name, colorKey: ck, shape: myCfg.shape, joinedAt: Date.now() };
         return cur;
       });
-      joined = tx.committed;
-    } catch (e) {
-      setOnlineStatus('참가 실패: ' + e.message); joinBtn.disabled = false; return;
-    }
-    if (!joined) { setOnlineStatus('이미 인원이 다 찼어요.'); joinBtn.disabled = false; return; }
-    try {
-      myDisconnectRef = ref.child('players/' + myUid).onDisconnect();
-      await myDisconnectRef.remove();
-    } catch (e) {}
-    selectedMapKey = data.mapKey;
-    selectedMapSize = data.mapSize;
+      ok = tx.committed;
+    } catch (e) { setOnlineStatus('참가 실패: ' + e.message); jb.disabled = false; return; }
+    if (!ok) { setOnlineStatus('인원이 다 찼어요.'); jb.disabled = false; return; }
+    try { myDisconnectRef = ref.child('players/' + myUid).onDisconnect(); await myDisconnectRef.remove(); } catch (e) {}
+    selectedMapKey = data.mapKey; selectedMapSize = data.mapSize;
     selectedShotSpeed = data.shotSpeed || 'normal';
     windStrengthPct = (data.windStrength != null) ? data.windStrength : 100;
-    fogMode = !!data.fogMode;
-    itemDrops = (data.itemDrops !== false);
-    teamCount = data.teamCount || 0;
-    mapSeed = data.mapSeed;
-    onlineMode = true;
-    currentRoomId = roomId;
-    isRoomHost = false;
-    gameStartedFromRoom = false;
+    fogMode = !!data.fogMode; itemDrops = (data.itemDrops !== false);
+    teamCount = data.teamCount || 0; mapSeed = data.mapSeed;
+    onlineMode = true; currentRoomId = roomId; isRoomHost = false; gameStartedFromRoom = false;
     setOnlineStatus('참가 완료! 방장이 시작할 때까지 기다려주세요.');
-    listenRoom(roomId);
-    joinBtn.disabled = false;
+    listenRoom(roomId); jb.disabled = false;
   }
 
   function sortedRoomUids(data) {
-    const players = data.players || {};
-    return Object.keys(players).sort((a, b) => {
+    const pl = data.players || {};
+    return Object.keys(pl).sort((a, b) => {
       if (a === data.hostUid) return -1;
       if (b === data.hostUid) return 1;
-      return (players[a].joinedAt || 0) - (players[b].joinedAt || 0);
+      return (pl[a].joinedAt || 0) - (pl[b].joinedAt || 0);
     });
   }
-
   function renderLobby(data) {
-    const panel = document.getElementById('lobbyPanel');
-    panel.style.display = 'block';
+    document.getElementById('lobbyPanel').style.display = 'block';
     const list = document.getElementById('lobbyList');
     list.innerHTML = '';
-    const uids = sortedRoomUids(data);
-    const tc = data.teamCount || 0;
+    const uids = sortedRoomUids(data), tc = data.teamCount || 0;
     uids.forEach((uid, i) => {
       const p = data.players[uid];
-      const preset = COLOR_PRESETS.find(c => c.key === p.colorKey) || COLOR_PRESETS[0];
+      const pr = COLOR_PRESETS.find(c => c.key === p.colorKey) || COLOR_PRESETS[0];
       const chip = document.createElement('div');
       chip.className = 'lobby-chip' + (uid === myUid ? ' me' : '');
-      const dot = document.createElement('span'); dot.className = 'lobby-dot'; dot.style.background = preset.color;
+      const dot = document.createElement('span'); dot.className = 'lobby-dot'; dot.style.background = pr.color;
       chip.appendChild(dot);
-      const name = document.createElement('span'); name.textContent = `${i + 1}. ${p.name}` + (uid === data.hostUid ? ' 👑' : '');
-      chip.appendChild(name);
-      if (tc > 0) { const t = document.createElement('span'); t.className = 'lobby-team'; t.textContent = 'Team ' + TEAM_KEYS[i % tc]; chip.appendChild(t); }
+      const nm = document.createElement('span'); nm.textContent = `${i + 1}. ${p.name}` + (uid === data.hostUid ? ' 👑' : '');
+      chip.appendChild(nm);
+      if (tc > 0) { const t = document.createElement('span'); t.className = 'lobby-team'; t.textContent = TEAM_KEYS[i % tc] + '팀'; chip.appendChild(t); }
       list.appendChild(chip);
     });
     document.getElementById('lobbyCount').textContent = `${uids.length} / ${data.maxPlayers || 2}명`;
-    const startBtn = document.getElementById('lobbyStartBtn');
-    const waitMsg = document.getElementById('lobbyWaitMsg');
+    const sb = document.getElementById('lobbyStartBtn'), wm = document.getElementById('lobbyWaitMsg');
     if (isRoomHost) {
-      startBtn.style.display = '';
-      startBtn.disabled = uids.length < 2;
-      waitMsg.textContent = uids.length < 2 ? '2명 이상 모이면 시작할 수 있어요.' : '';
-    } else {
-      startBtn.style.display = 'none';
-      waitMsg.textContent = '방장이 시작하기를 기다리는 중...';
-    }
+      sb.style.display = ''; sb.disabled = uids.length < 2;
+      wm.textContent = uids.length < 2 ? '2명 이상 모이면 시작할 수 있어요.' : `${uids.length}명 준비됨`;
+    } else { sb.style.display = 'none'; wm.textContent = '방장이 시작하기를 기다리는 중...'; }
   }
-
   async function hostStartFromLobby() {
     if (!isRoomHost || !currentRoomId || !lastRoomData) return;
     const order = sortedRoomUids(lastRoomData);
     if (order.length < 2) return;
-    const btn = document.getElementById('lobbyStartBtn');
-    btn.disabled = true;
-    try {
-      await roomRef(currentRoomId).update({ playerOrder: order, status: 'ready', startedAt: firebase.database.ServerValue.TIMESTAMP });
-    } catch (e) { setOnlineStatus('시작 실패: ' + e.message); btn.disabled = false; }
+    const b = document.getElementById('lobbyStartBtn'); b.disabled = true;
+    try { await roomRef(currentRoomId).update({ playerOrder: order, status: 'ready', startedAt: firebase.database.ServerValue.TIMESTAMP }); }
+    catch (e) { setOnlineStatus('시작 실패: ' + e.message); b.disabled = false; }
   }
-
   function startFromRoom(data) {
     const order = data.playerOrder || sortedRoomUids(data);
     const n = order.length;
     for (let i = 0; i < n; i++) {
-      const cfg = (data.players && data.players[order[i]]) || null;
-      playerConfig[i] = cfg
-        ? { name: cfg.name || ('P' + (i + 1)), colorKey: cfg.colorKey || COLOR_PRESETS[i].key, shape: cfg.shape || 'classic' }
+      const c = (data.players && data.players[order[i]]) || null;
+      playerConfig[i] = c
+        ? { name: c.name || ('P' + (i + 1)), colorKey: c.colorKey || COLOR_PRESETS[i].key, shape: c.shape || 'classic' }
         : { name: 'P' + (i + 1), colorKey: COLOR_PRESETS[i].key, shape: 'classic' };
     }
     myPlayerIndex = order.indexOf(myUid);
-    if (myPlayerIndex < 0) { setOnlineStatus('명단에 내가 없어요. 방을 다시 만들어주세요.'); leaveOnlineRoom(); return; }
-    selectedPlayerCount = n;
-    teamCount = data.teamCount || 0;
-    normalizeTeamCount();
-    selectedMapKey = data.mapKey;
-    selectedMapSize = data.mapSize;
+    if (myPlayerIndex < 0) { setOnlineStatus('명단에 내가 없어요.'); leaveOnlineRoom(); return; }
+    selectedPlayerCount = n; teamCount = data.teamCount || 0; normalizeTeamCount();
+    selectedMapKey = data.mapKey; selectedMapSize = data.mapSize;
     selectedShotSpeed = data.shotSpeed || 'normal';
     windStrengthPct = (data.windStrength != null) ? data.windStrength : 100;
-    fogMode = !!data.fogMode;
-    itemDrops = (data.itemDrops !== false);
+    fogMode = !!data.fogMode; itemDrops = (data.itemDrops !== false);
     mapSeed = data.mapSeed;
     if (!isRoomHost && myDisconnectRef) { try { myDisconnectRef.cancel(); } catch (e) {} myDisconnectRef = null; }
-    setupScreen.style.display = 'none';
-    resetMatchWins();
-    startGame();
+    setupScreen.style.display = 'none'; resetMatchWins(); startGame();
   }
-
   function listenRoom(roomId) {
     if (roomUnsub) roomUnsub();
-    const rref = roomRef(roomId);
-    const roomHandler = snap => {
+    const rr = roomRef(roomId);
+    const rh = snap => {
       const data = snap.val();
       if (!data) {
         if (onlineMode && currentRoomId === roomId) {
-          const wasInGame = gameStartedFromRoom;
+          const inGame = gameStartedFromRoom;
           leaveOnlineRoom();
-          if (wasInGame) { alert('방장이 나가서 대전이 끝났어요.'); openSetupScreen(); }
-          else { setOnlineStatus('방이 사라졌어요. (방장이 나감)'); hideLobby(); }
+          if (inGame) { alert('방장이 나가서 대전이 끝났어요.'); openSetupScreen(); }
+          else { setOnlineStatus('방이 사라졌어요.'); hideLobby(); }
         }
         return;
       }
@@ -1637,21 +1742,17 @@
       if (data.mapSeed) mapSeed = data.mapSeed;
       if (data.status === 'waiting') renderLobby(data);
       if (data.status === 'ready' && !gameStartedFromRoom) {
-        gameStartedFromRoom = true;
-        setOnlineStatus('시작합니다!');
-        startFromRoom(data);
+        gameStartedFromRoom = true; setOnlineStatus('시작합니다!'); startFromRoom(data);
       }
     };
-    rref.on('value', roomHandler);
-    roomUnsub = () => rref.off('value', roomHandler);
-
+    rr.on('value', rh);
+    roomUnsub = () => rr.off('value', rh);
     if (actionsUnsub) actionsUnsub();
-    const aref = actionsRef(roomId);
-    const actionHandler = snap => { applyAction(snap.val()); };
-    aref.on('child_added', actionHandler);
-    actionsUnsub = () => aref.off('child_added', actionHandler);
+    const ar = actionsRef(roomId);
+    const ah = snap => { applyAction(snap.val()); };
+    ar.on('child_added', ah);
+    actionsUnsub = () => ar.off('child_added', ah);
   }
-
   function leaveOnlineRoom() {
     if (roomUnsub) { roomUnsub(); roomUnsub = null; }
     if (actionsUnsub) { actionsUnsub(); actionsUnsub = null; }
@@ -1662,33 +1763,26 @@
         if (myDisconnectRef) myDisconnectRef.cancel();
       } catch (e) {}
     }
-    myDisconnectRef = null;
-    onlineMode = false;
-    isRoomHost = false;
-    currentRoomId = null;
-    lastRoomData = null;
-    gameStartedFromRoom = false;
-    hideRoomCodeBig();
-    hideLobby();
-    const createBtn = document.getElementById('roomCreateBtn');
-    const joinBtn = document.getElementById('roomJoinBtn');
-    if (createBtn) createBtn.disabled = false;
-    if (joinBtn) joinBtn.disabled = false;
+    myDisconnectRef = null; onlineMode = false; isRoomHost = false;
+    currentRoomId = null; lastRoomData = null; gameStartedFromRoom = false;
+    hideRoomCodeBig(); hideLobby();
+    const cb = document.getElementById('roomCreateBtn'), jb = document.getElementById('roomJoinBtn');
+    if (cb) cb.disabled = false;
+    if (jb) jb.disabled = false;
   }
 
-  // ---- 전적 저장 / 명예의 전당 ----
-  function statsKey(name) { return String(name).replace(/[.#$\[\]\/]/g, '_').slice(0, 20); }
-  function recordStatsToCloud(winnerIdx, winnerTeamKey) {
+  // ---- 전적 ----
+  function statsKey(n) { return String(n).replace(/[.#$\[\]\/]/g, '_').slice(0, 20); }
+  function recordStatsToCloud(wIdx, wTeam) {
     if (!db) return;
     if (onlineMode && myPlayerIndex !== 0) return;
     players.forEach((p, i) => {
       if (p.isAI) return;
-      if (/^P\d$/.test(p.name)) return;
-      const won = winnerTeamKey ? (p.team === winnerTeamKey) : (i === winnerIdx);
+      if (/^P\d{1,2}$/.test(p.name)) return;
+      const won = wTeam ? (p.team === wTeam) : (i === wIdx);
       db.ref('stats/' + statsKey(p.name)).transaction(cur => {
         cur = cur || { name: p.name, wins: 0, games: 0 };
-        cur.name = p.name;
-        cur.games = (cur.games || 0) + 1;
+        cur.name = p.name; cur.games = (cur.games || 0) + 1;
         if (won) cur.wins = (cur.wins || 0) + 1;
         cur.last = Date.now();
         return cur;
@@ -1701,60 +1795,56 @@
     statsScreen.style.display = 'flex';
     const body = document.getElementById('statsBody');
     body.textContent = '불러오는 중...';
-    if (!db) { body.textContent = 'Firebase가 연결되지 않아 전적을 볼 수 없어요.'; return; }
+    if (!db) { body.textContent = 'Firebase가 연결되지 않았어요.'; return; }
     try {
       const snap = await db.ref('stats').orderByChild('wins').limitToLast(30).once('value');
       const val = snap.val() || {};
       const rows = Object.keys(val).map(k => val[k]).filter(r => r && r.name);
       rows.sort((a, b) => (b.wins || 0) - (a.wins || 0) || (b.games || 0) - (a.games || 0));
       if (!rows.length) { body.textContent = '아직 기록이 없어요. 닉네임을 정하고 한 판 해보세요!'; return; }
-      const table = document.createElement('table'); table.className = 'stats-table';
-      table.innerHTML = '<thead><tr><th>#</th><th>닉네임</th><th style="text-align:right">승</th><th style="text-align:right">판</th><th style="text-align:right">승률</th></tr></thead>';
-      const tbody = document.createElement('tbody');
+      const t = document.createElement('table'); t.className = 'stats-table';
+      t.innerHTML = '<thead><tr><th>#</th><th>닉네임</th><th style="text-align:right">승</th><th style="text-align:right">판</th><th style="text-align:right">승률</th></tr></thead>';
+      const tb = document.createElement('tbody');
       rows.forEach((r, i) => {
         const tr = document.createElement('tr');
         const rate = r.games ? Math.round((r.wins || 0) / r.games * 100) : 0;
         tr.innerHTML = `<td class="stats-rank">${i + 1}</td><td></td><td class="num">${r.wins || 0}</td><td class="num">${r.games || 0}</td><td class="num">${rate}%</td>`;
         tr.children[1].textContent = r.name;
-        tbody.appendChild(tr);
+        tb.appendChild(tr);
       });
-      table.appendChild(tbody);
-      body.innerHTML = ''; body.appendChild(table);
+      t.appendChild(tb); body.innerHTML = ''; body.appendChild(t);
     } catch (e) { body.textContent = '불러오기 실패: ' + e.message; }
   });
 
   // ---------------------------------------------------------------------
-  // 액션 적용 (단일 진입점): fire / pass / pickup
+  // 액션 (fire / pass / pickup)
   // ---------------------------------------------------------------------
-  function applyAction(action) {
-    if (!action) return;
-    if (action.type !== 'fire' && action.type !== 'pass' && action.type !== 'pickup') return;
+  function applyAction(a) {
+    if (!a) return;
+    if (a.type !== 'fire' && a.type !== 'pass' && a.type !== 'pickup') return;
     if (state === 'title' || state === 'setup' || state === 'gameover') return;
-    const t = (typeof action.turn === 'number') ? action.turn : turnCount;
-    if (t > turnCount) { pendingActions.push(action); return; }
+    const t = (typeof a.turn === 'number') ? a.turn : turnCount;
+    if (t > turnCount) { pendingActions.push(a); return; }
     if (t < turnCount) return;
     if (state !== 'aiming') return;
-    if (action.player !== current) return;
-    const shooter = players[action.player];
-    if (!shooter) return;
-
-    if (action.type === 'pickup') {
-      const idx = items.findIndex(it => it.id === action.item);
-      if (idx < 0) return; // 이미 사라진 아이템 (중복 수신 등)
-      if (typeof action.x === 'number') { shooter.x = action.x; shooter.y = surfaceYAt(shooter.x) - 6; shooter.falling = false; }
-      const it = items[idx];
-      items.splice(idx, 1);
-      applyItemEffect(shooter, it);
+    if (a.player !== current) return;
+    const sh = players[a.player];
+    if (!sh) return;
+    if (a.type === 'pickup') {
+      const idx = items.findIndex(it => it.id === a.item);
+      if (idx < 0) return;
+      if (typeof a.x === 'number') { sh.x = a.x; sh.y = surfaceYAt(sh.x) - 6; sh.falling = false; }
+      const it = items[idx]; items.splice(idx, 1);
+      applyItemEffect(sh, it);
       return;
     }
-    if (action.type === 'fire') {
-      if (typeof action.facing === 'number') shooter.facing = action.facing;
-      if (typeof action.x === 'number') { shooter.x = action.x; shooter.y = surfaceYAt(shooter.x) - 6; shooter.falling = false; }
-      shooter.charging = false; shooter.power = 0;
-      fireProjectile(action.player, action.angle, action.power, action.weapon);
-    } else if (action.type === 'pass') {
-      sfxMiss();
-      nextTurnSetup(false);
+    if (a.type === 'fire') {
+      if (typeof a.facing === 'number') sh.facing = a.facing;
+      if (typeof a.x === 'number') { sh.x = a.x; sh.y = surfaceYAt(sh.x) - 6; sh.falling = false; }
+      sh.charging = false; sh.power = 0;
+      fireProjectile(a.player, a.angle, a.power, a.weapon);
+    } else {
+      sfxMiss(); nextTurnSetup(false);
     }
   }
   function drainPendingActions() {
@@ -1763,28 +1853,20 @@
       const t = (typeof a.turn === 'number') ? a.turn : turnCount;
       if (t < turnCount) { pendingActions.shift(); continue; }
       if (t > turnCount) break;
-      pendingActions.shift();
-      applyAction(a);
+      pendingActions.shift(); applyAction(a);
     }
   }
-
   const NetworkHooks = {
-    sendAction(action) {
+    sendAction(a) {
       if (onlineMode && currentRoomId && db) {
-        actionsRef(currentRoomId).push(Object.assign({}, action, { ts: Date.now() })).catch(e => console.warn('액션 전송 실패:', e));
-      } else {
-        NetworkHooks.onReceiveAction(action);
-      }
+        actionsRef(currentRoomId).push(Object.assign({}, a, { ts: Date.now() })).catch(e => console.warn('전송 실패:', e));
+      } else NetworkHooks.onReceiveAction(a);
     },
-    onReceiveAction(action) { applyAction(action); }
+    onReceiveAction(a) { applyAction(a); }
   };
-
-  // 이동 중 아이템을 밟았는지 확인해서 획득 액션 전송 (조작 중인 클라이언트/AI만)
-  let pickupSentIds = new Set();
   function checkPickup(p) {
     const it = findItemUnderTank(p);
-    if (!it) return;
-    if (pickupSentIds.has(it.id)) return; // 온라인에서 액션 왕복 동안 중복 전송 방지
+    if (!it || pickupSentIds.has(it.id)) return;
     pickupSentIds.add(it.id);
     NetworkHooks.sendAction({ type: 'pickup', player: current, turn: turnCount, item: it.id, x: p.x });
   }
@@ -1792,85 +1874,79 @@
   // ---------------------------------------------------------------------
   // 발사 / 폭발
   // ---------------------------------------------------------------------
-  function makeProjectile(x, y, vx, vy, weaponIdx, owner, isSub) {
-    return { x, y, vx, vy, weapon: weaponIdx, owner, trail: [], spin: 0, sub: !!isSub };
+  function makeProjectile(x, y, vx, vy, wi, owner, sub) {
+    return { x, y, vx, vy, weapon: wi, owner, trail: [], spin: 0, sub: !!sub };
   }
-
-  function fireProjectile(playerIdx, angle, power, weaponIdx) {
-    const p = players[playerIdx];
-    if (!WEAPONS[weaponIdx]) weaponIdx = 0;
-    const w = WEAPONS[weaponIdx];
+  function fireProjectile(pi, angle, power, wi) {
+    const p = players[pi];
+    if (!WEAPONS[wi]) wi = 0;
+    const w = WEAPONS[wi];
     if (w.ammo !== Infinity) {
-      if (p.ammo[weaponIdx] <= 0) weaponIdx = 0;
-      else p.ammo[weaponIdx]--;
+      if (p.ammo[wi] <= 0) wi = 0;
+      else p.ammo[wi]--;
     }
     const rad = deg2rad(angle);
     const speed = (115 + (power / 100) * 400) * mapScale * resolveShotSpeedScale();
     const mx = p.x + Math.cos(rad) * 13, my = p.y - 6 - Math.sin(rad) * 13;
-    projectiles = [makeProjectile(p.x, p.y - Math.sin(rad) * 11, Math.cos(rad) * speed, -Math.sin(rad) * speed, weaponIdx, playerIdx, false)];
-    currentShot = { rnd: mulberry32(mapSeed + turnCount * 104729 + playerIdx * 131 + 3), exploded: false, nuke: false };
+    projectiles = [makeProjectile(p.x, p.y - Math.sin(rad) * 11, Math.cos(rad) * speed, -Math.sin(rad) * speed, wi, pi, false)];
+    currentShot = { rnd: mulberry32(mapSeed + turnCount * 104729 + pi * 131 + 3), exploded: false, nuke: false };
+    // 직전 발사 제원 기록 (잔상 표시용)
+    p.lastShot = { elev: Math.round(angle <= 90 ? angle : 180 - angle), power: Math.round(power) };
     p.recoil = 1;
     spawnMuzzleFlash(mx, my, rad);
     sfxFire();
     state = 'firing';
   }
-
   function spawnMuzzleFlash(x, y, rad) {
     for (let i = 0; i < 10; i++) {
-      const a = rad + (Math.random() - 0.5) * 0.8;
-      const sp = 60 + Math.random() * 100;
+      const a = rad + (Math.random() - 0.5) * 0.8, sp = 60 + Math.random() * 100;
       particles.push({ x, y, vx: Math.cos(a) * sp, vy: -Math.sin(a) * sp, life: 0.15 + Math.random() * 0.12, maxLife: 0.27,
         color: Math.random() < 0.5 ? PAL.spark : PAL.fire, size: 2, kind: 'spark' });
     }
   }
-
   function scorchRing(cx, cy, r) {
-    const rOuter = r + 6;
-    const x0 = Math.max(0, Math.floor(cx - rOuter)), x1 = Math.min(terrain.w - 1, Math.ceil(cx + rOuter));
-    const y0 = Math.max(0, Math.floor(cy - rOuter)), y1 = Math.min(terrain.h - 1, Math.ceil(cy + rOuter));
-    for (let yy = y0; yy <= y1; yy++) for (let xx = x0; xx <= x1; xx++) {
-      const dx = xx - cx, dy = yy - cy;
-      const d = Math.sqrt(dx * dx + dy * dy);
-      if (d >= r && d < rOuter) {
-        const idx = (yy * terrain.w + xx) * 4;
-        if (terrain.data[idx + 3] > 0) {
-          const t = 1 - (d - r) / (rOuter - r);
-          terrain.data[idx] *= (1 - 0.55 * t); terrain.data[idx + 1] *= (1 - 0.55 * t); terrain.data[idx + 2] *= (1 - 0.55 * t);
+    const ro = r + 6;
+    const x0 = Math.max(0, Math.floor(cx - ro)), x1 = Math.min(terrain.w - 1, Math.ceil(cx + ro));
+    const y0 = Math.max(0, Math.floor(cy - ro)), y1 = Math.min(terrain.h - 1, Math.ceil(cy + ro));
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+      const dx = x - cx, dy = y - cy, d = Math.sqrt(dx * dx + dy * dy);
+      if (d >= r && d < ro) {
+        const i = (y * terrain.w + x) * 4;
+        if (terrain.data[i + 3] > 0) {
+          const t = 1 - (d - r) / (ro - r);
+          terrain.data[i] *= (1 - 0.55 * t); terrain.data[i + 1] *= (1 - 0.55 * t); terrain.data[i + 2] *= (1 - 0.55 * t);
         }
       }
     }
   }
-
   function hasLineOfSight(x0, y0, x1, y1) {
-    const dist = Math.hypot(x1 - x0, y1 - y0);
-    const steps = Math.max(4, Math.ceil(dist / 4));
+    const d = Math.hypot(x1 - x0, y1 - y0), steps = Math.max(4, Math.ceil(d / 4));
     for (let i = 1; i < steps; i++) {
       const t = i / steps;
       if (terrainSolid(Math.round(x0 + (x1 - x0) * t), Math.round(y0 + (y1 - y0) * t))) return false;
     }
     return true;
   }
-
   function dealSplashDamage(x, y, radius, dmgMax) {
-    let anyHit = false;
+    let hit = false;
     players.forEach(pl => {
       if (!pl.alive) return;
-      const dist = Math.hypot(pl.x - x, pl.y - y);
-      if (dist < radius + 10) {
+      const d = Math.hypot(pl.x - x, pl.y - y);
+      if (d < radius + 10) {
         if (!hasLineOfSight(x, y, pl.x, pl.y - 4)) return;
-        const falloff = clamp(1 - dist / (radius + 10), 0, 1);
-        const dmg = Math.round(dmgMax * falloff);
-        if (dmg > 0) { damageTank(pl, dmg); anyHit = true; }
+        const f = clamp(1 - d / (radius + 10), 0, 1);
+        const dmg = Math.round(dmgMax * f);
+        if (dmg > 0) { damageTank(pl, dmg); hit = true; }
       }
     });
-    if (anyHit) sfxHit();
+    if (hit) sfxHit();
   }
-
-  function explodeAt(x, y, spec, owner) {
+  function explodeAt(x, y, spec) {
     const kind = spec.kind || 'normal';
     if (kind === 'smoke') {
-      smokeClouds.push({ x, y, r: spec.cloudRadius || 44, expiresTurn: turnCount + players.length, seed: Math.floor(currentShot ? currentShot.rnd() * 1e9 : 1) });
-      spawnSmokePuff(x, y, spec.cloudRadius || 44);
+      smokeClouds.push({ x, y, r: spec.cloudRadius || 88, expiresTurn: turnCount + players.length,
+        seed: Math.floor(currentShot ? currentShot.rnd() * 1e9 : 1) });
+      spawnSmokePuff(x, y, spec.cloudRadius || 88);
       sfxSmoke();
       return;
     }
@@ -1880,8 +1956,7 @@
         if (Math.hypot(pl.x - x, pl.y - y) < spec.radius + 8) { pl.hp = clamp(pl.hp + (spec.healAmt || 30), 0, 100); pl.healFlash = 1; }
       });
       spawnHealBurst(x, y, spec.radius);
-      flash = Math.max(flash, 0.25);
-      sfxHeal();
+      flash = Math.max(flash, 0.25); sfxHeal();
       return;
     }
     carveCircle(x, y, spec.radius);
@@ -1890,49 +1965,42 @@
     spawnExplosion(x, y, spec.radius, kind === 'nuke');
     destroyItemsInRadius(x, y, spec.radius);
     if (kind === 'nuke') {
-      shake = Math.max(shake, 34); flash = 1.6; sfxNuke();
+      shake = Math.max(shake, 46); flash = 2.2; sfxNuke();
       if (currentShot) currentShot.nuke = true;
     } else {
       shake = Math.max(shake, spec.radius * 0.35); flash = 1; sfxExplosion(spec.radius);
     }
     dealSplashDamage(x, y, spec.radius, spec.dmg);
   }
-
   function detonate(proj, x, y) {
     if (currentShot) currentShot.exploded = true;
     const w = WEAPONS[proj.weapon];
-    const spec = proj.sub ? w.sub : w;
-    explodeAt(x, y, spec, proj.owner);
+    explodeAt(x, y, proj.sub ? w.sub : w);
     if (!proj.sub && w.kind === 'cluster' && currentShot) {
-      const count = w.subCount || 4;
-      for (let i = 0; i < count; i++) {
-        const r = currentShot.rnd();
-        const r2 = currentShot.rnd();
-        const spread = (i / (count - 1) - 0.5) * 1.6 + (r - 0.5) * 0.4;
-        const vx = spread * 120 * mapScale;
-        const vy = -(110 + r2 * 80) * mapScale;
-        projectiles.push(makeProjectile(x, y - 2, vx, vy, proj.weapon, proj.owner, true));
+      const c = w.subCount || 4;
+      for (let i = 0; i < c; i++) {
+        const r1 = currentShot.rnd(), r2 = currentShot.rnd();
+        const spread = (i / (c - 1) - 0.5) * 1.6 + (r1 - 0.5) * 0.4;
+        projectiles.push(makeProjectile(x, y - 2, spread * 120 * mapScale, -(110 + r2 * 80) * mapScale, proj.weapon, proj.owner, true));
       }
     }
   }
-
   function stepProjectile(proj, dt) {
     const steps = 6, sdt = dt / steps;
     for (let s = 0; s < steps; s++) {
       proj.vy += 260 * mapScale * sdt;
       proj.vx += wind * resolveWindForce() * mapScale * sdt;
-      const nx = proj.x + proj.vx * sdt;
-      const ny = proj.y + proj.vy * sdt;
+      const nx = proj.x + proj.vx * sdt, ny = proj.y + proj.vy * sdt;
       proj.trail.push({ x: proj.x, y: proj.y });
       if (proj.trail.length > 14) proj.trail.shift();
-      let hitTank = -1;
+      let hit = -1;
       for (let i = 0; i < players.length; i++) {
         if (i === proj.owner) continue;
         const pl = players[i];
         if (!pl.alive) continue;
-        if (Math.hypot(pl.x - nx, pl.y - ny) < 8) { hitTank = i; break; }
+        if (Math.hypot(pl.x - nx, pl.y - ny) < 8) { hit = i; break; }
       }
-      if (hitTank >= 0) { detonate(proj, nx, ny); return false; }
+      if (hit >= 0) { detonate(proj, nx, ny); return false; }
       if (nx < 0 || nx >= mapW) return false;
       if (ny >= mapH) { detonate(proj, clamp(nx, 0, mapW - 1), mapH - 1); return false; }
       if (terrainSolid(Math.round(nx), Math.round(ny))) { detonate(proj, nx, ny); return false; }
@@ -1940,96 +2008,81 @@
     }
     return true;
   }
-
   function finishShot() {
-    const shot = currentShot;
-    projectiles = [];
-    currentShot = null;
-    if (shot && shot.exploded) { state = 'resolving'; resolveTimer = shot.nuke ? 1.0 : 0.5; }
+    const s = currentShot;
+    projectiles = []; currentShot = null;
+    if (s && s.exploded) { state = 'resolving'; resolveTimer = s.nuke ? 1.6 : 0.5; }
     else missAndSwitch('맵 밖으로 벗어남');
   }
-  function missAndSwitch(msg) {
-    projectiles = [];
-    missMsg = msg;
-    missMsgTimer = 0.9;
-    sfxMiss();
-    state = 'resolving-miss';
+  function missAndSwitch(m) {
+    projectiles = []; missMsg = m; missMsgTimer = 0.9; sfxMiss(); state = 'resolving-miss';
   }
-
   function spawnExplosion(x, y, radius, nuke) {
     particles.push({ x, y, vx: 0, vy: 0, life: 0.18, maxLife: 0.18, kind: 'ring', color: '#fff6d8', radius });
     if (nuke) {
-      particles.push({ x, y, vx: 0, vy: 0, life: 0.6, maxLife: 0.6, kind: 'ring', color: '#ff7a3c', radius: radius * 1.6 });
-      particles.push({ x, y, vx: 0, vy: 0, life: 1.0, maxLife: 1.0, kind: 'ring', color: '#ffcf5c', radius: radius * 2.2 });
+      particles.push({ x, y, vx: 0, vy: 0, life: 0.8, maxLife: 0.8, kind: 'ring', color: '#ff7a3c', radius: radius * 1.15 });
+      particles.push({ x, y, vx: 0, vy: 0, life: 1.4, maxLife: 1.4, kind: 'ring', color: '#ffcf5c', radius: radius * 1.5 });
     }
-    const mult = nuke ? 2.2 : 1;
-    const fireCount = Math.round((14 + radius * 0.4) * mult);
-    for (let i = 0; i < fireCount; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const sp = (40 + Math.random() * 110) * (nuke ? 1.5 : 1);
-      particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 30, life: 0.35 + Math.random() * 0.35 * mult, maxLife: 0.7 * mult,
+    const m = nuke ? 3.0 : 1;
+    const fc = Math.round(Math.min(220, (14 + radius * 0.4) * m));
+    for (let i = 0; i < fc; i++) {
+      const a = Math.random() * Math.PI * 2, sp = (40 + Math.random() * 110) * (nuke ? 2.2 : 1);
+      particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 30,
+        life: 0.35 + Math.random() * 0.35 * m, maxLife: 0.7 * m,
         color: [PAL.fire, PAL.fire2, PAL.fire3][Math.floor(Math.random() * 3)], size: 2 + Math.random() * 2, kind: 'fire' });
     }
-    const smokeCount = Math.round((8 + radius * 0.25) * mult);
-    for (let i = 0; i < smokeCount; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const sp = 10 + Math.random() * 24;
-      particles.push({ x: x + Math.cos(a) * radius * 0.3, y: y + Math.sin(a) * radius * 0.3, vx: Math.cos(a) * sp, vy: (-20 - Math.random() * 20) * (nuke ? 2 : 1),
-        life: (0.8 + Math.random() * 0.6) * mult, maxLife: 1.4 * mult, color: PAL.smoke, size: (3 + Math.random() * 4) * (nuke ? 1.8 : 1), kind: 'smoke', grow: 1.6 });
+    const sc = Math.round(Math.min(120, (8 + radius * 0.25) * m));
+    for (let i = 0; i < sc; i++) {
+      const a = Math.random() * Math.PI * 2, sp = 10 + Math.random() * 24;
+      particles.push({ x: x + Math.cos(a) * radius * 0.3, y: y + Math.sin(a) * radius * 0.3,
+        vx: Math.cos(a) * sp, vy: (-20 - Math.random() * 20) * (nuke ? 2.4 : 1),
+        life: (0.8 + Math.random() * 0.6) * m, maxLife: 1.4 * m,
+        color: PAL.smoke, size: (3 + Math.random() * 4) * (nuke ? 2.2 : 1), kind: 'smoke', grow: 1.6 });
     }
-    const debrisCount = Math.round((6 + radius * 0.3) * mult);
-    for (let i = 0; i < debrisCount; i++) {
-      const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.4;
-      const sp = 60 + Math.random() * 140;
+    const dc = Math.round(Math.min(90, (6 + radius * 0.3) * m));
+    for (let i = 0; i < dc; i++) {
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.4, sp = 60 + Math.random() * 140;
       particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.6 + Math.random() * 0.5, maxLife: 1.1,
         color: [currentTheme.dirtLight, currentTheme.dirtMid, currentTheme.dirtDark][Math.floor(Math.random() * 3)],
         size: 2 + Math.random() * 2, kind: 'debris', rot: Math.random() * Math.PI, rotSpd: (Math.random() - 0.5) * 10 });
     }
   }
   function spawnSmokePuff(x, y, r) {
-    for (let i = 0; i < 18; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const sp = 20 + Math.random() * 40;
-      particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6 - 10, life: 0.6 + Math.random() * 0.5, maxLife: 1.1,
-        color: 'rgba(190,195,205,0.7)', size: 4 + Math.random() * 5, kind: 'smoke', grow: 1.8 });
+    for (let i = 0; i < 30; i++) {
+      const a = Math.random() * Math.PI * 2, sp = 20 + Math.random() * 50;
+      particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6 - 10,
+        life: 0.6 + Math.random() * 0.5, maxLife: 1.1, color: 'rgba(190,195,205,0.7)',
+        size: 5 + Math.random() * 6, kind: 'smoke', grow: 1.8 });
     }
   }
   function spawnHealBurst(x, y, r) {
     particles.push({ x, y, vx: 0, vy: 0, life: 0.35, maxLife: 0.35, kind: 'ring', color: PAL.heal, radius: r });
     for (let i = 0; i < 26; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const d = Math.random() * r;
+      const a = Math.random() * Math.PI * 2, d = Math.random() * r;
       particles.push({ x: x + Math.cos(a) * d, y: y + Math.sin(a) * d * 0.5, vx: (Math.random() - 0.5) * 10, vy: -25 - Math.random() * 35,
         life: 0.6 + Math.random() * 0.6, maxLife: 1.2, color: Math.random() < 0.5 ? PAL.heal : PAL.healLight, size: 2 + Math.random() * 2, kind: 'heal' });
     }
   }
   function spawnPickupSparkle(x, y, color) {
     for (let i = 0; i < 14; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const sp = 30 + Math.random() * 50;
+      const a = Math.random() * Math.PI * 2, sp = 30 + Math.random() * 50;
       particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 20, life: 0.4 + Math.random() * 0.3, maxLife: 0.7, color, size: 2, kind: 'spark' });
     }
   }
-
   function spawnConfetti() {
     let colors;
     if (winnerTeam) {
-      const teamPlayers = players.filter(p => p.team === winnerTeam);
-      colors = teamPlayers.length ? [].concat(...teamPlayers.map(p => [p.color, p.colorLight])).concat(PAL.uiAccent) : [PAL.uiAccent];
-    } else if (winner < 0) {
-      colors = players.length ? [].concat(...players.map(p => [p.color, p.colorLight])) : [PAL.uiAccent];
-    } else {
-      colors = [players[winner].color, players[winner].colorLight, PAL.uiAccent, '#fff'];
-    }
+      const tp = players.filter(p => p.team === winnerTeam);
+      colors = tp.length ? [].concat(...tp.map(p => [p.color, p.colorLight])).concat(PAL.uiAccent) : [PAL.uiAccent];
+    } else if (winner < 0) colors = players.length ? [].concat(...players.map(p => [p.color, p.colorLight])) : [PAL.uiAccent];
+    else colors = [players[winner].color, players[winner].colorLight, PAL.uiAccent, '#fff'];
     for (let i = 0; i < 46; i++) {
       particles.push({ x: camX + Math.random() * W, y: camY - 10 - Math.random() * 60, vx: (Math.random() - 0.5) * 30, vy: 20 + Math.random() * 30,
-        life: 2.4 + Math.random() * 1.2, maxLife: 3.6, color: colors[Math.floor(Math.random() * colors.length)], kind: 'confetti', rot: Math.random() * Math.PI, rotSpd: (Math.random() - 0.5) * 6 });
+        life: 2.4 + Math.random() * 1.2, maxLife: 3.6, color: colors[Math.floor(Math.random() * colors.length)],
+        kind: 'confetti', rot: Math.random() * Math.PI, rotSpd: (Math.random() - 0.5) * 6 });
     }
   }
 
-  // ---------------------------------------------------------------------
-  // 연막 판정
-  // ---------------------------------------------------------------------
   function isInSmoke(x, y) {
     for (const c of smokeClouds) if (Math.hypot(x - c.x, y - c.y) < c.r * 0.9) return true;
     return false;
@@ -2051,48 +2104,41 @@
     if (players[current] && players[current].isAI) return false;
     return true;
   }
-  function selectWeapon(idx) {
-    if (!canControlNow()) return;
-    if (!WEAPONS[idx]) return;
-    if (WEAPONS[idx].ammo !== Infinity && players[current].ammo[idx] <= 0) return;
-    players[current].weapon = idx;
+  function selectWeapon(i) {
+    if (!canControlNow() || !WEAPONS[i]) return;
+    if (WEAPONS[i].ammo !== Infinity && players[current].ammo[i] <= 0) return;
+    players[current].weapon = i;
   }
   function cycleWeapon() {
     if (!canControlNow()) return;
     const p = players[current];
     for (let k = 1; k <= WEAPONS.length; k++) {
-      const idx = (p.weapon + k) % WEAPONS.length;
-      if (WEAPONS[idx].ammo === Infinity || p.ammo[idx] > 0) { p.weapon = idx; return; }
+      const i = (p.weapon + k) % WEAPONS.length;
+      if (WEAPONS[i].ammo === Infinity || p.ammo[i] > 0) { p.weapon = i; return; }
     }
   }
-  function flipFacing() {
-    if (!canControlNow()) return;
-    players[current].facing *= -1;
-  }
+  function flipFacing() { if (canControlNow()) players[current].facing *= -1; }
   function releaseFire() {
     if (state !== 'aiming') return;
     if (onlineMode && current !== myPlayerIndex) return;
     const p = players[current];
     if (p.charging) {
       p.charging = false;
-      const power = p.power;
-      p.power = 0;
-      NetworkHooks.sendAction({ type: 'fire', player: current, turn: turnCount, angle: toAbsoluteAngle(p), power, weapon: p.weapon, facing: p.facing, x: p.x });
+      const pw = p.power; p.power = 0;
+      NetworkHooks.sendAction({ type: 'fire', player: current, turn: turnCount, angle: toAbsoluteAngle(p), power: pw, weapon: p.weapon, facing: p.facing, x: p.x });
     }
   }
 
   // ---------------------------------------------------------------------
-  // 솔로 AI
+  // AI
   // ---------------------------------------------------------------------
-  function simulateLanding(x0, y0, angleAbsDeg, power) {
-    const rad = deg2rad(angleAbsDeg);
+  function simulateLanding(x0, y0, ang, power) {
+    const rad = deg2rad(ang);
     const speed = (115 + (power / 100) * 400) * mapScale * resolveShotSpeedScale();
-    let x = x0, y = y0 - Math.sin(rad) * 11;
-    let vx = Math.cos(rad) * speed, vy = -Math.sin(rad) * speed;
+    let x = x0, y = y0 - Math.sin(rad) * 11, vx = Math.cos(rad) * speed, vy = -Math.sin(rad) * speed;
     const sdt = 0.05;
     for (let i = 0; i < 400; i++) {
-      vy += 260 * mapScale * sdt;
-      vx += wind * resolveWindForce() * mapScale * sdt;
+      vy += 260 * mapScale * sdt; vx += wind * resolveWindForce() * mapScale * sdt;
       x += vx * sdt; y += vy * sdt;
       if (x < 0 || x >= mapW) return { x: clamp(x, 0, mapW), y };
       if (y >= mapH) return { x, y: mapH };
@@ -2100,85 +2146,72 @@
     }
     return { x, y };
   }
-
-  function planAIShot(aiIdx) {
-    const p = players[aiIdx];
-    const diff = AI_DIFFICULTIES.find(d => d.key === selectedDifficulty) || AI_DIFFICULTIES[1];
-    const candidates = players.filter((pl, i) => i !== aiIdx && pl.alive && (!p.team || pl.team !== p.team));
-    const target = candidates[Math.floor(Math.random() * candidates.length)] || players[(aiIdx + 1) % players.length];
-    const maxMoveDist = 60 * mapScale * 1.4;
-    let moveTargetX = null;
-    // 가까운 아이템이 있으면 그쪽으로 가보기도 함
-    const nearItem = items.find(it => !it.falling && Math.abs(it.x - p.x) < maxMoveDist);
-    if (nearItem && Math.random() < 0.6) moveTargetX = nearItem.x;
-    else if (Math.random() < diff.moveChance) {
-      const offset = (Math.random() * 2 - 1) * maxMoveDist;
-      moveTargetX = clamp(p.x + offset, 6, mapW - 6);
-    }
-    const shootX = moveTargetX !== null ? moveTargetX : p.x;
-    const shootY = surfaceYAt(shootX) - 6;
-    const neededFacing = target.x < shootX ? -1 : 1;
+  function planAIShot(ai) {
+    const p = players[ai];
+    const d = AI_DIFFICULTIES.find(x => x.key === selectedDifficulty) || AI_DIFFICULTIES[1];
+    const cand = players.filter((pl, i) => i !== ai && pl.alive && (!p.team || pl.team !== p.team));
+    const target = cand[Math.floor(Math.random() * cand.length)] || players[(ai + 1) % players.length];
+    const maxMove = 60 * mapScale * 1.4;
+    let mt = null;
+    const near = items.find(it => !it.falling && Math.abs(it.x - p.x) < maxMove);
+    if (near && Math.random() < 0.6) mt = near.x;
+    else if (Math.random() < d.moveChance) mt = clamp(p.x + (Math.random() * 2 - 1) * maxMove, 6, mapW - 6);
+    const sx = mt !== null ? mt : p.x, sy = surfaceYAt(sx) - 6;
+    const nf = target.x < sx ? -1 : 1;
     let best = null;
-    for (let a = 8; a <= 82; a += diff.angleStep) {
-      const absAngle = neededFacing > 0 ? a : 180 - a;
-      for (let pw = 15; pw <= 100; pw += diff.powerStep) {
-        const land = simulateLanding(shootX, shootY, absAngle, pw);
-        const err = Math.abs(land.x - target.x);
-        if (!best || err < best.err) best = { angle: a, power: pw, err };
+    for (let a = 8; a <= 82; a += d.angleStep) {
+      const abs = nf > 0 ? a : 180 - a;
+      for (let pw = 15; pw <= 100; pw += d.powerStep) {
+        const l = simulateLanding(sx, sy, abs, pw);
+        const e = Math.abs(l.x - target.x);
+        if (!best || e < best.err) best = { angle: a, power: pw, err: e };
       }
     }
     if (!best) best = { angle: 45, power: 60 };
-    const isMiss = Math.random() < (diff.missChance || 0);
-    const errMult = isMiss ? (diff.missMult || 1) : 1;
-    const finalAngle = clamp(best.angle + (Math.random() * 2 - 1) * diff.angleError * errMult, 3, 87);
-    const finalPower = clamp(best.power + (Math.random() * 2 - 1) * diff.powerError * errMult, 10, 100);
-    const specialWeaponIdxs = WEAPONS.map((w, i) => i).filter(i => i > 0 && p.ammo[i] > 0 && (WEAPONS[i].kind === 'normal' || WEAPONS[i].kind === 'cluster' || WEAPONS[i].kind === 'nuke'));
-    const useSpecial = specialWeaponIdxs.length > 0 && Math.random() < (diff.specialChance ?? 0.25);
-    const weaponIdx = useSpecial ? specialWeaponIdxs[Math.floor(Math.random() * specialWeaponIdxs.length)] : 0;
+    const miss = Math.random() < (d.missChance || 0), em = miss ? (d.missMult || 1) : 1;
+    const fa = clamp(best.angle + (Math.random() * 2 - 1) * d.angleError * em, 3, 87);
+    const fp = clamp(best.power + (Math.random() * 2 - 1) * d.powerError * em, 10, 100);
+    const sp = WEAPONS.map((w, i) => i).filter(i => i > 0 && p.ammo[i] > 0 && ['normal', 'cluster', 'nuke'].includes(WEAPONS[i].kind));
+    const use = sp.length > 0 && Math.random() < (d.specialChance ?? 0.25);
     aiPlan = {
-      phase: 'thinking',
-      timer: diff.thinkTime[0] + Math.random() * (diff.thinkTime[1] - diff.thinkTime[0]),
-      moveTargetX, targetAngle: finalAngle, targetFacing: neededFacing, targetPower: finalPower, weaponIdx
+      phase: 'thinking', timer: d.thinkTime[0] + Math.random() * (d.thinkTime[1] - d.thinkTime[0]),
+      moveTargetX: mt, targetAngle: fa, targetFacing: nf, targetPower: fp,
+      weaponIdx: use ? sp[Math.floor(Math.random() * sp.length)] : 0
     };
   }
-
   function updateAITurn(p, dt) {
     if (!aiPlan) { planAIShot(current); return; }
-    const plan = aiPlan;
-    if (plan.phase === 'thinking') {
-      plan.timer -= dt;
-      if (plan.timer <= 0) plan.phase = (plan.moveTargetX !== null && Math.abs(plan.moveTargetX - p.x) > 2) ? 'moving' : 'aiming';
-    } else if (plan.phase === 'moving') {
-      if (p.fuel > 0 && Math.abs(plan.moveTargetX - p.x) > 2) {
-        const dir = plan.moveTargetX > p.x ? 1 : -1;
+    const pl = aiPlan;
+    if (pl.phase === 'thinking') {
+      pl.timer -= dt;
+      if (pl.timer <= 0) pl.phase = (pl.moveTargetX !== null && Math.abs(pl.moveTargetX - p.x) > 2) ? 'moving' : 'aiming';
+    } else if (pl.phase === 'moving') {
+      if (p.fuel > 0 && Math.abs(pl.moveTargetX - p.x) > 2) {
+        const dir = pl.moveTargetX > p.x ? 1 : -1;
         p.x = clamp(p.x + dir * 60 * mapScale * dt, 6, mapW - 6);
         p.fuel = clamp(p.fuel - dt * 65, 0, 100);
         p.y = surfaceYAt(p.x) - 6; p.falling = false; p.treadPhase += dt * 8;
         checkPickup(p);
-      } else plan.phase = 'aiming';
-    } else if (plan.phase === 'aiming') {
-      p.facing = plan.targetFacing;
-      const aimSpeed = 55 * dt;
-      if (p.angle < plan.targetAngle) p.angle = Math.min(plan.targetAngle, p.angle + aimSpeed);
-      else if (p.angle > plan.targetAngle) p.angle = Math.max(plan.targetAngle, p.angle - aimSpeed);
-      if (Math.abs(p.angle - plan.targetAngle) < 0.5) { p.weapon = plan.weaponIdx; plan.phase = 'charging'; }
-    } else if (plan.phase === 'charging') {
+      } else pl.phase = 'aiming';
+    } else if (pl.phase === 'aiming') {
+      p.facing = pl.targetFacing;
+      const s = 55 * dt;
+      if (p.angle < pl.targetAngle) p.angle = Math.min(pl.targetAngle, p.angle + s);
+      else if (p.angle > pl.targetAngle) p.angle = Math.max(pl.targetAngle, p.angle - s);
+      if (Math.abs(p.angle - pl.targetAngle) < 0.5) { p.weapon = pl.weaponIdx; pl.phase = 'charging'; }
+    } else if (pl.phase === 'charging') {
       p.charging = true;
       p.power += p.chargeDir * 130 * dt;
       if (p.power >= 100) { p.power = 100; p.chargeDir = -1; }
       if (p.power <= 0) { p.power = 0; p.chargeDir = 1; }
-      if (Math.abs(p.power - plan.targetPower) <= 130 * dt + 0.5) {
-        p.power = plan.targetPower;
-        releaseFire();
-        aiPlan = null;
-      }
+      if (Math.abs(p.power - pl.targetPower) <= 130 * dt + 0.5) { p.power = pl.targetPower; releaseFire(); aiPlan = null; }
     }
   }
 
   window.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       if (howtoScreen.style.display !== 'none') { howtoScreen.style.display = 'none'; return; }
-      if (statsScreen.style.display !== 'none' && statsScreen.style.display !== '') { statsScreen.style.display = 'none'; return; }
+      if (statsScreen.style.display === 'flex') { statsScreen.style.display = 'none'; return; }
       if (menuBtnShown) menuBtn.click();
       return;
     }
@@ -2194,42 +2227,38 @@
     if (e.key === ' ' && !(players[current] && players[current].isAI)) releaseFire();
   });
   window.addEventListener('blur', () => {
-    const wasCharging = keys[' '];
+    const wc = keys[' '];
     for (const k in keys) keys[k] = false;
-    if (wasCharging && !(players[current] && players[current].isAI)) releaseFire();
+    if (wc && !(players[current] && players[current].isAI)) releaseFire();
   });
-
-  function bindHoldButton(el, key) {
+  function bindHold(el, key) {
     if (!el) return;
-    const press = ev => { ev.preventDefault(); keys[key] = true; };
-    const release = () => { keys[key] = false; if (key === ' ' && !(players[current] && players[current].isAI)) releaseFire(); };
+    const press = e => { e.preventDefault(); keys[key] = true; };
+    const rel = () => { keys[key] = false; if (key === ' ' && !(players[current] && players[current].isAI)) releaseFire(); };
     el.addEventListener('pointerdown', press);
-    el.addEventListener('pointerup', release);
-    el.addEventListener('pointercancel', release);
-    el.addEventListener('pointerleave', release);
+    el.addEventListener('pointerup', rel);
+    el.addEventListener('pointercancel', rel);
+    el.addEventListener('pointerleave', rel);
   }
-  document.querySelectorAll('.tc-btn[data-key]').forEach(btn => bindHoldButton(btn, btn.dataset.key));
-  bindHoldButton(document.getElementById('tcFire'), ' ');
+  document.querySelectorAll('.tc-btn[data-key]').forEach(b => bindHold(b, b.dataset.key));
+  bindHold(document.getElementById('tcFire'), ' ');
   document.getElementById('tcWeaponCycle').addEventListener('pointerdown', e => { e.preventDefault(); cycleWeapon(); });
   document.getElementById('tcFlip').addEventListener('pointerdown', e => { e.preventDefault(); flipFacing(); });
 
   canvas.addEventListener('click', e => {
-    const rect = canvas.getBoundingClientRect();
-    const mx = (e.clientX - rect.left) / rect.width * W;
-    const my = (e.clientY - rect.top) / rect.height * H;
+    const r = canvas.getBoundingClientRect();
+    const mx = (e.clientX - r.left) / r.width * W, my = (e.clientY - r.top) / r.height * H;
     if (state === 'title') {
       if (mx > W / 2 - 65 && mx < W / 2 + 65 && my > H / 2 + 34 && my < H / 2 + 68) openSetupScreen();
     } else if (state === 'gameover') {
       if (onlineMode) {
-        const btnW = 150, btnH = 34, btnX = W / 2 - btnW / 2, btnY = H / 2 + 40;
-        if (mx > btnX && mx < btnX + btnW && my > btnY && my < btnY + btnH) openSetupScreen();
+        const bw = 150, bh = 34, bx = W / 2 - bw / 2, by = H / 2 + 40;
+        if (mx > bx && mx < bx + bw && my > by && my < by + bh) openSetupScreen();
       } else {
-        const btnW = 122, gap = 10, btnH = 34;
-        const totalW = btnW * 2 + gap;
-        const startX = W / 2 - totalW / 2, btnY = H / 2 + 40;
-        if (my > btnY && my < btnY + btnH) {
-          if (mx > startX && mx < startX + btnW) startGame();
-          else if (mx > startX + btnW + gap && mx < startX + btnW + gap + btnW) openSetupScreen();
+        const bw = 122, gap = 10, bh = 34, tw = bw * 2 + gap, sx = W / 2 - tw / 2, by = H / 2 + 40;
+        if (my > by && my < by + bh) {
+          if (mx > sx && mx < sx + bw) startGame();
+          else if (mx > sx + bw + gap && mx < sx + bw + gap + bw) openSetupScreen();
         }
       }
     }
@@ -2238,11 +2267,10 @@
   // ---------------------------------------------------------------------
   // 업데이트
   // ---------------------------------------------------------------------
-  let lastT = performance.now();
-  let bgTime = 0;
+  let lastT = performance.now(), bgTime = 0;
   function update(dt) {
     bgTime += dt;
-    players.forEach(pl => applyTankGravity(pl, dt));
+    players.forEach(p => applyTankGravity(p, dt));
     items.forEach(it => applyItemGravity(it, dt));
 
     if (state === 'aiming') {
@@ -2250,14 +2278,12 @@
       if (state !== 'aiming') return;
       const p = players[current];
       if (turnMsgTimer > 0) turnMsgTimer -= dt;
-      const isAITurn = p.isAI === true;
-      const iControlThis = !isAITurn && (!onlineMode || current === myPlayerIndex);
-
-      if (isAITurn) {
-        updateAITurn(p, dt);
-      } else {
+      const isAI = p.isAI === true;
+      const mine = !isAI && (!onlineMode || current === myPlayerIndex);
+      if (isAI) updateAITurn(p, dt);
+      else {
         let moving = false;
-        if (iControlThis && p.fuel > 0) {
+        if (mine && p.fuel > 0) {
           if (keys['ArrowLeft']) { p.x -= 60 * mapScale * dt; moving = true; }
           if (keys['ArrowRight']) { p.x += 60 * mapScale * dt; moving = true; }
         }
@@ -2267,10 +2293,10 @@
           p.y = surfaceYAt(p.x) - 6; p.falling = false; p.treadPhase += dt * 8;
           checkPickup(p);
         }
-        if (iControlThis) {
-          const aimSpeed = 55 * dt;
-          if (keys['ArrowUp']) p.angle = clamp(p.angle + aimSpeed, 2, 88);
-          if (keys['ArrowDown']) p.angle = clamp(p.angle - aimSpeed, 2, 88);
+        if (mine) {
+          const s = 55 * dt;
+          if (keys['ArrowUp']) p.angle = clamp(p.angle + s, 2, 88);
+          if (keys['ArrowDown']) p.angle = clamp(p.angle - s, 2, 88);
           if (keys[' ']) {
             p.charging = true;
             p.power += p.chargeDir * 112 * dt;
@@ -2279,18 +2305,15 @@
           }
         }
       }
-
       if (turnTimeLeft > 0) {
         turnTimeLeft = Math.max(0, turnTimeLeft - dt);
-        if (turnTimeLeft <= 0) {
-          if (isAITurn || iControlThis) {
-            if (p.charging) releaseFire();
-            else NetworkHooks.sendAction({ type: 'pass', player: current, turn: turnCount });
-          }
+        if (turnTimeLeft <= 0 && (isAI || mine)) {
+          if (p.charging) releaseFire();
+          else NetworkHooks.sendAction({ type: 'pass', player: current, turn: turnCount });
         }
       } else {
         turnOverdue += dt;
-        if (onlineMode && myPlayerIndex === 0 && !iControlThis && turnOverdue > 4 && turnOverdue < 999) {
+        if (onlineMode && myPlayerIndex === 0 && !mine && turnOverdue > 4 && turnOverdue < 999) {
           turnOverdue = 999;
           NetworkHooks.sendAction({ type: 'pass', player: current, turn: turnCount });
         }
@@ -2298,44 +2321,40 @@
     } else if (state === 'firing') {
       const cur = projectiles;
       projectiles = [];
-      const survivors = [];
-      for (const proj of cur) if (stepProjectile(proj, dt)) survivors.push(proj);
-      projectiles = survivors.concat(projectiles);
+      const alive = [];
+      for (const pr of cur) if (stepProjectile(pr, dt)) alive.push(pr);
+      projectiles = alive.concat(projectiles);
       if (projectiles.length === 0 && state === 'firing') finishShot();
     } else if (state === 'resolving') {
       resolveTimer -= dt;
       if (resolveTimer <= 0) {
-        particles = particles.filter(pt => pt.life > 0);
-        players.forEach(pl => { if (pl.hp <= 0) pl.alive = false; });
-        const result = checkGameOver();
-        if (result.over) finishGame(result);
+        particles = particles.filter(p => p.life > 0);
+        players.forEach(p => { if (p.hp <= 0) p.alive = false; });
+        const r = checkGameOver();
+        if (r.over) finishGame(r);
         else { nextTurnSetup(false); state = 'aiming'; }
       }
     }
-
     if (missMsgTimer > 0) {
       missMsgTimer -= dt;
       if (missMsgTimer <= 0 && state === 'resolving-miss') {
-        players.forEach(pl => { if (pl.hp <= 0) pl.alive = false; });
-        const result = checkGameOver();
-        if (result.over) finishGame(result);
+        players.forEach(p => { if (p.hp <= 0) p.alive = false; });
+        const r = checkGameOver();
+        if (r.over) finishGame(r);
         else { nextTurnSetup(false); state = 'aiming'; }
       }
     }
-
     particles.forEach(pt => {
       pt.x += pt.vx * dt; pt.y += pt.vy * dt;
       if (pt.kind === 'smoke') { pt.vy *= (1 - 1.2 * dt); pt.vx *= (1 - 1.2 * dt); }
       else if (pt.kind === 'debris') { pt.vy += 260 * dt; pt.rot += pt.rotSpd * dt; }
       else if (pt.kind === 'confetti') { pt.vy += 70 * dt; pt.vx += Math.sin(bgTime * 3 + pt.x) * 12 * dt; pt.rot += pt.rotSpd * dt; }
-      else if (pt.kind === 'ring' || pt.kind === 'heal') { }
-      else pt.vy += 200 * dt;
+      else if (pt.kind !== 'ring' && pt.kind !== 'heal') pt.vy += 200 * dt;
       pt.life -= dt;
     });
-    particles = particles.filter(pt => pt.life > 0);
-    itemPopups.forEach(pp => { pp.y -= 14 * dt; pp.life -= dt; });
-    itemPopups = itemPopups.filter(pp => pp.life > 0);
-
+    particles = particles.filter(p => p.life > 0);
+    itemPopups.forEach(p => { p.y -= 14 * dt; p.life -= dt; });
+    itemPopups = itemPopups.filter(p => p.life > 0);
     if (shake > 0) shake = Math.max(0, shake - dt * 40);
     if (flash > 0) flash = Math.max(0, flash - dt * 3.5);
     players.forEach(p => {
@@ -2357,15 +2376,14 @@
     camX = clamp(tx - W / 2, 0, Math.max(0, mapW - W));
     camY = clamp(ty - H / 2, 0, Math.max(0, mapH - H));
   }
-
   function drawSky() {
     const g = ctx.createLinearGradient(0, 0, 0, H);
     g.addColorStop(0, currentTheme.sky.top); g.addColorStop(0.55, currentTheme.sky.mid); g.addColorStop(1, currentTheme.sky.bot);
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     const sx = W * 0.78, sy = H * 0.22;
-    for (let ring = 3; ring >= 1; ring--) {
-      ctx.globalAlpha = 0.10 * ring; ctx.fillStyle = PAL.sun;
-      ctx.beginPath(); ctx.arc(sx, sy, 14 + ring * 8, 0, Math.PI * 2); ctx.fill();
+    for (let r = 3; r >= 1; r--) {
+      ctx.globalAlpha = 0.10 * r; ctx.fillStyle = PAL.sun;
+      ctx.beginPath(); ctx.arc(sx, sy, 14 + r * 8, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1; ctx.fillStyle = PAL.sunCore;
     ctx.beginPath(); ctx.arc(sx, sy, 13, 0, Math.PI * 2); ctx.fill();
@@ -2383,69 +2401,70 @@
     ctx.ellipse(cx - 12 * s, cy + 2, 11 * s, 5 * s, 0, 0, Math.PI * 2);
     ctx.fill();
   }
-  function drawMountainRange(color, baseY, amp, freq, offset) {
+  function drawMountainRange(color, baseY, amp, freq, off) {
     ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(0, H);
     for (let x = 0; x <= W; x += 8) {
-      const yy = baseY - Math.abs(Math.sin((x + offset) * 0.02 * freq)) * amp - Math.abs(Math.sin((x + offset) * 0.007 * freq + 1.7)) * amp * 0.6;
-      ctx.lineTo(x, yy);
+      const y = baseY - Math.abs(Math.sin((x + off) * 0.02 * freq)) * amp - Math.abs(Math.sin((x + off) * 0.007 * freq + 1.7)) * amp * 0.6;
+      ctx.lineTo(x, y);
     }
     ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
   }
-
-  function drawTankBodyPath(shape) {
+  function tankBodyPath(shape) {
     if (shape === 'wedge') {
       ctx.beginPath();
       ctx.moveTo(-8, 3); ctx.lineTo(-9, -3); ctx.lineTo(-3, -6); ctx.lineTo(6, -6); ctx.lineTo(9, -1); ctx.lineTo(8, 3);
       ctx.closePath();
     } else if (shape === 'round') {
-      ctx.beginPath();
-      ctx.moveTo(-7, -5);
+      ctx.beginPath(); ctx.moveTo(-7, -5);
       ctx.arcTo(9, -5, 9, 3, 4); ctx.arcTo(9, 3, -8, 3, 4); ctx.arcTo(-8, 3, -8, -5, 4); ctx.arcTo(-8, -5, 9, -5, 4);
       ctx.closePath();
-    } else {
-      ctx.beginPath(); ctx.rect(-8, -5, 16, 8);
-    }
+    } else { ctx.beginPath(); ctx.rect(-8, -5, 16, 8); }
   }
-
-  function drawTank(p, isCurrent) {
+  function drawTank(p, isCur) {
     ctx.save();
-    const bobY = p.alive ? Math.sin(bgTime * 2 + p.bob) * 0.4 : 0;
-    ctx.translate(Math.round(p.x), Math.round(p.y + bobY));
+    const bob = p.alive ? Math.sin(bgTime * 2 + p.bob) * 0.4 : 0;
+    ctx.translate(Math.round(p.x), Math.round(p.y + bob));
     ctx.fillStyle = 'rgba(0,0,0,0.32)';
     ctx.beginPath(); ctx.ellipse(0, 8, 11, 2.6, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = p.colorDark; ctx.fillRect(-10, 2, 20, 6);
     ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 1;
     for (let i = -10; i < 10; i += 3) {
-      const off = ((i + (p.treadPhase || 0) * 6) % 20 + 20) % 20 - 10;
-      ctx.beginPath(); ctx.moveTo(off, 3); ctx.lineTo(off, 7); ctx.stroke();
+      const o = ((i + (p.treadPhase || 0) * 6) % 20 + 20) % 20 - 10;
+      ctx.beginPath(); ctx.moveTo(o, 3); ctx.lineTo(o, 7); ctx.stroke();
     }
     ctx.fillStyle = '#20222a';
     for (const wx of [-8, -3, 3, 8]) { ctx.beginPath(); ctx.arc(wx, 5, 2.3, 0, Math.PI * 2); ctx.fill(); }
-
     const shape = p.shape || 'classic';
-    const bodyGrad = ctx.createLinearGradient(0, -5, 0, 3);
-    bodyGrad.addColorStop(0, p.colorLight); bodyGrad.addColorStop(0.35, p.color); bodyGrad.addColorStop(1, p.colorDark);
-    ctx.fillStyle = bodyGrad; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1;
-    drawTankBodyPath(shape); ctx.fill(); ctx.stroke();
-
-    if (p.hitFlash > 0) { ctx.globalAlpha = p.hitFlash * 0.7; ctx.fillStyle = '#ffffff'; drawTankBodyPath(shape); ctx.fill(); ctx.globalAlpha = 1; }
-    if (p.healFlash > 0) { ctx.globalAlpha = p.healFlash * 0.6; ctx.fillStyle = PAL.heal; drawTankBodyPath(shape); ctx.fill(); ctx.globalAlpha = 1; }
-
-    const turretGrad = ctx.createRadialGradient(-1.5, -7, 1, 0, -5, 6);
-    turretGrad.addColorStop(0, p.colorLight); turretGrad.addColorStop(1, p.colorDark);
-    ctx.fillStyle = turretGrad;
+    const bg = ctx.createLinearGradient(0, -5, 0, 3);
+    bg.addColorStop(0, p.colorLight); bg.addColorStop(0.35, p.color); bg.addColorStop(1, p.colorDark);
+    ctx.fillStyle = bg; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1;
+    tankBodyPath(shape); ctx.fill(); ctx.stroke();
+    if (p.hitFlash > 0) { ctx.globalAlpha = p.hitFlash * 0.7; ctx.fillStyle = '#fff'; tankBodyPath(shape); ctx.fill(); ctx.globalAlpha = 1; }
+    if (p.healFlash > 0) { ctx.globalAlpha = p.healFlash * 0.6; ctx.fillStyle = PAL.heal; tankBodyPath(shape); ctx.fill(); ctx.globalAlpha = 1; }
+    const tg = ctx.createRadialGradient(-1.5, -7, 1, 0, -5, 6);
+    tg.addColorStop(0, p.colorLight); tg.addColorStop(1, p.colorDark);
+    ctx.fillStyle = tg;
     if (shape === 'wedge') { ctx.beginPath(); ctx.moveTo(-5, -6); ctx.lineTo(0, -12); ctx.lineTo(5, -6); ctx.closePath(); ctx.fill(); }
     else if (shape === 'round') { ctx.beginPath(); ctx.arc(0, -7, 5.5, 0, Math.PI * 2); ctx.fill(); }
     else { ctx.beginPath(); ctx.arc(0, -5, 5, Math.PI, 0); ctx.fill(); }
-
     ctx.strokeStyle = p.colorDark; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(4, -9); ctx.lineTo(6, -15); ctx.stroke();
     ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(6, -15, 1, 0, Math.PI * 2); ctx.fill();
 
+    // ---- 직전 발사 각도 잔상 (점선 포신) ----
+    if (isCur && state === 'aiming' && p.lastShot) {
+      const gr = deg2rad(p.facing > 0 ? p.lastShot.elev : 180 - p.lastShot.elev);
+      ctx.save();
+      ctx.setLineDash([2, 3]);
+      ctx.strokeStyle = PAL.ghost; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(Math.cos(gr) * 17, -Math.sin(gr) * 17 - 6); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+
     const rad = deg2rad(toAbsoluteAngle(p));
-    const recoilPull = (p.recoil || 0) * 3.5;
-    const barrelLen = 13 - recoilPull;
-    const bx = Math.cos(rad) * barrelLen, by = -Math.sin(rad) * barrelLen;
+    const bl = 13 - (p.recoil || 0) * 3.5;
+    const bx = Math.cos(rad) * bl, by = -Math.sin(rad) * bl;
     ctx.strokeStyle = '#3a3d47'; ctx.lineWidth = 3.4; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(bx, by - 6); ctx.stroke();
     ctx.strokeStyle = '#20222a'; ctx.lineWidth = 1.4;
@@ -2453,41 +2472,40 @@
     ctx.lineCap = 'butt';
 
     if (p.team) {
-      const ti = TEAM_KEYS.indexOf(p.team);
-      ctx.fillStyle = ['#ff8a7a', '#7ab4ff', '#a0e87c', '#ffe98c'][ti] || '#fff';
+      ctx.fillStyle = TEAM_COLORS[TEAM_KEYS.indexOf(p.team)] || '#fff';
       ctx.fillRect(-10, 9, 20, 1.5);
     }
-
-    // 방어막 버블
     if (p.shield && p.alive) {
-      const pulse = 0.5 + Math.sin(bgTime * 4) * 0.15;
-      ctx.globalAlpha = pulse;
-      ctx.strokeStyle = PAL.shield; ctx.lineWidth = 1.5;
+      const pu = 0.5 + Math.sin(bgTime * 4) * 0.15;
+      ctx.globalAlpha = pu; ctx.strokeStyle = PAL.shield; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.ellipse(0, -2, 15, 12, 0, 0, Math.PI * 2); ctx.stroke();
-      ctx.globalAlpha = pulse * 0.25;
-      ctx.fillStyle = PAL.shield;
+      ctx.globalAlpha = pu * 0.25; ctx.fillStyle = PAL.shield;
       ctx.beginPath(); ctx.ellipse(0, -2, 15, 12, 0, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
     }
-
-    if (isCurrent && state === 'aiming') {
+    if (p.ammo[NUKE_IDX] > 0 && p.alive) {
+      ctx.fillStyle = '#ffd24a';
+      ctx.beginPath(); ctx.arc(-7, -14, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#2a2a2a';
+      for (let i = 0; i < 3; i++) {
+        const a0 = i * (Math.PI * 2 / 3) - Math.PI / 2 - 0.5;
+        ctx.beginPath(); ctx.moveTo(-7, -14); ctx.arc(-7, -14, 2.6, a0, a0 + 1.0); ctx.closePath(); ctx.fill();
+      }
+    }
+    if (isCur && state === 'aiming') {
       drawAimTrajectory(p);
-      const bounce = Math.sin(bgTime * 6) * 1.5;
+      const b = Math.sin(bgTime * 6) * 1.5;
       ctx.fillStyle = PAL.uiAccent;
-      ctx.beginPath(); ctx.moveTo(0, -19 + bounce); ctx.lineTo(-4, -14 + bounce); ctx.lineTo(4, -14 + bounce); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0, -19 + b); ctx.lineTo(-4, -14 + b); ctx.lineTo(4, -14 + b); ctx.fill();
     }
     ctx.restore();
   }
-
   function drawAimTrajectory(p) {
-    const angle = toAbsoluteAngle(p);
-    const rad = deg2rad(angle);
-    const previewPower = p.charging ? p.power : 55;
-    const speed = (115 + (previewPower / 100) * 400) * mapScale * resolveShotSpeedScale();
-    let x = p.x, y = p.y - Math.sin(rad) * 11;
-    let vx = Math.cos(rad) * speed, vy = -Math.sin(rad) * speed;
-    const sdt = 0.045;
-    const pts = [];
+    const rad = deg2rad(toAbsoluteAngle(p));
+    const pw = p.charging ? p.power : 55;
+    const speed = (115 + (pw / 100) * 400) * mapScale * resolveShotSpeedScale();
+    let x = p.x, y = p.y - Math.sin(rad) * 11, vx = Math.cos(rad) * speed, vy = -Math.sin(rad) * speed;
+    const sdt = 0.045, pts = [];
     for (let i = 0; i < 70; i++) {
       vy += 260 * mapScale * sdt; vx += wind * resolveWindForce() * mapScale * sdt;
       x += vx * sdt; y += vy * sdt;
@@ -2500,64 +2518,61 @@
     if (pts.length < 2) return;
     ctx.save();
     ctx.setLineDash([3, 4]); ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1.2;
-    ctx.beginPath(); pts.forEach((pt, i) => { if (i === 0) ctx.moveTo(pt.x, pt.y); else ctx.lineTo(pt.x, pt.y); }); ctx.stroke();
-    ctx.setLineDash([]);
-    const last = pts[pts.length - 1];
-    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.arc(last.x, last.y, 1.8, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    pts.forEach((pt, i) => { if (i === 0) ctx.moveTo(pt.x, pt.y); else ctx.lineTo(pt.x, pt.y); });
+    ctx.stroke(); ctx.setLineDash([]);
+    const l = pts[pts.length - 1];
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.beginPath(); ctx.arc(l.x, l.y, 1.8, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
-
   function drawSmokeClouds() {
     smokeClouds.forEach(c => {
-      const remaining = c.expiresTurn - turnCount;
-      const alpha = remaining <= 1 ? 0.72 : 0.92;
+      const rem = c.expiresTurn - turnCount;
+      const alpha = rem <= 1 ? 0.72 : 0.92;
       const rnd = mulberry32(c.seed);
-      for (let k = 0; k < 10; k++) {
-        const ox = (rnd() - 0.5) * c.r * 1.3, oy = (rnd() - 0.5) * c.r * 0.9;
-        const pr = c.r * 0.38 + rnd() * c.r * 0.3;
-        const drift = Math.sin(bgTime * 0.7 + k * 1.3) * 2.5;
+      for (let k = 0; k < 18; k++) {
+        const ox = (rnd() - 0.5) * c.r * 1.35, oy = (rnd() - 0.5) * c.r * 0.95;
+        const pr = c.r * 0.34 + rnd() * c.r * 0.28;
+        const dft = Math.sin(bgTime * 0.7 + k * 1.3) * 2.5;
         ctx.globalAlpha = alpha;
         ctx.fillStyle = k % 3 === 0 ? '#b8bcc6' : '#9aa0aa';
-        ctx.beginPath(); ctx.arc(c.x + ox + drift, c.y + oy, pr, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(c.x + ox + dft, c.y + oy, pr, 0, Math.PI * 2); ctx.fill();
       }
     });
     ctx.globalAlpha = 1;
   }
-
-  // 아이템 상자 (낙하 중엔 작은 낙하산 표시)
   function drawItems() {
     items.forEach(it => {
-      const type = ITEM_TYPES.find(t => t.key === it.type) || ITEM_TYPES[0];
+      const t = ITEM_TYPES.find(x => x.key === it.type) || ITEM_TYPES[0];
       ctx.save();
-      const bobY = it.falling ? 0 : Math.sin(bgTime * 3 + it.bob) * 1.2;
-      ctx.translate(Math.round(it.x), Math.round(it.y + bobY));
+      const bob = it.falling ? 0 : Math.sin(bgTime * 3 + it.bob) * 1.2;
+      ctx.translate(Math.round(it.x), Math.round(it.y + bob));
       if (it.falling) {
         ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1;
         ctx.fillStyle = 'rgba(240,240,250,0.85)';
         ctx.beginPath(); ctx.arc(0, -13, 9, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(-9, -13); ctx.lineTo(-4, -5); ctx.moveTo(9, -13); ctx.lineTo(4, -5); ctx.stroke();
       } else {
-        // 바닥 글로우
         ctx.globalAlpha = 0.35 + Math.sin(bgTime * 3 + it.bob) * 0.12;
-        ctx.fillStyle = type.color;
+        ctx.fillStyle = t.color;
         ctx.beginPath(); ctx.ellipse(0, 5, 9, 3, 0, 0, Math.PI * 2); ctx.fill();
         ctx.globalAlpha = 1;
       }
-      // 상자 본체
       ctx.fillStyle = '#c99a5a'; ctx.strokeStyle = '#5a3a1a'; ctx.lineWidth = 1;
       ctx.fillRect(-5, -5, 10, 10); ctx.strokeRect(-5.5, -5.5, 11, 11);
-      ctx.fillStyle = type.color; ctx.fillRect(-5, -1.5, 10, 3); ctx.fillRect(-1.5, -5, 3, 10);
+      ctx.fillStyle = t.color; ctx.fillRect(-5, -1.5, 10, 3); ctx.fillRect(-1.5, -5, 3, 10);
       ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(-5, -5, 10, 2);
-      // 종류 표시
       ctx.fillStyle = '#fff';
       if (it.type === 'hp') { ctx.fillRect(-1, -3, 2, 6); ctx.fillRect(-3, -1, 6, 2); }
       else if (it.type === 'fuel') { ctx.beginPath(); ctx.moveTo(0, -3.5); ctx.lineTo(2.5, 1); ctx.lineTo(-2.5, 1); ctx.closePath(); ctx.fill(); }
       else if (it.type === 'ammo') { ctx.beginPath(); ctx.arc(0, 0, 2.2, 0, Math.PI * 2); ctx.fill(); }
-      else if (it.type === 'shield') { ctx.beginPath(); ctx.moveTo(0, -3.5); ctx.lineTo(3, -2); ctx.lineTo(2.5, 1.5); ctx.lineTo(0, 3.5); ctx.lineTo(-2.5, 1.5); ctx.lineTo(-3, -2); ctx.closePath(); ctx.fill(); }
+      else if (it.type === 'shield') {
+        ctx.beginPath(); ctx.moveTo(0, -3.5); ctx.lineTo(3, -2); ctx.lineTo(2.5, 1.5); ctx.lineTo(0, 3.5); ctx.lineTo(-2.5, 1.5); ctx.lineTo(-3, -2); ctx.closePath(); ctx.fill();
+      }
       ctx.restore();
     });
   }
-
   function drawPanel(x, y, w, h) {
     const g = ctx.createLinearGradient(0, y, 0, y + h);
     g.addColorStop(0, 'rgba(28,32,44,0.82)'); g.addColorStop(1, 'rgba(10,12,18,0.82)');
@@ -2565,67 +2580,104 @@
     ctx.strokeStyle = PAL.uiBorder; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
     ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(x + 1, y + 1, w - 2, 1.5);
   }
-  function drawBar(x, y, w, h, pct, colorFn) {
+  function drawBar(x, y, w, h, pct, fn) {
     ctx.fillStyle = '#22242c'; ctx.fillRect(x, y, w, h);
-    const fillW = Math.max(0, w * clamp(pct, 0, 1));
+    const fw = Math.max(0, w * clamp(pct, 0, 1));
     const g = ctx.createLinearGradient(x, y, x, y + h);
-    const c = colorFn(pct); g.addColorStop(0, c.light); g.addColorStop(1, c.dark);
-    ctx.fillStyle = g; ctx.fillRect(x, y, fillW, h);
-    ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(x, y, fillW, Math.max(1, h * 0.35));
+    const c = fn(pct); g.addColorStop(0, c.light); g.addColorStop(1, c.dark);
+    ctx.fillStyle = g; ctx.fillRect(x, y, fw, h);
+    ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(x, y, fw, Math.max(1, h * 0.35));
     ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
   }
-  function fitLabelText(text, maxWidthPx, sizePx) {
-    const charW = sizePx * 0.62;
-    const maxChars = Math.max(1, Math.floor(maxWidthPx / charW));
-    if (text.length <= maxChars) return text;
-    return text.slice(0, Math.max(1, maxChars - 1)) + '…';
+  function fitLabelText(t, maxW, size) {
+    const cw = size * 0.62, mc = Math.max(1, Math.floor(maxW / cw));
+    return t.length <= mc ? t : t.slice(0, Math.max(1, mc - 1)) + '…';
   }
 
-  const WIND_PANEL_W = 84;
-  function drawHPBar(p, x, y, w, idPrefix) {
-    const h = 8;
+  // ---- 바람 게이지 (6칸 + 이전 턴 잔상) ----
+  const WIND_PANEL_W = 104, WIND_PANEL_H = 30;
+  function drawWindIndicator() {
+    const bx = W - 8 - WIND_PANEL_W, by = 3;
+    drawPanel(bx, by, WIND_PANEL_W, WIND_PANEL_H);
+    const dirTxt = windLevel === 0 ? '무풍' : (windLevel < 0 ? '◀ 왼쪽 ' : '오른쪽 ▶ ') + Math.abs(windLevel);
+    lbl('wind-label', '바람 ' + dirTxt, bx + WIND_PANEL_W / 2, by + 8, 9, windLevel === 0 ? PAL.uiDim : PAL.ui, 'center');
+    const cellW = 11, cellH = 8, gap = 2, midGap = 5;
+    const totalW = 6 * cellW + 5 * gap + midGap;
+    const sx = bx + (WIND_PANEL_W - totalW) / 2, cy = by + 17;
+    for (let i = 0; i < 6; i++) {
+      const x = sx + i * (cellW + gap) + (i >= 3 ? midGap : 0);
+      const mag = i < 3 ? (3 - i) : (i - 2);       // 바깥일수록 큼
+      const side = i < 3 ? -1 : 1;
+      const active = windLevel !== 0 && Math.sign(windLevel) === side && mag <= Math.abs(windLevel);
+      const prevActive = prevWindLevel !== 0 && Math.sign(prevWindLevel) === side && mag === Math.abs(prevWindLevel);
+      ctx.fillStyle = '#1c1e26'; ctx.fillRect(x, cy, cellW, cellH);
+      if (active) {
+        ctx.fillStyle = mag === 3 ? '#ff5a3c' : (mag === 2 ? '#ffa03c' : '#ffe08c');
+        ctx.fillRect(x, cy, cellW, cellH);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.fillRect(x, cy, cellW, 2);
+      }
+      ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 1;
+      ctx.strokeRect(x + 0.5, cy + 0.5, cellW - 1, cellH - 1);
+      // 지난 턴 위치 표시 (회색 눈금)
+      if (prevActive) {
+        ctx.fillStyle = 'rgba(255,255,255,0.75)';
+        ctx.fillRect(x + cellW / 2 - 2, cy + cellH + 1.5, 4, 2);
+      }
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.fillRect(sx + 3 * cellW + 3 * gap - 1, cy - 1, 1, cellH + 2);
+  }
+
+  // ---- HP 표시 (8명 이하 = 막대 / 9명 이상 = 칩) ----
+  function drawHPBarFull(p, x, y, w, id) {
     drawPanel(x - 3, y, w + 6, 24);
-    const nameSize = w > 70 ? 11 : (w > 50 ? 9 : 8);
-    const rawLabel = (p.team ? `${p.team} ` : '') + (p.shield ? '🛡' : '') + p.name;
-    const label = fitLabelText(rawLabel, w - 4, nameSize);
-    lbl('hp-name-' + idPrefix, label, x, y + 8, nameSize, p.colorLight, 'left');
-    lbl('hp-num-' + idPrefix, `${Math.max(0, Math.round(p.hp))}`, x + w, y + 8, 10, PAL.ui, 'right');
-    drawBar(x, y + 12, w, h, p.hp / 100, pct => {
-      if (pct > 0.5) return { light: '#8fef7c', dark: '#4aa838' };
-      if (pct > 0.25) return { light: '#ffe58c', dark: '#d19a2c' };
-      return { light: '#ff8a7a', dark: '#c23a2c' };
-    });
+    const ns = w > 70 ? 11 : (w > 50 ? 9 : 8);
+    const raw = (p.team ? p.team + ' ' : '') + (p.shield ? '🛡' : '') + p.name;
+    lbl('hp-name-' + id, fitLabelText(raw, w - 4, ns), x, y + 8, ns, p.colorLight, 'left');
+    lbl('hp-num-' + id, `${Math.max(0, Math.round(p.hp))}`, x + w, y + 8, 10, PAL.ui, 'right');
+    drawBar(x, y + 12, w, 8, p.hp / 100, pct =>
+      pct > 0.5 ? { light: '#8fef7c', dark: '#4aa838' } :
+      pct > 0.25 ? { light: '#ffe58c', dark: '#d19a2c' } : { light: '#ff8a7a', dark: '#c23a2c' });
     if (!p.alive) { ctx.save(); ctx.globalAlpha = 0.55; ctx.fillStyle = '#000'; ctx.fillRect(x - 3, y, w + 6, 24); ctx.restore(); }
+  }
+  function drawHPChip(p, x, y, w, id, isCur) {
+    const h = 13;
+    ctx.fillStyle = '#181a22'; ctx.fillRect(x, y, w, h);
+    const fw = Math.max(0, (w - 4) * clamp(p.hp / 100, 0, 1));
+    ctx.fillStyle = p.alive ? p.color : '#3a3a42';
+    ctx.fillRect(x + 2, y + 2, fw, h - 4);
+    ctx.strokeStyle = isCur ? PAL.uiAccent : 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = isCur ? 1.5 : 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    if (p.team) {
+      ctx.fillStyle = TEAM_COLORS[TEAM_KEYS.indexOf(p.team)] || '#fff';
+      ctx.fillRect(x, y, 2.5, h);
+    }
+    if (p.shield) { ctx.fillStyle = PAL.shield; ctx.fillRect(x + w - 3, y, 3, h); }
+    lbl('chip-' + id, p.alive ? String(Math.round(p.hp)) : '×', x + w / 2, y + h / 2, 8,
+        p.alive ? '#fff' : '#8a8878', 'center', 'middle');
+    if (!p.alive) { ctx.save(); ctx.globalAlpha = 0.5; ctx.fillStyle = '#000'; ctx.fillRect(x, y, w, h); ctx.restore(); }
   }
   function drawAllHPBars() {
     const n = players.length || 1;
-    const rows = n > 4 ? 2 : 1;
-    const cols = Math.ceil(n / rows);
     const reserved = WIND_PANEL_W + 12;
-    const avail = W - 16 - reserved - 6 * (cols - 1);
-    const barW = clamp(avail / cols, 40, 92);
-    players.forEach((p, i) => {
-      const r = Math.floor(i / cols), c = i % cols;
-      drawHPBar(p, 8 + c * (barW + 6), 4 + r * 27, barW, String(i));
-    });
-  }
-
-  function drawWindIndicator() {
-    const bx = W - 8 - WIND_PANEL_W;
-    const cx = bx + WIND_PANEL_W / 2;
-    drawPanel(bx, 3, WIND_PANEL_W, 24);
-    lbl('wind-label', 'WIND', cx, 11, 10, PAL.ui, 'center');
-    ctx.save(); ctx.translate(cx, 20);
-    const mag = clamp(Math.abs(wind) / 8, 0, 1);
-    const dir = wind >= 0 ? 1 : -1;
-    const col = mag > 0.6 ? PAL.fire2 : PAL.uiAccent;
-    ctx.strokeStyle = ctx.fillStyle = col; ctx.lineWidth = 2; ctx.lineCap = 'round';
-    const len = 8 + mag * 20;
-    ctx.beginPath();
-    ctx.moveTo(-len * dir, 0); ctx.lineTo(len * dir, 0);
-    ctx.moveTo(len * dir, 0); ctx.lineTo((len - 6) * dir, -4);
-    ctx.moveTo(len * dir, 0); ctx.lineTo((len - 6) * dir, 4);
-    ctx.stroke(); ctx.lineCap = 'butt'; ctx.restore();
+    if (n <= 8) {
+      const rows = n > 4 ? 2 : 1, cols = Math.ceil(n / rows);
+      const avail = W - 16 - reserved - 6 * (cols - 1);
+      const bw = clamp(avail / cols, 40, 92);
+      players.forEach((p, i) => {
+        const r = Math.floor(i / cols), c = i % cols;
+        drawHPBarFull(p, 8 + c * (bw + 6), 4 + r * 27, bw, String(i));
+      });
+    } else {
+      const rows = 2, cols = Math.ceil(n / rows);
+      const avail = W - 16 - reserved - 3 * (cols - 1);
+      const cw = clamp(avail / cols, 18, 40);
+      players.forEach((p, i) => {
+        const r = Math.floor(i / cols), c = i % cols;
+        drawHPChip(p, 8 + c * (cw + 3), 4 + r * 16, cw, String(i), i === current);
+      });
+    }
   }
 
   function drawWeaponIcon(x, y, w) {
@@ -2634,7 +2686,7 @@
     if (w.icon === 'spike') {
       ctx.fillStyle = w.coreColor; ctx.beginPath();
       for (let i = 0; i < 8; i++) {
-        const a = (i / 8) * Math.PI * 2; const r = i % 2 === 0 ? 5.5 : 2.8;
+        const a = (i / 8) * Math.PI * 2, r = i % 2 === 0 ? 5.5 : 2.8;
         const px = Math.cos(a) * r, py = Math.sin(a) * r;
         if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
       }
@@ -2642,11 +2694,10 @@
       ctx.fillStyle = w.highlightColor; ctx.beginPath(); ctx.arc(-1.2, -1.2, 1.4, 0, Math.PI * 2); ctx.fill();
     } else if (w.icon === 'cluster') {
       ctx.fillStyle = w.coreColor;
-      [[-3, 1.5], [3, 1.5], [0, -3.5]].forEach(([cx, cy]) => { ctx.beginPath(); ctx.arc(cx, cy, 2.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
+      [[-3, 1.5], [3, 1.5], [0, -3.5]].forEach(c => { ctx.beginPath(); ctx.arc(c[0], c[1], 2.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
       ctx.fillStyle = w.highlightColor; ctx.beginPath(); ctx.arc(-0.8, -4.2, 0.9, 0, Math.PI * 2); ctx.fill();
     } else if (w.icon === 'smoke') {
-      ctx.fillStyle = '#c4c8d2';
-      ctx.beginPath();
+      ctx.fillStyle = '#c4c8d2'; ctx.beginPath();
       ctx.arc(-2.5, 1, 3, 0, Math.PI * 2); ctx.arc(2.5, 1, 3, 0, Math.PI * 2); ctx.arc(0, -2, 3.4, 0, Math.PI * 2);
       ctx.fill(); ctx.stroke();
     } else if (w.icon === 'heal') {
@@ -2656,8 +2707,8 @@
       ctx.fillStyle = '#ffd24a'; ctx.beginPath(); ctx.arc(0, 0, 5.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#2a2a2a';
       for (let i = 0; i < 3; i++) {
-        const a0 = i * (Math.PI * 2 / 3) - Math.PI / 2 - 0.5, a1 = a0 + 1.0;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 5.2, a0, a1); ctx.closePath(); ctx.fill();
+        const a0 = i * (Math.PI * 2 / 3) - Math.PI / 2 - 0.5;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 5.2, a0, a0 + 1.0); ctx.closePath(); ctx.fill();
       }
       ctx.fillStyle = '#ffd24a'; ctx.beginPath(); ctx.arc(0, 0, 1.4, 0, Math.PI * 2); ctx.fill();
     } else {
@@ -2668,49 +2719,55 @@
   }
 
   function drawAimHUD() {
-    const p = players[current];
-    const w = WEAPONS[p.weapon];
-    const panelH = 44;
-    drawPanel(0, H - panelH, W, panelH);
-
-    lbl('turn-name', `▶ ${p.name}`, 8, H - 32, 11, p.colorLight, 'left');
-    const iconX0 = 100, slot = 22;
+    const p = players[current], w = WEAPONS[p.weapon];
+    const ph = 46;
+    drawPanel(0, H - ph, W, ph);
+    // 1행
+    lbl('turn-name', `▶ ${p.name}` + (p.team ? ` (${p.team}팀)` : ''), 8, H - 34, 11, p.colorLight, 'left');
+    const ix0 = 92, slot = 20;
     WEAPONS.forEach((wd, i) => {
-      const cx = iconX0 + i * slot, cy = H - 33;
+      const cx = ix0 + i * slot, cy = H - 35;
       const has = wd.ammo === Infinity || p.ammo[i] > 0;
       if (i === p.weapon) {
-        ctx.fillStyle = 'rgba(240,201,92,0.22)'; ctx.fillRect(cx - 10, cy - 9, 20, 19);
-        ctx.strokeStyle = PAL.uiAccent; ctx.lineWidth = 1; ctx.strokeRect(cx - 9.5, cy - 8.5, 19, 18);
+        ctx.fillStyle = 'rgba(240,201,92,0.22)'; ctx.fillRect(cx - 9, cy - 9, 18, 18);
+        ctx.strokeStyle = PAL.uiAccent; ctx.lineWidth = 1; ctx.strokeRect(cx - 8.5, cy - 8.5, 17, 17);
       }
-      ctx.globalAlpha = has ? 1 : 0.28;
+      ctx.globalAlpha = has ? 1 : 0.25;
       drawWeaponIcon(cx, cy, wd);
       ctx.globalAlpha = 1;
-      lbl('wammo-' + i, wd.ammo === Infinity ? '∞' : String(p.ammo[i]), cx + 9, cy - 5, 7, has ? PAL.ui : '#6b6b6b', 'right');
+      lbl('wammo-' + i, wd.ammo === Infinity ? '∞' : String(p.ammo[i]), cx + 8, cy - 5, 7, has ? PAL.ui : '#6b6b6b', 'right');
     });
     const urgent = turnTimeLeft <= 6;
-    lbl('turn-timer', `⏱ ${Math.ceil(turnTimeLeft)}s`, W - 8, H - 32, 11, urgent ? '#ff8a7a' : PAL.ui, 'right');
-    drawBar(W - 62, H - 27, 54, 5, turnTimeLeft / TURN_TIME_LIMIT, () =>
+    lbl('turn-timer', `⏱ ${Math.ceil(turnTimeLeft)}s`, W - 8, H - 34, 11, urgent ? '#ff8a7a' : PAL.ui, 'right');
+    drawBar(W - 58, H - 29, 50, 5, turnTimeLeft / turnTimeLimit, () =>
       urgent ? { light: '#ff8a7a', dark: '#c23a2c' } : { light: '#9fe0ff', dark: '#3c8cc2' });
-
-    lbl('turn-angle', `각도 ${Math.round(p.angle)}°`, 8, H - 11, 9, PAL.ui, 'left');
-    lbl('weapon-name', `${p.weapon + 1}. ${w.name}`, 100, H - 11, 9, PAL.uiAccent, 'left');
-    lbl('fuel-label', '연료', 176, H - 11, 9, PAL.uiAccent, 'left');
-    drawBar(198, H - 15, 48, 6, p.fuel / 100, () => ({ light: '#9fe0ff', dark: '#3c8cc2' }));
-    lbl('power-label', '파워', 256, H - 11, 9, PAL.uiAccent, 'left');
-    const powerW = Math.max(30, W - 70 - 280);
-    drawBar(280, H - 16, powerW, 8, p.power / 100, pv => pv > 0.8 ? { light: '#ff8a7a', dark: '#c23a2c' } : { light: '#ffd98c', dark: '#e0982c' });
+    // 2행
+    lbl('turn-angle', `각도 ${Math.round(p.angle)}°`, 8, H - 12, 9, PAL.ui, 'left');
+    lbl('weapon-name', `${p.weapon + 1}.${w.name}`, 66, H - 12, 9, PAL.uiAccent, 'left');
+    lbl('fuel-label', '연료', 136, H - 12, 9, PAL.uiAccent, 'left');
+    drawBar(158, H - 16, 44, 6, p.fuel / 100, () => ({ light: '#9fe0ff', dark: '#3c8cc2' }));
+    lbl('power-label', '파워', 210, H - 12, 9, PAL.uiAccent, 'left');
+    const px = 232, pw = Math.max(40, W - 70 - px);
+    drawBar(px, H - 17, pw, 9, p.power / 100, v => v > 0.8 ? { light: '#ff8a7a', dark: '#c23a2c' } : { light: '#ffd98c', dark: '#e0982c' });
+    // ---- 직전 파워 잔상 눈금 ----
+    if (p.lastShot) {
+      const gx = px + pw * clamp(p.lastShot.power / 100, 0, 1);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(gx - 0.5, H - 19, 1.5, 13);
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.beginPath(); ctx.moveTo(gx - 3, H - 20); ctx.lineTo(gx + 3, H - 20); ctx.lineTo(gx, H - 17); ctx.closePath(); ctx.fill();
+      lbl('ghost-info', `이전 ${p.lastShot.elev}° · ${p.lastShot.power}%`, W - 8, H - 12, 8, PAL.ghost, 'right');
+    } else lbl('ghost-info', '조준하고 SPACE를 꾹 눌러 발사!', W - 8, H - 12, 8, PAL.uiDim, 'right');
 
     if (turnMsgTimer > 0) {
-      const bw = 190, bh = 28;
-      const bx = W / 2 - bw / 2, by = H / 2 - 42;
+      const bw = 200, bh = 28, bx = W / 2 - bw / 2, by = H / 2 - 42;
       drawPanel(bx, by, bw, bh);
       ctx.fillStyle = p.color; ctx.fillRect(bx + 4, by + bh / 2 - 6, 3, 12);
-      const teamTxt = p.team ? ` (Team ${p.team})` : '';
-      lbl('turn-banner', `${p.name}${teamTxt} 의 턴!`, W / 2 + 4, by + bh / 2 + 1, 14, p.colorLight, 'center');
+      lbl('turn-banner', `${p.name}${p.team ? ` (${p.team}팀)` : ''} 의 턴!`, W / 2 + 4, by + bh / 2 + 1, 14, p.colorLight, 'center');
     } else lbl('turn-banner', '', 0, 0, 15, '#fff', 'center');
 
-    if (onlineMode && current !== myPlayerIndex) lbl('wait-note', '다른 사람 차례예요. 기다려주세요…', W / 2, H - 52, 9, PAL.uiDim, 'center');
-    else if (p.isAI) lbl('wait-note', 'AI가 생각 중…', W / 2, H - 52, 9, PAL.uiDim, 'center');
+    if (onlineMode && current !== myPlayerIndex) lbl('wait-note', '다른 사람 차례예요…', W / 2, H - 54, 9, PAL.uiDim, 'center');
+    else if (p.isAI) lbl('wait-note', 'AI가 생각 중…', W / 2, H - 54, 9, PAL.uiDim, 'center');
     else lbl('wait-note', '', 0, 0, 9, '#fff', 'center');
   }
 
@@ -2721,8 +2778,9 @@
         ctx.globalAlpha = lt * 0.8; ctx.strokeStyle = pt.color; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.radius * (1 - lt) * 1.3 + 2, 0, Math.PI * 2); ctx.stroke();
       } else if (pt.kind === 'smoke') {
-        ctx.globalAlpha = lt * 0.55; const sz = pt.size * (1 + (1 - lt) * (pt.grow || 1));
-        ctx.fillStyle = pt.color; ctx.beginPath(); ctx.arc(pt.x, pt.y, sz, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = lt * 0.55;
+        const s = pt.size * (1 + (1 - lt) * (pt.grow || 1));
+        ctx.fillStyle = pt.color; ctx.beginPath(); ctx.arc(pt.x, pt.y, s, 0, Math.PI * 2); ctx.fill();
       } else if (pt.kind === 'debris') {
         ctx.globalAlpha = lt; ctx.save(); ctx.translate(pt.x, pt.y); ctx.rotate(pt.rot || 0);
         ctx.fillStyle = pt.color; ctx.fillRect(-pt.size / 2, -pt.size / 2, pt.size, pt.size); ctx.restore();
@@ -2731,54 +2789,48 @@
         ctx.fillStyle = pt.color; ctx.fillRect(-2, -3, 4, 6); ctx.restore();
       } else if (pt.kind === 'heal') {
         ctx.globalAlpha = lt; ctx.fillStyle = pt.color;
-        const sz = pt.size || 2;
-        ctx.fillRect(Math.round(pt.x) - sz / 2, Math.round(pt.y) - 1.5, sz, 3);
-        ctx.fillRect(Math.round(pt.x) - 1.5, Math.round(pt.y) - sz / 2, 3, sz);
+        const s = pt.size || 2;
+        ctx.fillRect(Math.round(pt.x) - s / 2, Math.round(pt.y) - 1.5, s, 3);
+        ctx.fillRect(Math.round(pt.x) - 1.5, Math.round(pt.y) - s / 2, 3, s);
       } else {
-        ctx.globalAlpha = lt; ctx.fillStyle = pt.color; const sz = pt.size || 3;
-        ctx.fillRect(Math.round(pt.x) - sz / 2, Math.round(pt.y) - sz / 2, sz, sz);
+        ctx.globalAlpha = lt; ctx.fillStyle = pt.color;
+        const s = pt.size || 3;
+        ctx.fillRect(Math.round(pt.x) - s / 2, Math.round(pt.y) - s / 2, s, s);
       }
     });
     ctx.globalAlpha = 1;
   }
-
   function drawProjectiles() {
-    projectiles.forEach(proj => {
-      const wdef = WEAPONS[proj.weapon];
-      const glowColor = wdef.glowColor || '#ffcf5c';
-      const scale = proj.sub ? 0.6 : 1;
-      proj.trail.forEach((t, i) => {
-        const a = (i / proj.trail.length);
+    projectiles.forEach(pr => {
+      const wd = WEAPONS[pr.weapon], gc = wd.glowColor || '#ffcf5c';
+      const sc = pr.sub ? 0.6 : (wd.kind === 'nuke' ? 1.5 : 1);
+      pr.trail.forEach((t, i) => {
+        const a = i / pr.trail.length;
         ctx.globalAlpha = a * 0.75;
-        const gr = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, 5.5 * scale);
-        gr.addColorStop(0, glowColor); gr.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(t.x, t.y, (4.5 * a + 1.5) * scale, 0, Math.PI * 2); ctx.fill();
+        const g = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, 5.5 * sc);
+        g.addColorStop(0, gc); g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(t.x, t.y, (4.5 * a + 1.5) * sc, 0, Math.PI * 2); ctx.fill();
       });
       ctx.globalAlpha = 1;
-      const haloGrad = ctx.createRadialGradient(proj.x, proj.y, 0, proj.x, proj.y, 9 * scale);
-      haloGrad.addColorStop(0, glowColor); haloGrad.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.globalAlpha = 0.85; ctx.fillStyle = haloGrad;
-      ctx.beginPath(); ctx.arc(proj.x, proj.y, 9 * scale, 0, Math.PI * 2); ctx.fill();
+      const hg = ctx.createRadialGradient(pr.x, pr.y, 0, pr.x, pr.y, 9 * sc);
+      hg.addColorStop(0, gc); hg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.globalAlpha = 0.85; ctx.fillStyle = hg;
+      ctx.beginPath(); ctx.arc(pr.x, pr.y, 9 * sc, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
-      proj.spin = (proj.spin || 0) + 0.35;
-      ctx.save(); ctx.translate(proj.x, proj.y); ctx.rotate(proj.spin); ctx.scale(scale, scale);
-      ctx.fillStyle = wdef.coreColor || '#5a5a5f'; ctx.strokeStyle = glowColor; ctx.lineWidth = 1;
+      pr.spin = (pr.spin || 0) + 0.35;
+      ctx.save(); ctx.translate(pr.x, pr.y); ctx.rotate(pr.spin); ctx.scale(sc, sc);
+      ctx.fillStyle = wd.coreColor || '#5a5a5f'; ctx.strokeStyle = gc; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.ellipse(0, 0, 4.3, 2.9, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = wdef.highlightColor || '#f0d080';
+      ctx.fillStyle = wd.highlightColor || '#f0d080';
       ctx.beginPath(); ctx.ellipse(-1, -0.8, 1.6, 1.1, 0, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     });
   }
-
   function drawItemPopups() {
     itemPopups.forEach((pp, i) => {
+      if (i > 5) return;
       const lt = clamp(pp.life / pp.maxLife, 0, 1);
-      // 월드 좌표 → 화면 좌표 (카메라 보정)
-      const sx = pp.x - camX, sy = pp.y - camY;
-      const el = document.getElementById('lbl-popup-' + i);
-      lbl('popup-' + i, pp.text, sx, sy, 9, pp.color, 'center');
-      const e2 = el || document.getElementById('lbl-popup-' + i);
-      if (e2) e2.style.opacity = String(Math.min(1, lt * 1.6));
+      lbl('popup-' + i, pp.text, pp.x - camX, pp.y - camY, 9, pp.color, 'center', 'middle', Math.min(1, lt * 1.6));
     });
   }
 
@@ -2789,27 +2841,24 @@
     if (state === 'title') {
       drawSky();
       lbl('title-main', '온라인 포트리스', W / 2, H / 2 - 58, 26, PAL.ui, 'center');
-      lbl('title-sub', 'made by m00n  ·  최대 8인 · 팀전 · 7가지 무기 · 아이템', W / 2, H / 2 - 30, 10, PAL.uiDim, 'center');
+      lbl('title-sub', 'made by m00n  ·  최대 20인 · 팀전 · 11개 맵 · 아이템 · 핵폭탄', W / 2, H / 2 - 30, 9, PAL.uiDim, 'center');
       ctx.save();
-      const tt = { x: W / 2 - 70, y: H / 2 + 2, angle: 55, facing: 1, color: PAL.p1, colorLight: PAL.p1Light, colorDark: PAL.p1Dark, recoil: 0, treadPhase: bgTime, bob: 0, alive: true, hitFlash: 0, healFlash: 0 };
-      drawTank(tt, false);
-      const tt2 = { x: W / 2 + 70, y: H / 2 + 2, angle: 55, facing: -1, color: PAL.p2, colorLight: PAL.p2Light, colorDark: PAL.p2Dark, recoil: 0, treadPhase: bgTime, bob: 3, alive: true, hitFlash: 0, healFlash: 0 };
-      drawTank(tt2, false);
+      drawTank({ x: W / 2 - 70, y: H / 2 + 2, angle: 55, facing: 1, color: PAL.p1, colorLight: PAL.p1Light, colorDark: PAL.p1Dark, recoil: 0, treadPhase: bgTime, bob: 0, alive: true, hitFlash: 0, healFlash: 0, ammo: [] }, false);
+      drawTank({ x: W / 2 + 70, y: H / 2 + 2, angle: 55, facing: -1, color: PAL.p2, colorLight: PAL.p2Light, colorDark: PAL.p2Dark, recoil: 0, treadPhase: bgTime, bob: 3, alive: true, hitFlash: 0, healFlash: 0, ammo: [] }, false);
       ctx.restore();
-      const btnW = 130, btnH = 34, btnX = W / 2 - btnW / 2, btnY = H / 2 + 34;
-      const bg = ctx.createLinearGradient(0, btnY, 0, btnY + btnH);
-      bg.addColorStop(0, '#7fd35c'); bg.addColorStop(1, '#4a9832');
-      ctx.fillStyle = bg; ctx.fillRect(btnX, btnY, btnW, btnH);
-      ctx.strokeStyle = '#2f5a1a'; ctx.lineWidth = 2; ctx.strokeRect(btnX, btnY, btnW, btnH);
-      ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.fillRect(btnX + 2, btnY + 2, btnW - 4, btnH * 0.35);
-      lbl('start-btn', '시작하기', W / 2, btnY + btnH / 2, 14, '#fff', 'center', 'middle');
+      const bw = 130, bh = 34, bx = W / 2 - bw / 2, by = H / 2 + 34;
+      const g = ctx.createLinearGradient(0, by, 0, by + bh);
+      g.addColorStop(0, '#7fd35c'); g.addColorStop(1, '#4a9832');
+      ctx.fillStyle = g; ctx.fillRect(bx, by, bw, bh);
+      ctx.strokeStyle = '#2f5a1a'; ctx.lineWidth = 2; ctx.strokeRect(bx, by, bw, bh);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.fillRect(bx + 2, by + 2, bw - 4, bh * 0.35);
+      lbl('start-btn', '시작하기', W / 2, by + bh / 2, 14, '#fff', 'center', 'middle');
       hideUnusedLabels(); ctx.restore(); return;
     }
     if (state === 'setup') { drawSky(); hideUnusedLabels(); ctx.restore(); return; }
 
     updateCamera();
     drawSky();
-
     ctx.save();
     ctx.translate(-camX, -camY);
     ctx.drawImage(terrCanvas, 0, 0);
@@ -2820,7 +2869,7 @@
     drawSmokeClouds();
     ctx.restore();
 
-    if (flash > 0) { ctx.fillStyle = `rgba(255,240,200,${Math.min(0.6, flash * 0.35)})`; ctx.fillRect(0, 0, W, H); }
+    if (flash > 0) { ctx.fillStyle = `rgba(255,240,200,${Math.min(0.75, flash * 0.35)})`; ctx.fillRect(0, 0, W, H); }
 
     drawAllHPBars();
     drawWindIndicator();
@@ -2829,7 +2878,7 @@
 
     if (missMsgTimer > 0) {
       ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(W / 2 - 74, H / 2 - 11, 148, 22);
-      lbl('miss-msg', missMsg, W / 2, H / 2, 14, PAL.ui, 'center');
+      lbl('miss-msg', missMsg, W / 2, H / 2, 14, PAL.ui, 'center', 'middle');
     } else lbl('miss-msg', '', 0, 0, 14, PAL.ui, 'center');
 
     if (state === 'gameover') {
@@ -2842,38 +2891,33 @@
         ctx.fillStyle = pt.color; ctx.fillRect(-2, -3, 4, 6); ctx.restore();
       });
       ctx.globalAlpha = 1; ctx.restore();
-
-      let winColor, msg;
+      let wc, msg;
       if (isTeamMode() && winnerTeam) {
         const rep = players.find(p => p.team === winnerTeam);
-        winColor = rep ? rep.color : PAL.uiAccent;
+        wc = rep ? rep.color : PAL.uiAccent;
         const names = players.filter(p => p.team === winnerTeam).map(p => p.name).join(', ');
-        msg = `Team ${winnerTeam} 승리!  (${fitLabelText(names, W - 120, 12)})`;
-      } else if (winner < 0) { winColor = PAL.uiAccent; msg = '무승부!'; }
-      else { winColor = players[winner].color; msg = `${players[winner].name} 승리!`; }
-      lbl('gameover-msg', msg, W / 2, H / 2 - 42, 20, winColor, 'center');
+        msg = `${winnerTeam}팀 승리!  (${fitLabelText(names, W - 140, 11)})`;
+      } else if (winner < 0) { wc = PAL.uiAccent; msg = '무승부!'; }
+      else { wc = players[winner].color; msg = `${players[winner].name} 승리!`; }
+      lbl('gameover-msg', msg, W / 2, H / 2 - 42, 20, wc, 'center');
       lbl('gameover-tally', buildTallyText(), W / 2, H / 2 - 14, 10, PAL.uiDim, 'center');
-
-      function drawGoBtnBg(x, y, w, h) {
-        const bg = ctx.createLinearGradient(0, y, 0, y + h);
-        bg.addColorStop(0, '#7fd35c'); bg.addColorStop(1, '#4a9832');
-        ctx.fillStyle = bg; ctx.fillRect(x, y, w, h);
+      const gbtn = (x, y, w, h) => {
+        const g = ctx.createLinearGradient(0, y, 0, y + h);
+        g.addColorStop(0, '#7fd35c'); g.addColorStop(1, '#4a9832');
+        ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
         ctx.strokeStyle = '#2f5a1a'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
         ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.fillRect(x + 2, y + 2, w - 4, h * 0.35);
-      }
+      };
       if (onlineMode) {
-        const btnW = 150, btnH = 34, btnX = W / 2 - btnW / 2, btnY = H / 2 + 40;
-        drawGoBtnBg(btnX, btnY, btnW, btnH);
-        lbl('gameover-btn', '설정 화면으로', W / 2, btnY + btnH / 2, 14, '#fff', 'center', 'middle');
+        const bw = 150, bh = 34, bx = W / 2 - bw / 2, by = H / 2 + 40;
+        gbtn(bx, by, bw, bh);
+        lbl('gameover-btn', '설정 화면으로', W / 2, by + bh / 2, 14, '#fff', 'center', 'middle');
         lbl('gameover-btn2', '', 0, 0, 12, '#fff', 'center');
       } else {
-        const btnW = 122, gap = 10, btnH = 34;
-        const totalW = btnW * 2 + gap;
-        const startX = W / 2 - totalW / 2, btnY = H / 2 + 40;
-        drawGoBtnBg(startX, btnY, btnW, btnH);
-        drawGoBtnBg(startX + btnW + gap, btnY, btnW, btnH);
-        lbl('gameover-btn', '같은 참가자로', startX + btnW / 2, btnY + btnH / 2, 12, '#fff', 'center', 'middle');
-        lbl('gameover-btn2', '새로 설정하기', startX + btnW + gap + btnW / 2, btnY + btnH / 2, 12, '#fff', 'center', 'middle');
+        const bw = 122, gap = 10, bh = 34, tw = bw * 2 + gap, sx = W / 2 - tw / 2, by = H / 2 + 40;
+        gbtn(sx, by, bw, bh); gbtn(sx + bw + gap, by, bw, bh);
+        lbl('gameover-btn', '같은 참가자로', sx + bw / 2, by + bh / 2, 12, '#fff', 'center', 'middle');
+        lbl('gameover-btn2', '새로 설정하기', sx + bw + gap + bw / 2, by + bh / 2, 12, '#fff', 'center', 'middle');
       }
     } else {
       lbl('gameover-msg', '', 0, 0, 22, '#fff', 'center');
@@ -2886,17 +2930,16 @@
   }
 
   // ---------------------------------------------------------------------
-  // 메인 루프
+  // 메인 루프 (고정 타임스텝)
   // ---------------------------------------------------------------------
   const FIXED_DT = 1 / 60;
-  let physicsAccumulator = 0;
+  let acc = 0;
   function loop(now) {
-    const frameDt = Math.min(0.033, (now - lastT) / 1000);
+    const fdt = Math.min(0.033, (now - lastT) / 1000);
     lastT = now;
     if (state !== 'title' && state !== 'setup') {
-      physicsAccumulator += frameDt;
-      physicsAccumulator = Math.min(physicsAccumulator, FIXED_DT * 8);
-      while (physicsAccumulator >= FIXED_DT) { update(FIXED_DT); physicsAccumulator -= FIXED_DT; }
+      acc = Math.min(acc + fdt, FIXED_DT * 8);
+      while (acc >= FIXED_DT) { update(FIXED_DT); acc -= FIXED_DT; }
     }
     render();
     syncMenuBtnVisibility();
