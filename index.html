@@ -37,8 +37,8 @@
   }
   .setup-card {
     background: linear-gradient(#20242e, #14161d); border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 10px; padding: 20px 24px; width: min(94vw, 680px);
-    max-height: 90vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    border-radius: 10px; padding: 20px 24px; width: min(94vw, 700px);
+    max-height: 92vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.5);
   }
   .setup-card h2 { color: #f0c95c; text-align: center; margin: 0 0 16px; font-size: 20px; letter-spacing: 0.03em; }
   .setup-players { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -61,7 +61,7 @@
   }
   .swatch:hover { transform: scale(1.12); }
   .swatch.selected { border-color: #fff; box-shadow: 0 0 0 2px #f0c95c; }
-  .swatch.disabled { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
+  .swatch.disabled { opacity: 0.18; cursor: not-allowed; pointer-events: none; }
   .shapes { display: flex; gap: 6px; }
   .shape-btn {
     flex: 1; background: #1a1c24; border: 1px solid rgba(255,255,255,0.15); border-radius: 5px;
@@ -73,7 +73,7 @@
     background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
     border-radius: 8px; padding: 10px 12px; margin-bottom: 16px;
   }
-  .map-section-title { font-weight: 700; font-size: 14px; color: #f0c95c; margin-bottom: 8px; }
+  .map-section-title { font-weight: 700; font-size: 14px; color: #f0c95c; margin-bottom: 8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .map-grid { display: flex; flex-wrap: wrap; gap: 8px; }
   .map-btn {
     display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -93,7 +93,15 @@
   .size-btn:hover { background: #23262f; }
   .size-btn.selected { border-color: #f0c95c; background: rgba(240,201,92,0.12); color: #f0c95c; font-weight: 700; }
   .size-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .setup-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+  /* 참가자에게는 방장 설정이 읽기 전용으로 보임 */
+  .host-only-locked { position: relative; opacity: 0.72; }
+  .host-only-locked .size-btn, .host-only-locked .map-btn,
+  .host-only-locked input, .host-only-locked .opt-label { pointer-events: none; }
+  .lock-badge {
+    font-size: 10px; font-weight: 700; color: #8a8878;
+    background: rgba(255,255,255,0.06); border-radius: 10px; padding: 2px 8px;
+  }
+  .setup-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap; }
   .setup-btn {
     padding: 10px 22px; border-radius: 6px; font-size: 14px; font-weight: 700;
     cursor: pointer; font-family: inherit; border: 2px solid transparent;
@@ -103,6 +111,7 @@
   .setup-btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
   .setup-btn.ghost { background: transparent; border-color: rgba(255,255,255,0.2); color: #b8b6a8; }
   .setup-btn.ghost:hover:not(:disabled) { background: rgba(255,255,255,0.06); }
+  .setup-btn.small { padding: 6px 12px; font-size: 12px; }
   .opt-label { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: #b8b6a8; cursor: pointer; }
   .warn-note { margin-top: 8px; font-size: 11px; color: #ffb27a; }
   #lobbyList { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
@@ -112,8 +121,13 @@
     padding: 4px 10px 4px 6px; font-size: 12px; color: #e8e4d8;
   }
   .lobby-dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4); }
-  .lobby-chip.me { border-color: #f0c95c; }
+  .lobby-chip.me { border-color: #f0c95c; background: rgba(240,201,92,0.1); }
   .lobby-team { font-size: 10px; color: #f0c95c; }
+  .lobby-kick {
+    background: none; border: none; color: #8a8878; cursor: pointer;
+    font-size: 13px; padding: 0 2px; font-family: inherit; line-height: 1;
+  }
+  .lobby-kick:hover { color: #ff8a7a; }
   .stats-table { width: 100%; border-collapse: collapse; font-size: 13px; color: #e8e4d8; }
   .stats-table th { text-align: left; color: #8a8878; font-weight: 700; font-size: 11px; padding: 4px 6px; border-bottom: 1px solid rgba(255,255,255,0.12); }
   .stats-table td { padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,0.06); }
@@ -170,6 +184,13 @@
     -webkit-user-select: none; user-select: none;
   }
   #passBtn:active { background: rgba(240,201,92,0.4); border-color: #f0c95c; color: #f0ece0; }
+  /* 관전 모드 배너 */
+  #spectateBar {
+    display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 19;
+    background: rgba(200,60,50,0.85); color: #fff; text-align: center;
+    font: 700 12px 'Pretendard', sans-serif; padding: 5px 8px;
+    letter-spacing: 0.03em; pointer-events: none;
+  }
   .howto-section { margin-bottom: 14px; }
   .howto-section-title { font-weight: 700; font-size: 13px; color: #f0c95c; margin-bottom: 6px; }
   .howto-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #e8e4d8; padding: 3px 0; }
@@ -184,6 +205,7 @@
 <body>
 <div id="stage"><div id="canvasWrap"><canvas id="game"></canvas><div id="hud"></div></div></div>
 <div id="hint">← → 이동 　 ↑ ↓ 조준 　 SPACE 발사(누르고 있으면 파워 충전) 　 1~7 무기변경 　 F 방향전환 　 ESC 나가기</div>
+<div id="spectateBar">👁 관전 중 — 탈락했지만 경기는 계속 볼 수 있어요</div>
 <button type="button" id="muteBtn" class="topbtn">🔊</button>
 <button type="button" id="statsBtn" class="topbtn">🏆</button>
 <button type="button" id="howtoBtn" class="topbtn">?</button>
@@ -199,42 +221,36 @@
     </div>
     <div class="howto-section">
       <div class="howto-section-title">⌨️ PC 조작</div>
-      <div class="howto-row"><span class="howto-key">◀ ▶</span> 좌우 이동</div>
-      <div class="howto-row"><span class="howto-key">▲ ▼</span> 대포 각도 조절</div>
+      <div class="howto-row"><span class="howto-key">◀ ▶</span> 좌우 이동 　 <span class="howto-key">▲ ▼</span> 대포 각도</div>
       <div class="howto-row"><span class="howto-key">SPACE</span> 누르고 있으면 파워 충전, 떼면 발사</div>
       <div class="howto-row"><span class="howto-key">1 ~ 7</span> 무기 선택 　 <span class="howto-key">F</span> 방향 전환</div>
       <div class="howto-row"><span class="howto-key">ESC</span> 대전 중 나가기 메뉴 열기</div>
     </div>
     <div class="howto-section">
-      <div class="howto-section-title">⛰ 지형 이동 (중요!)</div>
-      <div class="howto-row">경사가 <b>60도보다 가파르면 못 올라가요.</b> 벽에 막히면 "너무 가팔라요"가 떠요.</div>
-      <div class="howto-row">돌아가거나, 대포로 길을 파서 뚫고 지나가세요.</div>
-      <div class="howto-row">높은 데서 떨어지면 <b>낙하 피해</b>를 입어요.</div>
-      <div class="howto-row"><b style="color:#ff8a7a">맵 아래로 떨어지면 장외 탈락!</b> 절벽 조심하세요. (탈락해도 구경은 계속 할 수 있어요)</div>
-      <div class="howto-row">동굴·층층이 맵에서는 아래층으로 파고 들어가 만날 수도 있어요.</div>
+      <div class="howto-section-title">⛰ 지형 이동</div>
+      <div class="howto-row">경사가 <b>60도보다 가파르면 못 올라가요.</b> 돌아가거나 대포로 길을 뚫으세요.</div>
+      <div class="howto-row"><b style="color:#ff8a7a">맵 아래로 떨어지면 장외 탈락!</b> (탈락해도 구경은 계속 할 수 있어요)</div>
     </div>
     <div class="howto-section">
       <div class="howto-section-title">💣 무기</div>
-      <div class="howto-row">기본포(무제한) · 강력포 ×3 · 지진탄 ×2</div>
-      <div class="howto-row">분열탄 ×2: 착탄 후 4개로 흩어져 다시 폭발</div>
-      <div class="howto-row">연막탄 ×2: 아주 넓게 퍼져서 한 바퀴 동안 안 보임</div>
-      <div class="howto-row">회복탄 ×2: 범위 안 탱크(나 포함) HP 회복</div>
+      <div class="howto-row">기본포(무제한) · 강력포 ×3 · 지진탄 ×2 · 분열탄 ×2</div>
+      <div class="howto-row">연막탄 ×2 (넓게 가려요) · 회복탄 ×2 (나 포함 회복)</div>
       <div class="howto-row"><b style="color:#ff8a7a">핵폭탄</b>: 기본으로 없어요! 탄약상자를 주워야만 얻습니다.</div>
     </div>
     <div class="howto-section">
       <div class="howto-section-title">🎁 아이템</div>
-      <div class="howto-row">가끔 하늘에서 상자가 떨어져요. 이동해서 밟으면 획득!</div>
       <div class="howto-row">❤ HP+30 · ⛽ 연료 충전 · 📦 특수무기+1(가끔 핵!) · 🛡 다음 피해 절반</div>
-      <div class="howto-row">폭발해도 상자는 안 부서져요. 대신 땅이 사라지면 아래로 굴러떨어져요.</div>
+      <div class="howto-row">폭발해도 상자는 안 부서져요. 땅이 사라지면 아래로 굴러떨어져요.</div>
     </div>
     <div class="howto-section">
-      <div class="howto-section-title">💨 바람 읽기</div>
-      <div class="howto-row">오른쪽 위 6칸 게이지가 바람이에요. 가운데에서 멀수록 강해요.</div>
-      <div class="howto-row">회색 눈금은 <b>지난 턴</b>의 바람이에요. 매 턴 반드시 바뀝니다!</div>
+      <div class="howto-section-title">💨 바람 · 조준</div>
+      <div class="howto-row">오른쪽 위 6칸이 바람. 회색 눈금은 <b>지난 턴</b> 값이라 변화를 알 수 있어요.</div>
+      <div class="howto-row">직전에 쏜 각도는 <b>점선 포신</b>, 파워는 게이지의 <b>흰 눈금</b>으로 남아요.</div>
     </div>
     <div class="howto-section">
-      <div class="howto-section-title">🎯 조준 도우미</div>
-      <div class="howto-row">직전에 쐈던 각도는 <b>점선 포신</b>, 파워는 게이지의 <b>흰 눈금</b>으로 남아요.</div>
+      <div class="howto-section-title">🌐 온라인</div>
+      <div class="howto-row">대기실에서 방장은 맵·팀을, 참가자는 이름·색·모양을 언제든 바꿀 수 있어요.</div>
+      <div class="howto-row">게임 중 나가면 <b>자동 탈락</b>되니 끝까지 함께해요!</div>
     </div>
     <div class="setup-actions">
       <button type="button" class="setup-btn primary" id="howtoCloseBtn">확인, 시작할게요</button>
@@ -270,8 +286,9 @@
 
 <div id="setupScreen" class="setup-overlay">
   <div class="setup-card">
-    <h2>탱크 설정</h2>
-    <div class="map-section">
+    <h2 id="setupTitle">탱크 설정</h2>
+
+    <div class="map-section" id="modeSection">
       <div class="map-section-title">대전 방식</div>
       <div class="size-grid" id="modeGrid">
         <button type="button" class="size-btn" id="modeLocalBtn">같은 화면 (로컬)</button>
@@ -284,58 +301,70 @@
         <div id="difficultyDesc" style="font-size:11px;color:#b8b6a8;margin-top:8px;min-height:14px;"></div>
       </div>
       <div id="onlinePanel" style="display:none;margin-top:10px;">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <button type="button" class="setup-btn primary" id="roomCreateBtn" style="padding:8px 14px;font-size:13px;">방 만들기</button>
+        <div id="onlineJoinRow" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button type="button" class="setup-btn primary small" id="roomCreateBtn">방 만들기</button>
           <span style="color:#8a8878;font-size:12px;">또는</span>
           <input type="text" id="roomCodeInput" placeholder="방 코드 4자리" maxlength="4" style="width:100px;text-transform:uppercase;background:#1a1c24;border:1px solid rgba(255,255,255,0.15);border-radius:5px;color:#e8e4d8;font-size:14px;padding:6px 8px;font-family:inherit;">
-          <button type="button" class="setup-btn ghost" id="roomJoinBtn" style="padding:8px 14px;font-size:13px;">코드로 참가</button>
+          <button type="button" class="setup-btn ghost small" id="roomJoinBtn">코드로 참가</button>
         </div>
         <div id="onlineStatus" style="margin-top:8px;font-size:12px;color:#f0c95c;min-height:16px;"></div>
-        <div id="roomCodeBig" style="display:none;margin-top:8px;align-items:center;gap:10px;">
+        <div id="roomCodeBig" style="display:none;margin-top:8px;align-items:center;gap:10px;flex-wrap:wrap;">
           <div id="roomCodeBigText" style="font-size:26px;font-weight:800;letter-spacing:4px;color:#f0c95c;background:#1a1c24;border:2px solid rgba(240,201,92,0.5);border-radius:8px;padding:6px 14px;"></div>
-          <button type="button" class="setup-btn ghost" id="roomCodeCopyBtn" style="padding:8px 12px;font-size:12px;">📋 복사</button>
+          <button type="button" class="setup-btn ghost small" id="roomCodeCopyBtn">📋 복사</button>
+          <button type="button" class="setup-btn ghost small" id="roomLeaveBtn">방 나가기</button>
         </div>
         <div id="lobbyPanel" style="display:none;">
           <div style="margin-top:10px;font-size:12px;color:#b8b6a8;">참가자 <span id="lobbyCount"></span></div>
           <div id="lobbyList"></div>
-          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
-            <button type="button" class="setup-btn primary" id="lobbyStartBtn" style="padding:8px 16px;font-size:13px;display:none;">게임 시작</button>
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button type="button" class="setup-btn primary small" id="lobbyStartBtn" style="display:none;">게임 시작</button>
             <span id="lobbyWaitMsg" style="font-size:12px;color:#8a8878;"></span>
           </div>
         </div>
-        <div style="margin-top:8px;font-size:11px;color:#8a8878;">방장이 아래 설정을 정하고 방을 만들면, 참가자는 자기 탱크만 정하고 코드를 입력하면 돼요. 최대 20명.</div>
       </div>
     </div>
-    <div class="map-section">
-      <div class="map-section-title">맵 선택</div>
+
+    <!-- 아래 설정들은 온라인일 때 방장만 조작 가능 (참가자는 읽기 전용) -->
+    <div class="map-section" id="mapSection">
+      <div class="map-section-title">
+        <span>맵 선택</span>
+        <span class="lock-badge host-badge" style="display:none;">방장만 변경</span>
+        <button type="button" class="setup-btn ghost small" id="rerollMapBtn" style="display:none;padding:3px 8px;font-size:11px;">🔀 맵 다시 뽑기</button>
+      </div>
       <div class="map-grid" id="mapGrid"></div>
     </div>
-    <div class="map-section">
-      <div class="map-section-title">맵 크기</div>
+    <div class="map-section" id="sizeSection">
+      <div class="map-section-title">
+        <span>맵 크기 · 옵션</span>
+        <span class="lock-badge host-badge" style="display:none;">방장만 변경</span>
+      </div>
       <div class="size-grid" id="sizeGrid"></div>
-      <label class="opt-label">
-        <input type="checkbox" id="fogModeCheck"> 안개 모드 (상대가 화면에 안 보임 · 감으로 조준)
-      </label>
-      <label class="opt-label">
-        <input type="checkbox" id="itemDropCheck" checked> 아이템 드롭 (핵폭탄은 여기서만 나와요)
-      </label>
-      <label class="opt-label">
-        <input type="checkbox" id="fallOutCheck" checked> 장외 탈락 (맵 아래로 떨어지면 탈락)
-      </label>
+      <label class="opt-label"><input type="checkbox" id="fogModeCheck"> 안개 모드 (상대가 화면에 안 보임)</label>
+      <label class="opt-label"><input type="checkbox" id="itemDropCheck" checked> 아이템 드롭 (핵폭탄은 여기서만)</label>
+      <label class="opt-label"><input type="checkbox" id="fallOutCheck" checked> 장외 탈락 (맵 아래로 떨어지면 탈락)</label>
     </div>
-    <div class="map-section">
-      <div class="map-section-title">포탄 발사 속도</div>
+    <div class="map-section" id="shotSection">
+      <div class="map-section-title">
+        <span>포탄 발사 속도</span>
+        <span class="lock-badge host-badge" style="display:none;">방장만 변경</span>
+      </div>
       <div class="size-grid" id="shotSpeedGrid"></div>
     </div>
-    <div class="map-section">
-      <div class="map-section-title">바람 세기: <span id="windStrengthValue">100%</span></div>
+    <div class="map-section" id="windSection">
+      <div class="map-section-title">
+        <span>바람 세기: <span id="windStrengthValue">100%</span></span>
+        <span class="lock-badge host-badge" style="display:none;">방장만 변경</span>
+      </div>
       <input type="range" id="windStrengthSlider" min="0" max="200" step="10" value="100" style="width:100%; accent-color:#f0c95c;">
       <div style="display:flex; justify-content:space-between; font-size:10px; color:#8a8878; margin-top:2px;">
         <span>바람 없음</span><span>기본</span><span>매우 강하게</span>
       </div>
     </div>
-    <div class="map-section">
-      <div class="map-section-title" id="countTitle">인원 수</div>
+    <div class="map-section" id="countSection">
+      <div class="map-section-title">
+        <span id="countTitle">인원 수</span>
+        <span class="lock-badge host-badge" style="display:none;">방장만 변경</span>
+      </div>
       <div class="size-grid" id="countGrid"></div>
       <div id="countWarn" class="warn-note"></div>
       <div id="teamRow" style="margin-top:10px;">
@@ -343,7 +372,13 @@
         <div class="size-grid" id="teamGrid"></div>
       </div>
     </div>
+
+    <div class="map-section" id="myTankSection" style="display:none;">
+      <div class="map-section-title">내 탱크 (언제든 바꿀 수 있어요)</div>
+      <div class="setup-players" id="playerCardsOnline"></div>
+    </div>
     <div class="setup-players" id="playerCards"></div>
+
     <div class="setup-actions">
       <button id="setup-back-btn" class="setup-btn ghost">뒤로</button>
       <button id="setup-start-btn" class="setup-btn primary">게임 시작</button>
@@ -353,30 +388,25 @@
 
 <script>
 /* =========================================================================
-   온라인 포트리스 v5
+   온라인 포트리스 v6
    - 로컬/AI/온라인(최대 20인, 팀전)
-   - 무기 7종 (핵폭탄은 아이템 드롭 전용) / 아이템 4종
-   - 지형: 픽셀 마스크 기반 (층/동굴/공중섬 지원)
-   - 바람 6단계 + 이전 턴 잔상 / 직전 발사 제원 잔상
+   - 무기 7종(핵은 아이템 전용) / 아이템 4종 / 다층 지형 / 등판각 제한 / 장외 탈락
 
-   ★ v5 지형 물리 (이번 버전의 핵심)
-   기존에는 이동할 때마다 surfaceYAt(x)(= 맵 맨 위부터 훑어 찾은 첫 지면)을
-   써서 탱크 y를 정했다. 그래서 동굴 안이나 아래층에 있어도 옆으로 한 칸만
-   움직이면 "위층 지붕"으로 순간이동하는 버그가 있었다.
-   → probeGround(x, 발밑높이, ...)로 바꿔서, 자기 발밑 근처의 지면만 찾는다.
-   → 이동은 1px씩 쪼개서 진행하고, 한 칸당 오를 수 있는 높이를
-     tan(60°)로 제한한다(= 60도보다 가파른 벽은 못 오름).
-   → 맵 아래로 떨어지면 장외 탈락(관전은 계속 가능).
-
-   ★ 온라인 동기화에서 같이 손봐야 했던 것
-   1) 다층 맵에서는 같은 x라도 층이 다를 수 있으므로 fire/pickup 액션에
-      y좌표도 함께 실어 보낸다. (예전엔 x만 보내서 상대 화면에서 내 탱크가
-      엉뚱한 층에 그려졌다)
-   2) 내 턴에 내가 절벽으로 떨어지는 건 다른 화면이 알 수 없다(이동은 실시간
-      동기화되지 않으므로). 그래서 'fell' 액션을 새로 만들어 알린다.
-      반대로 남의 턴에 폭발로 발밑이 뚫려 떨어지는 건 모든 화면에서 x가
-      동일하므로 각자 계산해도 결과가 같다 → 액션 불필요.
-   3) 탱크가 전부 착지할 때까지는 다음 턴으로 넘어가지 않는다.
+   ★ v6에서 바뀐 것
+   1) 대기실 라이브 설정
+      - 방장: 방을 만든 뒤에도 맵/크기/팀/바람/속도/옵션을 바꿀 수 있고,
+        변경 즉시 rooms/{code}에 반영되어 모든 참가자 화면이 갱신된다.
+        맵을 바꿀 때는 mapSeed도 같이 새로 뽑는다(설정과 시드가 항상 한 쌍).
+      - 참가자: 이름/색/모양을 언제든 바꿀 수 있고 명단에 즉시 반영된다.
+        방장 설정 영역은 읽기 전용으로 보여준다(뭘 고를지 알 수 있게).
+   2) 접속 해제 = 탈락
+      - rooms/{code}/alive/{uid} 를 onDisconnect().remove() 로 걸어둔다.
+        브라우저가 죽어도 서버가 지워주므로 모두가 동시에 알 수 있다.
+      - 게임 중 그 노드가 사라지면 해당 플레이어를 즉시 탈락 처리하고
+        탱크를 화면에서 숨긴다.
+      - 탈락했지만 접속 중인 사람은 계속 관전한다(조작만 막힘).
+   3) 관전 모드
+      - 내 탱크가 죽거나 끊겨도 화면은 계속 돌아간다. 상단에 관전 배너 표시.
    ========================================================================= */
 
   const canvas = document.getElementById('game');
@@ -388,19 +418,15 @@
   let W = BASE_W, H = BASE_H;
   let mapW = BASE_W, mapH = BASE_H;
   let mapScale = 1;
-  let fogMode = false;
-  let itemDrops = true;
-  let fallOutEnabled = true;
-  const FOG_EXTRA_SCALE = 2.4;
-  const MAX_MAP_SCALE = 3.6;
+  let fogMode = false, itemDrops = true, fallOutEnabled = true;
+  const FOG_EXTRA_SCALE = 2.4, MAX_MAP_SCALE = 3.6;
   let camX = 0, camY = 0;
   canvas.width = W; canvas.height = H;
 
   let uiScale = 1;
   function fitCanvas() {
     const stage = document.getElementById('stage');
-    const maxW = stage.clientWidth, maxH = stage.clientHeight;
-    let scale = Math.min(maxW / W, maxH / H);
+    let scale = Math.min(stage.clientWidth / W, stage.clientHeight / H);
     if (scale >= 1) scale = Math.floor(scale * 2) / 2;
     canvas.style.width = (W * scale) + 'px';
     canvas.style.height = (H * scale) + 'px';
@@ -409,19 +435,12 @@
   window.addEventListener('resize', fitCanvas);
   fitCanvas();
 
-  // ---------------------------------------------------------------------
-  // HUD 라벨
-  // ---------------------------------------------------------------------
   const hudSeen = new Set();
   function lbl(id, text, x, y, sizePx, color, align, vAlign, opacity) {
     align = align || 'left';
     hudSeen.add(id);
     let el = document.getElementById('lbl-' + id);
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'lbl-' + id; el.className = 'lbl';
-      hud.appendChild(el);
-    }
+    if (!el) { el = document.createElement('div'); el.id = 'lbl-' + id; el.className = 'lbl'; hud.appendChild(el); }
     if (text === null || text === undefined || text === '') { el.style.display = 'none'; return; }
     el.style.display = 'block';
     if (el.textContent !== text) el.textContent = text;
@@ -431,20 +450,15 @@
     el.style.color = color;
     el.style.opacity = (opacity === undefined ? 1 : opacity);
     const tx = align === 'center' ? '-50%' : (align === 'right' ? '-100%' : '0%');
-    const ty = vAlign === 'middle' ? '-50%' : '-68%';
-    el.style.transform = `translate(${tx}, ${ty})`;
+    el.style.transform = `translate(${tx}, ${vAlign === 'middle' ? '-50%' : '-68%'})`;
   }
   function hideUnusedLabels() {
     hud.querySelectorAll('.lbl').forEach(el => {
-      const id = el.id.slice(4);
-      if (!hudSeen.has(id)) el.style.display = 'none';
+      if (!hudSeen.has(el.id.slice(4))) el.style.display = 'none';
     });
     hudSeen.clear();
   }
 
-  // ---------------------------------------------------------------------
-  // 유틸
-  // ---------------------------------------------------------------------
   function mulberry32(seed) {
     return function() {
       seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
@@ -466,9 +480,6 @@
     return '#' + [f(r), f(g), f(b)].map(v => clamp(v, 0, 255).toString(16).padStart(2, '0')).join('');
   }
 
-  // ---------------------------------------------------------------------
-  // 팔레트 / 테마
-  // ---------------------------------------------------------------------
   const PAL = {
     sun: '#ffe9a8', sunCore: '#fff6d8',
     cloud: 'rgba(255,255,255,0.55)', cloudDim: 'rgba(200,215,240,0.35)',
@@ -513,51 +524,35 @@
       rim: '#c8d0d4', surfA: '#96a0a6', surfB: '#7c868c', deepFrom: '#5c666c', deepTo: '#242a2e',
       grassDark: '#7c868c', dirtLight: '#6a747a', dirtMid: '#4e565c', dirtDark: '#2e3438' }
   };
-  let currentTheme = THEMES.hills;
-  let currentMapKey = 'hills';
+  let currentTheme = THEMES.hills, currentMapKey = 'hills';
 
-  // ---------------------------------------------------------------------
-  // 플레이어 (최대 20명)
-  // ---------------------------------------------------------------------
   const MAX_PLAYERS = 20;
   const RAW_COLORS = [
-    { key: 'red', hex: '#e6483c' },     { key: 'blue', hex: '#3c86e6' },
-    { key: 'green', hex: '#5cb83c' },   { key: 'yellow', hex: '#e6c13c' },
-    { key: 'purple', hex: '#9450d6' },  { key: 'orange', hex: '#e6813c' },
-    { key: 'teal', hex: '#3cc4c1' },    { key: 'pink', hex: '#e65ca0' },
-    { key: 'lime', hex: '#a8e04a' },    { key: 'cyan', hex: '#4ad6f0' },
-    { key: 'indigo', hex: '#6a5cf0' },  { key: 'magenta', hex: '#d64ae6' },
-    { key: 'brown', hex: '#a5703c' },   { key: 'mint', hex: '#5ce8b0' },
-    { key: 'coral', hex: '#ff7a5c' },   { key: 'navy', hex: '#3a5ad6' },
-    { key: 'olive', hex: '#9aa83c' },   { key: 'rose', hex: '#f05c7a' },
-    { key: 'violet', hex: '#7a4ad6' },  { key: 'slate', hex: '#7a8a9a' }
+    { key: 'red', hex: '#e6483c' }, { key: 'blue', hex: '#3c86e6' }, { key: 'green', hex: '#5cb83c' },
+    { key: 'yellow', hex: '#e6c13c' }, { key: 'purple', hex: '#9450d6' }, { key: 'orange', hex: '#e6813c' },
+    { key: 'teal', hex: '#3cc4c1' }, { key: 'pink', hex: '#e65ca0' }, { key: 'lime', hex: '#a8e04a' },
+    { key: 'cyan', hex: '#4ad6f0' }, { key: 'indigo', hex: '#6a5cf0' }, { key: 'magenta', hex: '#d64ae6' },
+    { key: 'brown', hex: '#a5703c' }, { key: 'mint', hex: '#5ce8b0' }, { key: 'coral', hex: '#ff7a5c' },
+    { key: 'navy', hex: '#3a5ad6' }, { key: 'olive', hex: '#9aa83c' }, { key: 'rose', hex: '#f05c7a' },
+    { key: 'violet', hex: '#7a4ad6' }, { key: 'slate', hex: '#7a8a9a' }
   ];
-  const COLOR_PRESETS = RAW_COLORS.map(c => ({
-    key: c.key, color: c.hex, dark: shadeHex(c.hex, -0.38), light: shadeHex(c.hex, 0.42)
-  }));
-  const SHAPES = [
-    { key: 'classic', label: '클래식' }, { key: 'wedge', label: '웨지' }, { key: 'round', label: '라운드' }
-  ];
+  const COLOR_PRESETS = RAW_COLORS.map(c => ({ key: c.key, color: c.hex, dark: shadeHex(c.hex, -0.38), light: shadeHex(c.hex, 0.42) }));
+  const SHAPES = [{ key: 'classic', label: '클래식' }, { key: 'wedge', label: '웨지' }, { key: 'round', label: '라운드' }];
   const playerConfig = [];
   for (let i = 0; i < MAX_PLAYERS; i++) playerConfig.push({ name: 'P' + (i + 1), colorKey: COLOR_PRESETS[i].key, shape: 'classic' });
   const PLAYER_COUNTS = [2, 3, 4, 5, 6, 8, 10, 12, 16, 20];
   let selectedPlayerCount = 2;
-
-  const TEAM_OPTIONS = [
-    { key: 0, label: '개인전' }, { key: 2, label: '2팀' }, { key: 3, label: '3팀' }, { key: 4, label: '4팀' }
-  ];
+  const TEAM_OPTIONS = [{ key: 0, label: '개인전' }, { key: 2, label: '2팀' }, { key: 3, label: '3팀' }, { key: 4, label: '4팀' }];
   const TEAM_KEYS = ['A', 'B', 'C', 'D'];
   const TEAM_COLORS = ['#ff8a7a', '#7ab4ff', '#a0e87c', '#ffe98c'];
   let teamCount = 0;
   function isTeamMode() { return teamCount > 0; }
   function teamOf(i) { return teamCount > 0 ? TEAM_KEYS[i % teamCount] : null; }
-  function normalizeTeamCount() {
-    if (teamCount > 0 && selectedPlayerCount < teamCount * 2) teamCount = selectedPlayerCount >= 4 ? 2 : 0;
+  function normalizeTeamCount(playerN) {
+    const n = playerN || selectedPlayerCount;
+    if (teamCount > 0 && n < teamCount * 2) teamCount = n >= 4 ? 2 : 0;
   }
 
-  // ---------------------------------------------------------------------
-  // 맵
-  // ---------------------------------------------------------------------
   const MAPS = [
     { key: 'random', label: '랜덤' }, { key: 'hills', label: '언덕' }, { key: 'plains', label: '평원' },
     { key: 'mountains', label: '산악' }, { key: 'canyon', label: '협곡' }, { key: 'steps', label: '계단' },
@@ -569,7 +564,7 @@
   const MAP_SIZES = [
     { key: 'small', label: '좁게', scale: 0.8 }, { key: 'normal', label: '보통', scale: 1.0 },
     { key: 'large', label: '넓게', scale: 1.25 }, { key: 'huge', label: '매우 넓게', scale: 1.5 },
-    { key: 'giant', label: '초대형', scale: 2.0 }, { key: 'mega', label: '초대형+ (12인↑)', scale: 2.6 }
+    { key: 'giant', label: '초대형', scale: 2.0 }, { key: 'mega', label: '초대형+', scale: 2.6 }
   ];
   let selectedMapSize = 'normal';
   const SHOT_SPEEDS = [
@@ -581,9 +576,7 @@
   let windStrengthPct = 100;
   function resolveWindForce() { return 9 * (windStrengthPct / 100); }
 
-  // ---------------------------------------------------------------------
-  // 지형 마스크 생성
-  // ---------------------------------------------------------------------
+  // ---------------------- 지형 생성 ----------------------
   function mFill(mask, w, h, x0, y0, x1, y1) {
     x0 = Math.max(0, Math.floor(x0)); x1 = Math.min(w, Math.ceil(x1));
     y0 = Math.max(0, Math.floor(y0)); y1 = Math.min(h, Math.ceil(y1));
@@ -605,14 +598,13 @@
     }
   }
   function computeHeights(mapKey, rnd, w, h) {
-    const heights = new Float32Array(w);
-    const sc = h / BASE_H, ws = w / BASE_W;
+    const hs = new Float32Array(w), sc = h / BASE_H, ws = w / BASE_W;
     switch (mapKey) {
       case 'plains': {
         const b = h * (0.62 + rnd() * 0.05);
         const a1 = (6 + rnd() * 5) * sc, f1 = (0.006 + rnd() * 0.005) / ws, p1 = rnd() * 10;
         const a2 = (3 + rnd() * 3) * sc, f2 = (0.02 + rnd() * 0.01) / ws, p2 = rnd() * 10;
-        for (let x = 0; x < w; x++) heights[x] = b + Math.sin(x * f1 + p1) * a1 + Math.sin(x * f2 + p2) * a2;
+        for (let x = 0; x < w; x++) hs[x] = b + Math.sin(x * f1 + p1) * a1 + Math.sin(x * f2 + p2) * a2;
         break;
       }
       case 'mountains': {
@@ -620,7 +612,7 @@
         const a1 = (32 + rnd() * 20) * sc, f1 = (0.018 + rnd() * 0.014) / ws, p1 = rnd() * 10;
         const a2 = (14 + rnd() * 10) * sc, f2 = (0.05 + rnd() * 0.025) / ws, p2 = rnd() * 10;
         const a3 = (6 + rnd() * 5) * sc, f3 = (0.09 + rnd() * 0.03) / ws, p3 = rnd() * 10;
-        for (let x = 0; x < w; x++) heights[x] = b + Math.sin(x * f1 + p1) * a1 + Math.sin(x * f2 + p2) * a2 + Math.sin(x * f3 + p3) * a3;
+        for (let x = 0; x < w; x++) hs[x] = b + Math.sin(x * f1 + p1) * a1 + Math.sin(x * f2 + p2) * a2 + Math.sin(x * f3 + p3) * a3;
         break;
       }
       case 'canyon': {
@@ -628,25 +620,24 @@
         const na = (5 + rnd() * 4) * sc, nf = (0.05 + rnd() * 0.03) / ws, np = rnd() * 10;
         for (let x = 0; x < w; x++) {
           const t = x / (w - 1);
-          heights[x] = rim + (fl - rim) * Math.pow(Math.sin(Math.PI * t), 1.4) + Math.sin(x * nf + np) * na;
+          hs[x] = rim + (fl - rim) * Math.pow(Math.sin(Math.PI * t), 1.4) + Math.sin(x * nf + np) * na;
         }
         break;
       }
       case 'steps': {
-        const b = h * (0.4 + rnd() * 0.05);
-        const sh = (14 + rnd() * 6) * sc, sw = (34 + rnd() * 16) * ws;
+        const b = h * (0.4 + rnd() * 0.05), sh = (14 + rnd() * 6) * sc, sw = (34 + rnd() * 16) * ws;
         const na = (2 + rnd() * 2) * sc, nf = (0.12 + rnd() * 0.05) / ws, np = rnd() * 10;
-        for (let x = 0; x < w; x++) heights[x] = b + Math.floor(Math.abs(x - w / 2) / sw) * sh + Math.sin(x * nf + np) * na;
+        for (let x = 0; x < w; x++) hs[x] = b + Math.floor(Math.abs(x - w / 2) / sw) * sh + Math.sin(x * nf + np) * na;
         break;
       }
       default: {
         const b = h * (0.60 + rnd() * 0.08);
         const a1 = (20 + rnd() * 14) * sc, f1 = (0.015 + rnd() * 0.01) / ws, p1 = rnd() * 10;
         const a2 = (10 + rnd() * 8) * sc, f2 = (0.03 + rnd() * 0.02) / ws, p2 = rnd() * 10;
-        for (let x = 0; x < w; x++) heights[x] = b + Math.sin(x * f1 + p1) * a1 + Math.sin(x * f2 + p2) * a2;
+        for (let x = 0; x < w; x++) hs[x] = b + Math.sin(x * f1 + p1) * a1 + Math.sin(x * f2 + p2) * a2;
       }
     }
-    return heights;
+    return hs;
   }
   const LAYERED_GENERATORS = {
     layers(mask, rnd, w, h) {
@@ -674,8 +665,7 @@
       for (let x = 0; x < w; x++) mFill(mask, w, h, x, h * 0.30 + Math.sin(x * f + p) * a + Math.sin(x * f2 + p2) * a2, x + 1, h);
       const n = 3 + Math.floor(rnd() * 3), rooms = [];
       for (let i = 0; i < n; i++) {
-        const cx = w * (0.12 + 0.76 * (i + 0.5) / n + (rnd() - 0.5) * 0.06);
-        const cy = h * (0.52 + rnd() * 0.28);
+        const cx = w * (0.12 + 0.76 * (i + 0.5) / n + (rnd() - 0.5) * 0.06), cy = h * (0.52 + rnd() * 0.28);
         mCarveEllipse(mask, w, h, cx, cy, w * (0.055 + rnd() * 0.05), h * (0.07 + rnd() * 0.06));
         rooms.push({ cx, cy });
       }
@@ -731,8 +721,7 @@
     }
   };
   function buildSolidMask(mapKey, seed, w, h) {
-    const rnd = mulberry32(seed);
-    const mask = new Uint8Array(w * h);
+    const rnd = mulberry32(seed), mask = new Uint8Array(w * h);
     if (LAYERED_GENERATORS[mapKey]) LAYERED_GENERATORS[mapKey](mask, rnd, w, h);
     else {
       const hs = computeHeights(mapKey, rnd, w, h);
@@ -748,7 +737,6 @@
     }
     return mask;
   }
-
   let terrain = null;
   function generateTerrain(seed, mapKey) {
     mapKey = mapKey || 'hills';
@@ -783,47 +771,32 @@
     if (x < 0 || x >= terrain.w || y < 0 || y >= terrain.h) return false;
     return terrain.data[(y * terrain.w + x) * 4 + 3] > 0;
   }
-  // 맵 맨 위부터 훑는 함수. 스폰 위치 결정 등 "가장 위층"이 필요할 때만 쓴다.
-  // 이동/중력에는 절대 쓰지 말 것 (아래층에 있는 탱크가 위층으로 순간이동함)
   function topSurfaceYAt(x) {
     x = clamp(Math.round(x), 0, terrain.w - 1);
     for (let y = 0; y < terrain.h; y++) if (terrainSolid(x, y)) return y;
     return terrain.h;
   }
 
-  // =====================================================================
-  // ★ 지형 이동 물리 (v5 핵심)
-  // =====================================================================
-  const TANK_FOOT = 6;          // p.y + TANK_FOOT = 발이 닿는 높이
-  const ITEM_FOOT = 5;
-  const MAX_CLIMB_DEG = 60;     // 등판 한계 각도
-  const MAX_CLIMB_SLOPE = Math.tan(deg2rad(MAX_CLIMB_DEG)); // ≈ 1.732
-  const STEP_DOWN_MAX = 3;      // 이보다 크게 벌어지면 걸어 내려가지 않고 낙하
-  const FALL_SPEED = 230;       // 낙하 속도 (px/sec, mapScale 곱함)
-  const FALL_DAMAGE_THRESHOLD = 40;
+  const TANK_FOOT = 6, ITEM_FOOT = 5;
+  const MAX_CLIMB_DEG = 60, MAX_CLIMB_SLOPE = Math.tan(deg2rad(MAX_CLIMB_DEG));
+  const STEP_DOWN_MAX = 3, FALL_SPEED = 230, FALL_DAMAGE_THRESHOLD = 40;
 
-  // 발밑 지형 탐색. refFootY 근처(자기가 서 있는 층)에서만 지면을 찾는다.
-  // 반환: { blocked } | { offMap } | { footY, airborne }
   function probeGround(x, refFootY, maxRise, maxDrop) {
     x = clamp(Math.round(x), 0, mapW - 1);
     let y = Math.round(refFootY);
     if (terrainSolid(x, y)) {
-      // 땅에 파묻힘 → 위로 올라가며 그 덩어리의 윗면을 찾음
       let rise = 0;
       while (y > 0 && terrainSolid(x, y - 1)) {
         y--; rise++;
-        if (rise > maxRise) return { blocked: true }; // 너무 가파름
+        if (rise > maxRise) return { blocked: true };
       }
       return { footY: y, airborne: false };
     }
-    // 공중 → 아래로 내려가며 지면을 찾음
     let drop = 0;
     while (y < mapH && !terrainSolid(x, y)) { y++; drop++; }
     if (y >= mapH) return { offMap: true };
     return { footY: y, airborne: drop > maxDrop };
   }
-
-  // dx만큼 이동 시도. 1px씩 쪼개서 등판 각도를 검사한다. 실제 이동량 반환.
   function tryMoveTank(p, dx) {
     if (!dx) return 0;
     const dir = Math.sign(dx);
@@ -832,12 +805,11 @@
       const step = Math.min(1, remain);
       remain -= step;
       const nx = clamp(p.x + dir * step, 6, mapW - 6);
-      if (Math.abs(nx - p.x) < 0.0001) break; // 맵 가장자리
-      const maxRise = Math.max(1, step * MAX_CLIMB_SLOPE);
-      const r = probeGround(nx, p.y + TANK_FOOT, maxRise, STEP_DOWN_MAX);
+      if (Math.abs(nx - p.x) < 0.0001) break;
+      const r = probeGround(nx, p.y + TANK_FOOT, Math.max(1, step * MAX_CLIMB_SLOPE), STEP_DOWN_MAX);
       if (r.blocked) { p.climbBlocked = 0.8; break; }
       p.x = nx; moved += step;
-      if (r.offMap || r.airborne) { // 절벽에서 발을 뗌 → 중력에 맡김
+      if (r.offMap || r.airborne) {
         if (!p.falling) { p.falling = true; p.fallStartY = p.y; }
         break;
       }
@@ -884,39 +856,24 @@
     terrainDirty = { x0: 0, y0: 0, x1: 0, y1: 0, any: false };
   }
 
-  // ---------------------------------------------------------------------
-  // 무기
-  // ---------------------------------------------------------------------
   const WEAPONS = [
-    { name: '기본포', kind: 'normal', ammo: Infinity, dropWeight: 0, radius: 20, dmg: 40,
-      glowColor: '#ffcf5c', coreColor: '#5a5a5f', highlightColor: '#f0d080', icon: 'ball' },
-    { name: '강력포', kind: 'normal', ammo: 3, dropWeight: 4, radius: 34, dmg: 65,
-      glowColor: '#c88cff', coreColor: '#7a3fc4', highlightColor: '#e0b8ff', icon: 'ball' },
-    { name: '지진탄', kind: 'normal', ammo: 2, dropWeight: 4, radius: 48, dmg: 32,
-      glowColor: '#ffb15c', coreColor: '#a5501f', highlightColor: '#ffcf8c', icon: 'spike' },
-    { name: '분열탄', kind: 'cluster', ammo: 2, dropWeight: 4, radius: 12, dmg: 15,
-      glowColor: '#ffe27a', coreColor: '#b08a2a', highlightColor: '#fff2b0', icon: 'cluster',
-      sub: { kind: 'normal', radius: 14, dmg: 18 }, subCount: 4 },
-    { name: '연막탄', kind: 'smoke', ammo: 2, dropWeight: 4, radius: 0, dmg: 0, cloudRadius: 88,
-      glowColor: '#d0d4dc', coreColor: '#6a6f7a', highlightColor: '#f0f2f5', icon: 'smoke' },
-    { name: '회복탄', kind: 'heal', ammo: 2, dropWeight: 4, radius: 30, dmg: 0, healAmt: 35,
-      glowColor: '#7cf29a', coreColor: '#2f8a4a', highlightColor: '#d8ffe4', icon: 'heal' },
-    { name: '핵폭탄', kind: 'nuke', ammo: 0, dropWeight: 1, radius: 256, dmg: 95,
-      glowColor: '#ff5a3c', coreColor: '#3a3a3a', highlightColor: '#ffcf5c', icon: 'nuke' }
+    { name: '기본포', kind: 'normal', ammo: Infinity, dropWeight: 0, radius: 20, dmg: 40, glowColor: '#ffcf5c', coreColor: '#5a5a5f', highlightColor: '#f0d080', icon: 'ball' },
+    { name: '강력포', kind: 'normal', ammo: 3, dropWeight: 4, radius: 34, dmg: 65, glowColor: '#c88cff', coreColor: '#7a3fc4', highlightColor: '#e0b8ff', icon: 'ball' },
+    { name: '지진탄', kind: 'normal', ammo: 2, dropWeight: 4, radius: 48, dmg: 32, glowColor: '#ffb15c', coreColor: '#a5501f', highlightColor: '#ffcf8c', icon: 'spike' },
+    { name: '분열탄', kind: 'cluster', ammo: 2, dropWeight: 4, radius: 12, dmg: 15, glowColor: '#ffe27a', coreColor: '#b08a2a', highlightColor: '#fff2b0', icon: 'cluster', sub: { kind: 'normal', radius: 14, dmg: 18 }, subCount: 4 },
+    { name: '연막탄', kind: 'smoke', ammo: 2, dropWeight: 4, radius: 0, dmg: 0, cloudRadius: 88, glowColor: '#d0d4dc', coreColor: '#6a6f7a', highlightColor: '#f0f2f5', icon: 'smoke' },
+    { name: '회복탄', kind: 'heal', ammo: 2, dropWeight: 4, radius: 30, dmg: 0, healAmt: 35, glowColor: '#7cf29a', coreColor: '#2f8a4a', highlightColor: '#d8ffe4', icon: 'heal' },
+    { name: '핵폭탄', kind: 'nuke', ammo: 0, dropWeight: 1, radius: 256, dmg: 95, glowColor: '#ff5a3c', coreColor: '#3a3a3a', highlightColor: '#ffcf5c', icon: 'nuke' }
   ];
   const NUKE_IDX = 6;
 
-  // ---------------------------------------------------------------------
-  // 아이템
-  // ---------------------------------------------------------------------
   const ITEM_TYPES = [
     { key: 'hp', label: '구급상자', weight: 3, color: '#ff6a5c' },
     { key: 'fuel', label: '연료통', weight: 2, color: '#5cb8ff' },
     { key: 'ammo', label: '탄약상자', weight: 3, color: '#ffd24a' },
     { key: 'shield', label: '방어막', weight: 2, color: '#7ae0ff' }
   ];
-  const ITEM_SPAWN_CHANCE = 0.35;
-  const ITEM_PICK_RADIUS = 11;
+  const ITEM_SPAWN_CHANCE = 0.35, ITEM_PICK_RADIUS = 11;
   let items = [], nextItemId = 1, itemPopups = [];
   function itemMaxOnMap() { return clamp(2 + Math.floor(players.length / 2), 4, 10); }
   function pickWeighted(list, rnd, wkey) {
@@ -926,15 +883,12 @@
     return list[0];
   }
   function maybeSpawnItem(rnd) {
-    // rnd 호출 횟수를 항상 동일하게 유지해야 모든 화면이 같은 결과를 냄
     const roll = rnd();
     const type = pickWeighted(ITEM_TYPES, rnd, 'weight');
     let x = 20 + rnd() * (mapW - 40);
     const wRoll = rnd();
     for (let i = 1; i < 6; i++) x = 20 + rnd() * (mapW - 40);
-    if (!itemDrops) return;
-    if (items.length >= itemMaxOnMap()) return;
-    if (roll > ITEM_SPAWN_CHANCE) return;
+    if (!itemDrops || items.length >= itemMaxOnMap() || roll > ITEM_SPAWN_CHANCE) return;
     let tries = 0;
     while (tries < 8 && players.some(p => p.alive && Math.abs(p.x - x) < 26 * mapScale)) {
       x = 20 + ((x * 7.31 + 137) % (mapW - 40)); tries++;
@@ -948,9 +902,6 @@
     }
     items.push({ id: nextItemId++, type: type.key, x: Math.round(x), y: -10, weaponIdx, falling: true, bob: wRoll * 10 });
   }
-
-  // ★ 아이템 중력: 폭발로 발밑이 사라지면 아래로 떨어지고,
-  //   아래에 땅이 아예 없으면 맵 밖으로 유실된다.
   function applyItemGravity(it, dt) {
     const x = clamp(Math.round(it.x), 0, mapW - 1);
     let footY = it.y + ITEM_FOOT;
@@ -961,9 +912,7 @@
       const s = Math.min(1, remain);
       footY += s; remain -= s;
       if (footY >= mapH) { it.gone = true; return; }
-      if (footY >= 0 && terrainSolid(x, Math.round(footY))) {
-        it.y = Math.round(footY) - ITEM_FOOT; it.falling = false; return;
-      }
+      if (footY >= 0 && terrainSolid(x, Math.round(footY))) { it.y = Math.round(footY) - ITEM_FOOT; it.falling = false; return; }
     }
     it.y = footY - ITEM_FOOT;
   }
@@ -989,9 +938,7 @@
     spawnPickupSparkle(it.x, it.y, t.color);
   }
 
-  // ---------------------------------------------------------------------
-  // 사운드
-  // ---------------------------------------------------------------------
+  // ---------------------- 사운드 ----------------------
   let audioCtx = null, audioMuted = false;
   try { audioMuted = localStorage.getItem('fortressMuted') === '1'; } catch (e) {}
   function ensureAudio() {
@@ -1044,12 +991,10 @@
   function sfxClick() { sfxTone({ freq: 700, dur: 0.05, type: 'square', vol: 0.1 }); }
   function sfxVictory() { [523, 659, 784, 1046].forEach((f, i) => sfxTone({ freq: f, dur: 0.28, type: 'triangle', vol: 0.2, delay: i * 0.12 })); }
   function sfxMiss() { sfxTone({ freq: 300, freqEnd: 180, dur: 0.25, type: 'sine', vol: 0.14 }); }
-  // 장외 추락: 길게 떨어지는 삐요오옹 소리
-  function sfxFallOut() {
-    sfxTone({ freq: 700, freqEnd: 60, dur: 1.1, type: 'sawtooth', vol: 0.22 });
-    sfxNoise({ dur: 0.4, vol: 0.18, filterFreq: 500, delay: 1.0 });
-  }
+  function sfxFallOut() { sfxTone({ freq: 700, freqEnd: 60, dur: 1.1, type: 'sawtooth', vol: 0.22 }); sfxNoise({ dur: 0.4, vol: 0.18, filterFreq: 500, delay: 1.0 }); }
   function sfxBlocked() { sfxTone({ freq: 150, dur: 0.07, type: 'square', vol: 0.08 }); }
+  function sfxDisconnect() { sfxTone({ freq: 420, freqEnd: 140, dur: 0.5, type: 'triangle', vol: 0.18 }); }
+  function sfxJoin() { sfxTone({ freq: 520, dur: 0.1, type: 'sine', vol: 0.12 }); sfxTone({ freq: 780, dur: 0.14, type: 'sine', vol: 0.12, delay: 0.1 }); }
 
   const muteBtn = document.getElementById('muteBtn');
   function updateMuteBtn() { muteBtn.textContent = audioMuted ? '🔇' : '🔊'; }
@@ -1064,32 +1009,41 @@
   document.getElementById('howtoBtn').addEventListener('click', () => { howtoScreen.style.display = 'flex'; });
   const menuBtn = document.getElementById('menuBtn');
   menuBtn.addEventListener('click', () => {
-    if (confirm('진행 중인 대전을 그만두고 설정 화면으로 돌아갈까요?')) openSetupScreen();
+    const msg = onlineMode ? '나가면 탈락 처리돼요. 정말 나갈까요?' : '진행 중인 대전을 그만두고 설정 화면으로 돌아갈까요?';
+    if (confirm(msg)) openSetupScreen();
   });
   let menuBtnShown = false;
   function syncMenuBtnVisibility() {
-    const s = (state === 'aiming' || state === 'firing' || state === 'resolving' || state === 'resolving-miss');
+    const s = ['aiming', 'firing', 'resolving', 'resolving-miss', 'gameover'].includes(state);
     if (s !== menuBtnShown) { menuBtnShown = s; menuBtn.style.display = s ? 'block' : 'none'; }
   }
   const passBtn = document.getElementById('passBtn');
   passBtn.addEventListener('click', () => {
-    if (state !== 'aiming') return;
-    if (onlineMode && current !== myPlayerIndex) return;
-    const p = players[current];
-    if (!p || p.isAI || p.charging || p.falling) return;
+    if (!canControlNow()) return;
     NetworkHooks.sendAction({ type: 'pass', player: current, turn: turnCount });
   });
   let passBtnShown = false;
   function syncPassBtnVisibility() {
     const p = players[current];
-    const s = state === 'aiming' && p && !p.isAI && !p.charging && !p.falling && (!onlineMode || current === myPlayerIndex);
+    const s = state === 'aiming' && p && !p.isAI && !p.charging && !p.falling && (!onlineMode || current === myPlayerIndex) && p.alive;
     if (s !== passBtnShown) { passBtnShown = s; passBtn.style.display = s ? 'block' : 'none'; }
+  }
+  const spectateBar = document.getElementById('spectateBar');
+  let spectateShown = false;
+  function syncSpectateBar() {
+    const inGame = ['aiming', 'firing', 'resolving', 'resolving-miss'].includes(state);
+    const me = onlineMode ? players[myPlayerIndex] : null;
+    const s = inGame && onlineMode && me && !me.alive;
+    if (s !== spectateShown) {
+      spectateShown = s;
+      spectateBar.style.display = s ? 'block' : 'none';
+      spectateBar.textContent = (me && me.disconnected) ? '👁 연결이 끊겨 탈락했어요 — 경기는 계속 볼 수 있어요'
+        : '👁 관전 중 — 탈락했지만 경기는 계속 볼 수 있어요';
+    }
   }
   document.addEventListener('click', e => { if (e.target.closest('button, .swatch')) sfxClick(); });
 
-  // ---------------------------------------------------------------------
-  // 게임 상태
-  // ---------------------------------------------------------------------
+  // ---------------------- 게임 상태 ----------------------
   let state = 'title';
   let players = [], current = 0;
   let wind = 0, windLevel = 0, prevWindLevel = 0;
@@ -1097,8 +1051,7 @@
   let turnCount = 0;
   let projectiles = [], currentShot = null;
   let smokeClouds = [], particles = [];
-  let shake = 0, flash = 0;
-  let turnMsgTimer = 0;
+  let shake = 0, flash = 0, turnMsgTimer = 0;
   let turnTimeLimit = 25, turnTimeLeft = 25, turnOverdue = 0;
   let missMsg = '', missMsgTimer = 0;
   let eventMsg = '', eventMsgColor = '#fff', eventMsgTimer = 0;
@@ -1106,8 +1059,7 @@
   let winner = -1, winnerTeam = null;
   let mapSeed = 1;
   let pendingActions = [], pickupSentIds = new Set();
-
-  function showEvent(text, color) { eventMsg = text; eventMsgColor = color || PAL.ui; eventMsgTimer = 2.2; }
+  function showEvent(text, color) { eventMsg = text; eventMsgColor = color || PAL.ui; eventMsgTimer = 2.4; }
 
   let matchWins = [], matchWinsTeam = {}, matchDraws = 0;
   function resetMatchWins() { matchWins = new Array(selectedPlayerCount).fill(0); matchWinsTeam = {}; matchDraws = 0; }
@@ -1141,12 +1093,11 @@
   function newTank(px, c, name, facing, shape) {
     return {
       x: px, y: 0, hp: 100, name, color: c.color, colorDark: c.dark, colorLight: c.light,
-      facing, shape: shape || 'classic',
-      angle: 55, power: 0, charging: false, chargeDir: 1,
+      facing, shape: shape || 'classic', angle: 55, power: 0, charging: false, chargeDir: 1,
       fuel: 100, ammo: WEAPONS.map(w => w.ammo === Infinity ? Infinity : w.ammo), weapon: 0,
       alive: true, recoil: 0, treadPhase: 0, hitFlash: 0, healFlash: 0, bob: Math.random() * 10,
       falling: false, fallStartY: 0, team: null, isAI: false, shield: false,
-      lastShot: null, outOfBounds: false, fellSent: false, climbBlocked: 0
+      lastShot: null, outOfBounds: false, disconnected: false, fellSent: false, climbBlocked: 0
     };
   }
   function toAbsoluteAngle(p) { return p.facing > 0 ? p.angle : 180 - p.angle; }
@@ -1167,7 +1118,7 @@
     return pool[Math.floor(Math.random() * pool.length)];
   }
   function applyMapSize(baseScale) {
-    let s = Math.min(baseScale * (fogMode ? FOG_EXTRA_SCALE : 1), MAX_MAP_SCALE);
+    const s = Math.min(baseScale * (fogMode ? FOG_EXTRA_SCALE : 1), MAX_MAP_SCALE);
     mapScale = s;
     mapW = Math.round(BASE_W * s); mapH = Math.round(BASE_H * s);
     W = fogMode ? BASE_W : mapW; H = fogMode ? BASE_H : mapH;
@@ -1191,11 +1142,8 @@
     recordMatchResult(winner, winnerTeam); spawnConfetti(); sfxVictory();
   }
   function endGameIfOver() { if (state !== 'gameover') { const r = checkGameOver(); if (r.over) finishGame(r); } }
-
-  // ★ 착지 처리 (낙하 피해 포함)
   function landTank(pl, footY) {
-    pl.falling = false;
-    pl.y = footY - TANK_FOOT;
+    pl.falling = false; pl.y = footY - TANK_FOOT;
     const dist = (pl.y - pl.fallStartY) / mapScale;
     if (dist > FALL_DAMAGE_THRESHOLD) {
       const dmg = clamp(Math.round((dist - FALL_DAMAGE_THRESHOLD) * 0.5), 0, 35);
@@ -1206,18 +1154,13 @@
       }
     }
   }
-  // ★ 실제 탈락 처리
-  function doEliminate(pl) {
+  function doEliminate(pl, reason) {
     if (!pl.alive) return;
-    pl.alive = false; pl.hp = 0; pl.outOfBounds = true; pl.falling = false;
-    pl.y = mapH + 40;
-    sfxFallOut();
-    showEvent(`${pl.name} 장외 탈락!`, PAL.danger);
+    pl.alive = false; pl.hp = 0; pl.falling = false; pl.y = mapH + 40;
+    if (reason === 'fall') { pl.outOfBounds = true; sfxFallOut(); showEvent(`${pl.name} 장외 탈락!`, PAL.danger); }
+    else if (reason === 'disconnect') { pl.disconnected = true; sfxDisconnect(); showEvent(`${pl.name} 접속이 끊겼어요 — 탈락`, PAL.danger); }
     endGameIfOver();
   }
-  // ★ 맵 밖으로 떨어짐
-  //   자기 턴에 스스로 떨어진 경우는 다른 화면이 내 위치를 모르므로 액션으로 알린다.
-  //   (남의 턴에 폭발로 떨어지는 건 모든 화면에서 x가 같아 각자 계산해도 결과가 동일)
   function eliminateByFall(pl) {
     const idx = players.indexOf(pl);
     pl.falling = false; pl.y = mapH + 40;
@@ -1227,12 +1170,10 @@
         pl.fellSent = true;
         NetworkHooks.sendAction({ type: 'fell', player: idx, turn: turnCount });
       }
-      return; // 실제 처리는 applyAction('fell')에서
+      return;
     }
-    doEliminate(pl);
+    doEliminate(pl, 'fall');
   }
-
-  // ★ 탱크 중력. 자기 발밑만 보고 판정 (위층으로 튀어오르지 않음)
   function applyTankGravity(pl, dt) {
     if (!pl.alive) return;
     const x = clamp(Math.round(pl.x), 0, mapW - 1);
@@ -1242,21 +1183,18 @@
       return;
     }
     if (!pl.falling) { pl.falling = true; pl.fallStartY = pl.y; }
-    // 스윕: 한 프레임 이동량을 1px씩 검사해서 얇은 바닥을 뚫고 지나가지 않게
     let remain = FALL_SPEED * mapScale * dt;
     while (remain > 0.0001) {
       const s = Math.min(1, remain);
       footY += s; remain -= s;
       if (footY >= mapH) {
         if (fallOutEnabled) { eliminateByFall(pl); return; }
-        // 장외 탈락 옵션이 꺼져 있으면 바닥에 걸침
         pl.y = mapH - TANK_FOOT - 1; pl.falling = false; return;
       }
       if (footY >= 0 && terrainSolid(x, Math.round(footY))) { landTank(pl, Math.round(footY)); return; }
     }
     pl.y = footY - TANK_FOOT;
   }
-
   function findSpawnX(x0) {
     if (!LAYERED_KEYS.includes(currentMapKey)) return x0;
     let best = x0, bestY = topSurfaceYAt(x0);
@@ -1302,9 +1240,7 @@
     state = 'aiming';
   }
 
-  // ---------------------------------------------------------------------
-  // 설정 화면
-  // ---------------------------------------------------------------------
+  // ---------------------- 설정 화면 ----------------------
   const setupScreen = document.getElementById('setupScreen');
   const previewCanvas = document.createElement('canvas');
   previewCanvas.width = BASE_W; previewCanvas.height = BASE_H;
@@ -1351,6 +1287,39 @@
       playerConfig[pi].name = inp.value.trim() || ('P' + (pi + 1));
     });
   }
+
+  // ★ 방장이 설정을 바꿀 때마다 호출 — 방 데이터에 즉시 반영
+  let hostPushTimer = null;
+  function hostPushSettings(immediate) {
+    if (!onlineMode || !isRoomHost || !currentRoomId || !db) return;
+    const doPush = () => {
+      const payload = {
+        maxPlayers: selectedPlayerCount, teamCount,
+        mapKey: resolvedRoomMapKey, mapSize: selectedMapSize, shotSpeed: selectedShotSpeed,
+        windStrength: windStrengthPct, fogMode, itemDrops, fallOut: fallOutEnabled,
+        mapSeed
+      };
+      roomRef(currentRoomId).update(payload).catch(e => console.warn('설정 반영 실패:', e));
+    };
+    if (immediate) { clearTimeout(hostPushTimer); doPush(); return; }
+    clearTimeout(hostPushTimer);
+    hostPushTimer = setTimeout(doPush, 250); // 슬라이더 연타 대비
+  }
+  // ★ 참가자가 자기 탱크를 바꿀 때마다 호출
+  let myCfgPushTimer = null;
+  function pushMyConfig() {
+    if (!onlineMode || !currentRoomId || !db) return;
+    clearTimeout(myCfgPushTimer);
+    myCfgPushTimer = setTimeout(() => {
+      const c = playerConfig[0];
+      roomRef(currentRoomId).child('players/' + myUid).update({
+        name: c.name || 'P1', colorKey: c.colorKey, shape: c.shape
+      }).catch(e => console.warn('내 설정 반영 실패:', e));
+    }, 200);
+  }
+
+  let resolvedRoomMapKey = 'hills'; // 방에 저장되는 확정 맵(랜덤은 미리 뽑아둠)
+
   function buildSetupUI() {
     const mapGrid = document.getElementById('mapGrid');
     if (mapGrid.childElementCount === 0) {
@@ -1358,7 +1327,16 @@
         const b = document.createElement('div'); b.className = 'map-btn'; b.dataset.key = m.key;
         const pv = document.createElement('canvas'); pv.width = 60; pv.height = 34; b.appendChild(pv);
         const s = document.createElement('span'); s.textContent = m.label; b.appendChild(s);
-        b.addEventListener('click', () => { selectedMapKey = m.key; refreshSetupSelection(); });
+        b.addEventListener('click', () => {
+          if (onlineMode && !isRoomHost) { setOnlineStatus('맵은 방장만 바꿀 수 있어요.'); return; }
+          selectedMapKey = m.key;
+          if (onlineMode && isRoomHost) {
+            resolvedRoomMapKey = resolveMapKey();
+            mapSeed = (Date.now() % 100000) + Math.floor(Math.random() * 100000);
+            hostPushSettings(true);
+          }
+          refreshSetupSelection();
+        });
         mapGrid.appendChild(b); drawMapPreview(pv, m.key);
       });
     }
@@ -1372,25 +1350,53 @@
         g.appendChild(b);
       });
     };
-    mk('sizeGrid', MAP_SIZES, 'key', s => { selectedMapSize = s.key; refreshSetupSelection(); });
-    mk('shotSpeedGrid', SHOT_SPEEDS, 'key', s => { selectedShotSpeed = s.key; refreshSetupSelection(); });
+    const guardHost = fn => s => {
+      if (onlineMode && !isRoomHost) { setOnlineStatus('이 설정은 방장만 바꿀 수 있어요.'); return; }
+      fn(s);
+      if (onlineMode && isRoomHost) hostPushSettings(true);
+      refreshSetupSelection();
+    };
+    mk('sizeGrid', MAP_SIZES, 'key', guardHost(s => { selectedMapSize = s.key; }));
+    mk('shotSpeedGrid', SHOT_SPEEDS, 'key', guardHost(s => { selectedShotSpeed = s.key; }));
     mk('countGrid', PLAYER_COUNTS.map(n => ({ key: n, label: n + '인' })), 'count',
-       s => { selectedPlayerCount = s.key; normalizeTeamCount(); rebuildPlayerCards(); });
-    mk('teamGrid', TEAM_OPTIONS, 'team', s => { teamCount = s.key; normalizeTeamCount(); rebuildPlayerCards(); });
+       guardHost(s => { selectedPlayerCount = s.key; normalizeTeamCount(); }));
+    mk('teamGrid', TEAM_OPTIONS, 'team', guardHost(s => { teamCount = s.key; normalizeTeamCount(lobbyPlayerCount()); }));
     mk('difficultyGrid', AI_DIFFICULTIES, 'key', s => { selectedDifficulty = s.key; refreshSetupSelection(); });
+
     const bindCheck = (id, setter) => {
       const c = document.getElementById(id);
-      if (!c.dataset.bound) { c.dataset.bound = '1'; c.addEventListener('change', e => { setter(e.target.checked); refreshSetupSelection(); }); }
+      if (c.dataset.bound) return;
+      c.dataset.bound = '1';
+      c.addEventListener('change', e => {
+        if (onlineMode && !isRoomHost) { e.target.checked = !e.target.checked; setOnlineStatus('이 설정은 방장만 바꿀 수 있어요.'); return; }
+        setter(e.target.checked);
+        if (onlineMode && isRoomHost) hostPushSettings(true);
+        refreshSetupSelection();
+      });
     };
     bindCheck('fogModeCheck', v => { fogMode = v; });
     bindCheck('itemDropCheck', v => { itemDrops = v; });
     bindCheck('fallOutCheck', v => { fallOutEnabled = v; });
+
     const ws = document.getElementById('windStrengthSlider');
     if (!ws.dataset.bound) {
       ws.dataset.bound = '1';
       ws.addEventListener('input', e => {
+        if (onlineMode && !isRoomHost) { e.target.value = windStrengthPct; return; }
         windStrengthPct = Number(e.target.value);
         document.getElementById('windStrengthValue').textContent = windStrengthPct + '%';
+        if (onlineMode && isRoomHost) hostPushSettings(false);
+      });
+    }
+    const reroll = document.getElementById('rerollMapBtn');
+    if (!reroll.dataset.bound) {
+      reroll.dataset.bound = '1';
+      reroll.addEventListener('click', () => {
+        if (!isRoomHost) return;
+        resolvedRoomMapKey = resolveMapKey();
+        mapSeed = (Date.now() % 100000) + Math.floor(Math.random() * 100000);
+        hostPushSettings(true);
+        setOnlineStatus(`맵을 다시 뽑았어요: ${(MAPS.find(m => m.key === resolvedRoomMapKey) || {}).label || ''}`);
       });
     }
     const mL = document.getElementById('modeLocalBtn'), mS = document.getElementById('modeSoloBtn'), mO = document.getElementById('modeOnlineBtn');
@@ -1408,66 +1414,106 @@
       });
       document.getElementById('roomCreateBtn').addEventListener('click', () => { readNickInputs(); createOnlineRoom(); });
       document.getElementById('roomJoinBtn').addEventListener('click', () => { readNickInputs(); joinOnlineRoom(document.getElementById('roomCodeInput').value); });
+      document.getElementById('roomLeaveBtn').addEventListener('click', () => {
+        if (confirm('방에서 나갈까요?')) { leaveOnlineRoom(); setOnlineStatus('방에서 나왔어요.'); rebuildPlayerCards(); }
+      });
       document.getElementById('lobbyStartBtn').addEventListener('click', hostStartFromLobby);
     }
   }
+
+  function makePlayerCard(pi, isOnlineSelf) {
+    const card = document.createElement('div'); card.className = 'setup-player'; card.dataset.p = pi;
+    const title = document.createElement('div'); title.className = 'setup-player-title';
+    const pre = COLOR_PRESETS.find(c => c.key === playerConfig[pi].colorKey) || COLOR_PRESETS[pi];
+    title.style.color = pre.light;
+    let t = isOnlineSelf ? '내 탱크' : `Player ${pi + 1}`;
+    if (!isOnlineSelf && isTeamMode()) t += ` (${teamOf(pi)}팀)`;
+    if (soloMode && pi === 1) t += ' (AI)';
+    title.textContent = t; card.appendChild(title);
+    const nl = document.createElement('label'); nl.textContent = '닉네임 (전적 기록용)';
+    const ni = document.createElement('input');
+    ni.type = 'text'; ni.className = 'nick-input'; ni.dataset.p = pi;
+    ni.maxLength = 8; ni.placeholder = 'P' + (pi + 1); ni.value = playerConfig[pi].name;
+    ni.addEventListener('input', () => {
+      playerConfig[pi].name = ni.value.trim() || ('P' + (pi + 1));
+      if (isOnlineSelf) pushMyConfig();
+    });
+    card.appendChild(nl); card.appendChild(ni);
+    const cl = document.createElement('label'); cl.textContent = '색상';
+    const sw = document.createElement('div'); sw.className = 'swatches'; sw.dataset.p = pi;
+    COLOR_PRESETS.forEach(c => {
+      const s = document.createElement('div');
+      s.className = 'swatch'; s.style.background = c.color; s.dataset.key = c.key; s.title = c.key;
+      s.addEventListener('click', () => {
+        playerConfig[pi].colorKey = c.key;
+        if (isOnlineSelf) pushMyConfig();
+        refreshSetupSelection();
+      });
+      sw.appendChild(s);
+    });
+    card.appendChild(cl); card.appendChild(sw);
+    const sl = document.createElement('label'); sl.textContent = '모양';
+    const shw = document.createElement('div'); shw.className = 'shapes'; shw.dataset.p = pi;
+    SHAPES.forEach(s => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'shape-btn'; b.textContent = s.label; b.dataset.key = s.key;
+      b.addEventListener('click', () => {
+        playerConfig[pi].shape = s.key;
+        if (isOnlineSelf) pushMyConfig();
+        refreshSetupSelection();
+      });
+      shw.appendChild(b);
+    });
+    card.appendChild(sl); card.appendChild(shw);
+    return card;
+  }
   function rebuildPlayerCards() {
-    const wrap = document.getElementById('playerCards');
-    wrap.innerHTML = '';
-    const n = onlineMode ? 1 : Math.min(selectedPlayerCount, 8);
-    for (let pi = 0; pi < n; pi++) {
-      const card = document.createElement('div'); card.className = 'setup-player'; card.dataset.p = pi;
-      const title = document.createElement('div'); title.className = 'setup-player-title';
-      const pre = COLOR_PRESETS.find(c => c.key === playerConfig[pi].colorKey) || COLOR_PRESETS[pi];
-      title.style.color = pre.light;
-      let t = onlineMode ? '내 탱크' : `Player ${pi + 1}`;
-      if (!onlineMode && isTeamMode()) t += ` (${teamOf(pi)}팀)`;
-      if (soloMode && pi === 1) t += ' (AI)';
-      title.textContent = t; card.appendChild(title);
-      const nl = document.createElement('label'); nl.textContent = '닉네임 (전적 기록용)';
-      const ni = document.createElement('input');
-      ni.type = 'text'; ni.className = 'nick-input'; ni.dataset.p = pi;
-      ni.maxLength = 8; ni.placeholder = 'P' + (pi + 1); ni.value = playerConfig[pi].name;
-      ni.addEventListener('input', () => { playerConfig[pi].name = ni.value.trim() || ('P' + (pi + 1)); });
-      card.appendChild(nl); card.appendChild(ni);
-      const cl = document.createElement('label'); cl.textContent = '색상';
-      const sw = document.createElement('div'); sw.className = 'swatches'; sw.dataset.p = pi;
-      COLOR_PRESETS.forEach(c => {
-        const s = document.createElement('div');
-        s.className = 'swatch'; s.style.background = c.color; s.dataset.key = c.key; s.title = c.key;
-        s.addEventListener('click', () => {
-          const used = !onlineMode && playerConfig.some((cf, i) => i !== pi && i < selectedPlayerCount && cf.colorKey === c.key);
-          if (used) return;
-          playerConfig[pi].colorKey = c.key; refreshSetupSelection();
-        });
-        sw.appendChild(s);
-      });
-      card.appendChild(cl); card.appendChild(sw);
-      const sl = document.createElement('label'); sl.textContent = '모양';
-      const shw = document.createElement('div'); shw.className = 'shapes'; shw.dataset.p = pi;
-      SHAPES.forEach(s => {
-        const b = document.createElement('button');
-        b.type = 'button'; b.className = 'shape-btn'; b.textContent = s.label; b.dataset.key = s.key;
-        b.addEventListener('click', () => { playerConfig[pi].shape = s.key; refreshSetupSelection(); });
-        shw.appendChild(b);
-      });
-      card.appendChild(sl); card.appendChild(shw);
-      wrap.appendChild(card);
+    const local = document.getElementById('playerCards');
+    const online = document.getElementById('playerCardsOnline');
+    local.innerHTML = ''; online.innerHTML = '';
+    if (onlineMode) {
+      document.getElementById('myTankSection').style.display = currentRoomId ? 'block' : 'none';
+      if (currentRoomId) online.appendChild(makePlayerCard(0, true));
+    } else {
+      document.getElementById('myTankSection').style.display = 'none';
+      const n = Math.min(selectedPlayerCount, 8);
+      for (let pi = 0; pi < n; pi++) local.appendChild(makePlayerCard(pi, false));
+      if (selectedPlayerCount > 8)
+        for (let pi = 8; pi < selectedPlayerCount; pi++) playerConfig[pi].colorKey = COLOR_PRESETS[pi % COLOR_PRESETS.length].key;
     }
-    if (!onlineMode && selectedPlayerCount > 8)
-      for (let pi = 8; pi < selectedPlayerCount; pi++) playerConfig[pi].colorKey = COLOR_PRESETS[pi % COLOR_PRESETS.length].key;
     refreshSetupSelection();
   }
+
+  function lobbyPlayerCount() {
+    return (lastRoomData && lastRoomData.players) ? Object.keys(lastRoomData.players).length : selectedPlayerCount;
+  }
+  function usedColorsInRoom() {
+    const used = new Set();
+    if (!lastRoomData || !lastRoomData.players) return used;
+    Object.keys(lastRoomData.players).forEach(uid => {
+      if (uid !== myUid) used.add(lastRoomData.players[uid].colorKey);
+    });
+    return used;
+  }
+
   function refreshSetupSelection() {
+    const lockHostArea = onlineMode && currentRoomId && !isRoomHost;
+    ['mapSection', 'sizeSection', 'shotSection', 'windSection', 'countSection'].forEach(id => {
+      document.getElementById(id).classList.toggle('host-only-locked', lockHostArea);
+    });
+    document.querySelectorAll('.host-badge').forEach(b => { b.style.display = lockHostArea ? 'inline-block' : 'none'; });
+    document.getElementById('rerollMapBtn').style.display = (onlineMode && isRoomHost && currentRoomId) ? 'inline-block' : 'none';
+
     document.querySelectorAll('.map-btn').forEach(b => b.classList.toggle('selected', b.dataset.key === selectedMapKey));
     document.querySelectorAll('#sizeGrid .size-btn').forEach(b => b.classList.toggle('selected', b.dataset.key === selectedMapSize));
     document.querySelectorAll('#countGrid .size-btn').forEach(b => b.classList.toggle('selected', Number(b.dataset.count) === selectedPlayerCount));
     document.querySelectorAll('#shotSpeedGrid .size-btn').forEach(b => b.classList.toggle('selected', b.dataset.key === selectedShotSpeed));
     document.querySelectorAll('#difficultyGrid .size-btn').forEach(b => b.classList.toggle('selected', b.dataset.key === selectedDifficulty));
+    const teamBase = (onlineMode && currentRoomId) ? Math.max(2, lobbyPlayerCount()) : selectedPlayerCount;
     document.querySelectorAll('#teamGrid .size-btn').forEach(b => {
       const k = Number(b.dataset.team);
       b.classList.toggle('selected', k === teamCount);
-      b.disabled = (k > 0 && selectedPlayerCount < k * 2);
+      b.disabled = (k > 0 && teamBase < k * 2);
     });
     const d = AI_DIFFICULTIES.find(x => x.key === selectedDifficulty);
     document.getElementById('difficultyDesc').textContent = d ? d.desc : '';
@@ -1481,31 +1527,40 @@
     document.getElementById('modeOnlineBtn').classList.toggle('selected', onlineMode);
     document.getElementById('difficultyPanel').style.display = soloMode ? 'block' : 'none';
     document.getElementById('onlinePanel').style.display = onlineMode ? 'block' : 'none';
+    document.getElementById('onlineJoinRow').style.display = (onlineMode && !currentRoomId) ? 'flex' : 'none';
     document.getElementById('setup-start-btn').style.display = onlineMode ? 'none' : '';
-    document.getElementById('countTitle').textContent = onlineMode ? '최대 인원 (방장이 정함)' : '인원 수';
+    document.getElementById('countTitle').textContent = onlineMode ? '최대 인원' : '인원 수';
     document.getElementById('countGrid').style.pointerEvents = soloMode ? 'none' : '';
     document.getElementById('countGrid').style.opacity = soloMode ? '0.4' : '1';
     document.getElementById('teamRow').style.display = soloMode ? 'none' : 'block';
+    document.getElementById('setupTitle').textContent = (onlineMode && currentRoomId) ? '온라인 대기실' : '탱크 설정';
+
     const warn = document.getElementById('countWarn');
-    const n = selectedPlayerCount;
+    const n = (onlineMode && currentRoomId) ? lobbyPlayerCount() : selectedPlayerCount;
     let msg = '';
-    if (n >= 13) msg = `⚠ ${n}인은 한 바퀴에 약 ${Math.round(n * 14 / 60)}분. 턴 제한 14초. 맵은 '초대형+' 권장.`;
-    else if (n >= 9) msg = `${n}인은 턴 제한 18초. 맵은 '초대형' 이상 권장.`;
+    if (n >= 13) msg = `⚠ ${n}인은 한 바퀴 약 ${Math.round(n * 14 / 60)}분. 턴 제한 14초. 맵 '초대형+' 권장.`;
+    else if (n >= 9) msg = `${n}인은 턴 제한 18초. 맵 '초대형' 이상 권장.`;
     const extra = [];
-    if (!itemDrops) extra.push('아이템을 끄면 핵폭탄은 안 나와요');
-    if (!fallOutEnabled) extra.push('장외 탈락 꺼짐: 떨어져도 맵 바닥에 걸립니다');
+    if (!itemDrops) extra.push('아이템 끄면 핵폭탄 안 나옴');
+    if (!fallOutEnabled) extra.push('장외 탈락 꺼짐');
     if (extra.length) msg += (msg ? ' / ' : '') + extra.join(' / ');
     warn.textContent = msg;
-    const cnt = onlineMode ? 1 : Math.min(selectedPlayerCount, 8);
-    for (let pi = 0; pi < cnt; pi++) {
+
+    // 탱크 카드 선택 표시
+    const cards = onlineMode ? [0] : Array.from({ length: Math.min(selectedPlayerCount, 8) }, (_, i) => i);
+    const roomUsed = onlineMode ? usedColorsInRoom() : null;
+    cards.forEach(pi => {
       document.querySelectorAll(`.swatches[data-p="${pi}"] .swatch`).forEach(s => {
         s.classList.toggle('selected', s.dataset.key === playerConfig[pi].colorKey);
-        const used = !onlineMode && playerConfig.some((cf, i) => i !== pi && i < selectedPlayerCount && cf.colorKey === s.dataset.key);
+        let used;
+        if (onlineMode) used = roomUsed.has(s.dataset.key);
+        else used = playerConfig.some((cf, i) => i !== pi && i < selectedPlayerCount && cf.colorKey === s.dataset.key);
         s.classList.toggle('disabled', used);
       });
       document.querySelectorAll(`.shapes[data-p="${pi}"] .shape-btn`).forEach(b => b.classList.toggle('selected', b.dataset.key === playerConfig[pi].shape));
-    }
+    });
   }
+
   function openSetupScreen() {
     leaveOnlineRoom(); buildSetupUI(); rebuildPlayerCards(); refreshSetupSelection();
     state = 'setup'; setupScreen.style.display = 'flex';
@@ -1542,9 +1597,7 @@
     if (p.weapon > 0 && p.ammo[p.weapon] <= 0) p.weapon = 0;
   }
 
-  // ---------------------------------------------------------------------
-  // Firebase
-  // ---------------------------------------------------------------------
+  // ---------------------- Firebase ----------------------
   const firebaseConfig = {
     apiKey: "AIzaSyBfJWCTvUXzWvPfULRkLEl4XYLbtqhuOc8",
     authDomain: "potress-b699b.firebaseapp.com",
@@ -1563,7 +1616,10 @@
 
   const myUid = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-3);
   let onlineMode = false, currentRoomId = null, isRoomHost = false;
-  let myPlayerIndex = 0, lastRoomData = null, myDisconnectRef = null;
+  let myPlayerIndex = 0, lastRoomData = null;
+  let myPlayerDisconnectRef = null, myAliveDisconnectRef = null, roomDisconnectRef = null;
+  let playerOrderUids = [];       // 게임 시작 시 확정된 uid 순서
+  let aliveUnsub = null;
   let soloMode = false;
   const AI_DIFFICULTIES = [
     { key: 'veryeasy', label: '매우쉬움', angleStep: 14, powerStep: 26, angleError: 24, powerError: 26, thinkTime: [0.9, 1.8], moveChance: 0.2, missChance: 0.55, missMult: 3.4, specialChance: 0, desc: '거의 항상 크게 빗나가요.' },
@@ -1576,6 +1632,7 @@
   let aiPlan = null, actionsUnsub = null, roomUnsub = null, gameStartedFromRoom = false;
   function roomRef(id) { return db.ref('rooms/' + id); }
   function actionsRef(id) { return db.ref('rooms/' + id + '/actions'); }
+  function aliveRef(id) { return db.ref('rooms/' + id + '/alive'); }
   function setOnlineStatus(m) { const e = document.getElementById('onlineStatus'); if (e) e.textContent = m; }
   const roomCodeBig = document.getElementById('roomCodeBig'), roomCodeBigText = document.getElementById('roomCodeBigText');
   function showRoomCodeBig(c) { roomCodeBigText.textContent = c; roomCodeBig.style.display = 'flex'; }
@@ -1594,6 +1651,17 @@
   function myCfgForRoom() {
     return { name: playerConfig[0].name || 'P1', colorKey: playerConfig[0].colorKey, shape: playerConfig[0].shape, joinedAt: Date.now() };
   }
+  // ★ 접속 상태 노드 등록 (연결 끊기면 서버가 자동으로 지워줌)
+  async function registerAlive(roomId) {
+    if (!db) return;
+    try {
+      const ref = aliveRef(roomId).child(myUid);
+      myAliveDisconnectRef = ref.onDisconnect();
+      await myAliveDisconnectRef.remove();
+      await ref.set(true);
+    } catch (e) { console.warn('alive 등록 실패:', e); }
+  }
+
   async function createOnlineRoom() {
     if (!db) { setOnlineStatus('Firebase 설정이 안 되어있어요.'); return; }
     if (currentRoomId) { setOnlineStatus('이미 만든 방이 있어요.'); showRoomCodeBig(currentRoomId); return; }
@@ -1601,8 +1669,8 @@
     if (btn.disabled) return;
     btn.disabled = true; setOnlineStatus('방 만드는 중...');
     normalizeTeamCount();
-    const seed = (Date.now() % 100000) + Math.floor(Math.random() * 100000);
-    const mk = resolveMapKey();
+    mapSeed = (Date.now() % 100000) + Math.floor(Math.random() * 100000);
+    resolvedRoomMapKey = resolveMapKey();
     let roomId = makeRoomCode();
     try {
       for (let t = 0; t < 5; t++) {
@@ -1614,18 +1682,21 @@
       const pl = {}; pl[myUid] = me;
       await roomRef(roomId).set({
         status: 'waiting', maxPlayers: selectedPlayerCount, teamCount,
-        mapKey: mk, mapSize: selectedMapSize, shotSpeed: selectedShotSpeed,
+        mapKey: resolvedRoomMapKey, mapSize: selectedMapSize, shotSpeed: selectedShotSpeed,
         windStrength: windStrengthPct, fogMode, itemDrops, fallOut: fallOutEnabled,
-        mapSeed: seed, hostUid: myUid, players: pl,
+        mapSeed, hostUid: myUid, players: pl,
         createdAt: firebase.database.ServerValue.TIMESTAMP
       });
-      myDisconnectRef = roomRef(roomId).onDisconnect();
-      await myDisconnectRef.remove();
+      roomDisconnectRef = roomRef(roomId).onDisconnect();
+      await roomDisconnectRef.remove(); // 방장이 끊기면 방 전체 삭제
+      await registerAlive(roomId);
     } catch (e) { setOnlineStatus('방 생성 실패: ' + e.message); btn.disabled = false; return; }
-    onlineMode = true; selectedMapKey = mk; currentRoomId = roomId;
+    onlineMode = true; currentRoomId = roomId;
     isRoomHost = true; myPlayerIndex = 0; gameStartedFromRoom = false;
-    setOnlineStatus('친구들이 코드로 들어오면 명단에 나타나요. 2명 이상이면 "게임 시작".');
-    showRoomCodeBig(roomId); listenRoom(roomId); btn.disabled = false;
+    setOnlineStatus('코드를 알려주세요. 설정은 지금도 바꿀 수 있어요!');
+    showRoomCodeBig(roomId); listenRoom(roomId);
+    rebuildPlayerCards();
+    btn.disabled = false;
   }
   async function joinOnlineRoom(raw) {
     if (!db) { setOnlineStatus('Firebase 설정이 안 되어있어요.'); return; }
@@ -1641,7 +1712,7 @@
     try { data = (await ref.once('value')).val(); }
     catch (e) { setOnlineStatus('참가 실패: ' + e.message); jb.disabled = false; return; }
     if (data === null) { setOnlineStatus(`"${roomId}" 방을 찾을 수 없어요.`); jb.disabled = false; return; }
-    if (data.status !== 'waiting') { setOnlineStatus('이미 시작된 방이에요.'); jb.disabled = false; return; }
+    if (data.status !== 'waiting') { setOnlineStatus('이미 시작된 방이에요. 다음 판을 기다려주세요.'); jb.disabled = false; return; }
     const maxP = data.maxPlayers || 2, myCfg = myCfgForRoom();
     let ok = false;
     try {
@@ -1653,22 +1724,35 @@
         const used = new Set(uids.map(u => cur[u].colorKey));
         let ck = myCfg.colorKey;
         if (used.has(ck)) { const f = COLOR_PRESETS.find(c => !used.has(c.key)); ck = f ? f.key : ck; }
+        playerConfig[0].colorKey = ck;
         cur[myUid] = { name: myCfg.name, colorKey: ck, shape: myCfg.shape, joinedAt: Date.now() };
         return cur;
       });
       ok = tx.committed;
     } catch (e) { setOnlineStatus('참가 실패: ' + e.message); jb.disabled = false; return; }
     if (!ok) { setOnlineStatus('인원이 다 찼어요.'); jb.disabled = false; return; }
-    try { myDisconnectRef = ref.child('players/' + myUid).onDisconnect(); await myDisconnectRef.remove(); } catch (e) {}
-    selectedMapKey = data.mapKey; selectedMapSize = data.mapSize;
-    selectedShotSpeed = data.shotSpeed || 'normal';
-    windStrengthPct = (data.windStrength != null) ? data.windStrength : 100;
-    fogMode = !!data.fogMode; itemDrops = (data.itemDrops !== false);
-    fallOutEnabled = (data.fallOut !== false);
-    teamCount = data.teamCount || 0; mapSeed = data.mapSeed;
+    try {
+      myPlayerDisconnectRef = ref.child('players/' + myUid).onDisconnect();
+      await myPlayerDisconnectRef.remove();
+      await registerAlive(roomId);
+    } catch (e) {}
+    applyRoomSettings(data);
     onlineMode = true; currentRoomId = roomId; isRoomHost = false; gameStartedFromRoom = false;
-    setOnlineStatus('참가 완료! 방장이 시작할 때까지 기다려주세요.');
-    listenRoom(roomId); jb.disabled = false;
+    setOnlineStatus('참가 완료! 이름·색·모양은 지금도 바꿀 수 있어요.');
+    listenRoom(roomId); rebuildPlayerCards(); jb.disabled = false;
+  }
+  // 방 데이터 → 로컬 설정 반영 (참가자용)
+  function applyRoomSettings(d) {
+    selectedMapKey = d.mapKey; resolvedRoomMapKey = d.mapKey;
+    selectedMapSize = d.mapSize;
+    selectedShotSpeed = d.shotSpeed || 'normal';
+    windStrengthPct = (d.windStrength != null) ? d.windStrength : 100;
+    fogMode = !!d.fogMode;
+    itemDrops = (d.itemDrops !== false);
+    fallOutEnabled = (d.fallOut !== false);
+    teamCount = d.teamCount || 0;
+    selectedPlayerCount = d.maxPlayers || 2;
+    mapSeed = d.mapSeed;
   }
   function sortedRoomUids(d) {
     const pl = d.players || {};
@@ -1678,10 +1762,13 @@
       return (pl[a].joinedAt || 0) - (pl[b].joinedAt || 0);
     });
   }
+  let lastLobbyCount = 0;
   function renderLobby(d) {
     document.getElementById('lobbyPanel').style.display = 'block';
     const list = document.getElementById('lobbyList'); list.innerHTML = '';
     const uids = sortedRoomUids(d), tc = d.teamCount || 0;
+    if (uids.length > lastLobbyCount && lastLobbyCount > 0) sfxJoin();
+    lastLobbyCount = uids.length;
     uids.forEach((uid, i) => {
       const p = d.players[uid];
       const pr = COLOR_PRESETS.find(c => c.key === p.colorKey) || COLOR_PRESETS[0];
@@ -1689,16 +1776,25 @@
       chip.className = 'lobby-chip' + (uid === myUid ? ' me' : '');
       const dot = document.createElement('span'); dot.className = 'lobby-dot'; dot.style.background = pr.color;
       chip.appendChild(dot);
-      const nm = document.createElement('span'); nm.textContent = `${i + 1}. ${p.name}` + (uid === d.hostUid ? ' 👑' : '');
+      const nm = document.createElement('span');
+      nm.textContent = `${i + 1}. ${p.name}` + (uid === d.hostUid ? ' 👑' : '') + (uid === myUid ? ' (나)' : '');
       chip.appendChild(nm);
       if (tc > 0) { const t = document.createElement('span'); t.className = 'lobby-team'; t.textContent = TEAM_KEYS[i % tc] + '팀'; chip.appendChild(t); }
+      if (isRoomHost && uid !== myUid) {
+        const k = document.createElement('button');
+        k.className = 'lobby-kick'; k.textContent = '✕'; k.title = '내보내기';
+        k.addEventListener('click', () => {
+          if (confirm(`${p.name} 님을 내보낼까요?`)) roomRef(currentRoomId).child('players/' + uid).remove();
+        });
+        chip.appendChild(k);
+      }
       list.appendChild(chip);
     });
     document.getElementById('lobbyCount').textContent = `${uids.length} / ${d.maxPlayers || 2}명`;
     const sb = document.getElementById('lobbyStartBtn'), wm = document.getElementById('lobbyWaitMsg');
     if (isRoomHost) {
       sb.style.display = ''; sb.disabled = uids.length < 2;
-      wm.textContent = uids.length < 2 ? '2명 이상 모이면 시작할 수 있어요.' : `${uids.length}명 준비됨`;
+      wm.textContent = uids.length < 2 ? '2명 이상 모이면 시작할 수 있어요.' : `${uids.length}명 준비됨 · 설정을 바꾸면 모두에게 바로 반영돼요`;
     } else { sb.style.display = 'none'; wm.textContent = '방장이 시작하기를 기다리는 중...'; }
   }
   async function hostStartFromLobby() {
@@ -1706,11 +1802,18 @@
     const order = sortedRoomUids(lastRoomData);
     if (order.length < 2) return;
     const b = document.getElementById('lobbyStartBtn'); b.disabled = true;
-    try { await roomRef(currentRoomId).update({ playerOrder: order, status: 'ready', startedAt: firebase.database.ServerValue.TIMESTAMP }); }
-    catch (e) { setOnlineStatus('시작 실패: ' + e.message); b.disabled = false; }
+    // 시작 직전에 팀 수를 실제 인원에 맞게 보정
+    const tc = (teamCount > 0 && order.length < teamCount * 2) ? (order.length >= 4 ? 2 : 0) : teamCount;
+    try {
+      await roomRef(currentRoomId).update({
+        playerOrder: order, teamCount: tc, status: 'ready',
+        startedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    } catch (e) { setOnlineStatus('시작 실패: ' + e.message); b.disabled = false; }
   }
   function startFromRoom(d) {
     const order = d.playerOrder || sortedRoomUids(d), n = order.length;
+    playerOrderUids = order.slice();
     for (let i = 0; i < n; i++) {
       const c = (d.players && d.players[order[i]]) || null;
       playerConfig[i] = c
@@ -1719,15 +1822,33 @@
     }
     myPlayerIndex = order.indexOf(myUid);
     if (myPlayerIndex < 0) { setOnlineStatus('명단에 내가 없어요.'); leaveOnlineRoom(); return; }
-    selectedPlayerCount = n; teamCount = d.teamCount || 0; normalizeTeamCount();
-    selectedMapKey = d.mapKey; selectedMapSize = d.mapSize;
-    selectedShotSpeed = d.shotSpeed || 'normal';
-    windStrengthPct = (d.windStrength != null) ? d.windStrength : 100;
-    fogMode = !!d.fogMode; itemDrops = (d.itemDrops !== false);
-    fallOutEnabled = (d.fallOut !== false);
-    mapSeed = d.mapSeed;
-    if (!isRoomHost && myDisconnectRef) { try { myDisconnectRef.cancel(); } catch (e) {} myDisconnectRef = null; }
+    applyRoomSettings(d);
+    selectedPlayerCount = n;
+    teamCount = d.teamCount || 0;
+    normalizeTeamCount();
+    // 게임 시작 후에는 players 노드가 지워져도 탈락 판정은 alive 노드로만 한다
+    if (myPlayerDisconnectRef) { try { myPlayerDisconnectRef.cancel(); } catch (e) {} myPlayerDisconnectRef = null; }
     setupScreen.style.display = 'none'; resetMatchWins(); startGame();
+    listenAlive(currentRoomId);
+  }
+  // ★ 접속 상태 구독 — 게임 중 끊긴 사람을 탈락시킨다
+  function listenAlive(roomId) {
+    if (aliveUnsub) aliveUnsub();
+    const ar = aliveRef(roomId);
+    const handler = snap => {
+      const uid = snap.key;
+      const idx = playerOrderUids.indexOf(uid);
+      if (idx < 0) return;
+      const p = players[idx];
+      if (!p || !p.alive) return;
+      doEliminate(p, 'disconnect');
+      if (state !== 'gameover' && idx === current) {
+        // 끊긴 사람 차례였으면 곧바로 다음 턴으로
+        if (state === 'aiming') nextTurnSetup(false);
+      }
+    };
+    ar.on('child_removed', handler);
+    aliveUnsub = () => ar.off('child_removed', handler);
   }
   function listenRoom(roomId) {
     if (roomUnsub) roomUnsub();
@@ -1739,13 +1860,26 @@
           const inGame = gameStartedFromRoom;
           leaveOnlineRoom();
           if (inGame) { alert('방장이 나가서 대전이 끝났어요.'); openSetupScreen(); }
-          else { setOnlineStatus('방이 사라졌어요.'); hideLobby(); }
+          else { setOnlineStatus('방이 사라졌어요. (방장이 나감)'); hideLobby(); rebuildPlayerCards(); }
         }
         return;
       }
       lastRoomData = d;
-      if (d.mapSeed) mapSeed = d.mapSeed;
-      if (d.status === 'waiting') renderLobby(d);
+      // 대기실: 설정이 바뀌면 참가자 화면도 즉시 갱신
+      if (d.status === 'waiting') {
+        if (!isRoomHost) applyRoomSettings(d);
+        // 내가 방에서 쫓겨났는지 확인
+        if (!d.players || !d.players[myUid]) {
+          if (!isRoomHost) {
+            leaveOnlineRoom();
+            setOnlineStatus('방에서 나가졌어요. (방장이 내보냄)');
+            hideLobby(); rebuildPlayerCards();
+            return;
+          }
+        }
+        renderLobby(d);
+        refreshSetupSelection();
+      }
       if (d.status === 'ready' && !gameStartedFromRoom) {
         gameStartedFromRoom = true; setOnlineStatus('시작합니다!'); startFromRoom(d);
       }
@@ -1761,15 +1895,23 @@
   function leaveOnlineRoom() {
     if (roomUnsub) { roomUnsub(); roomUnsub = null; }
     if (actionsUnsub) { actionsUnsub(); actionsUnsub = null; }
+    if (aliveUnsub) { aliveUnsub(); aliveUnsub = null; }
     if (db && currentRoomId) {
       try {
         if (isRoomHost) roomRef(currentRoomId).remove();
-        else if (!gameStartedFromRoom) roomRef(currentRoomId).child('players/' + myUid).remove();
-        if (myDisconnectRef) myDisconnectRef.cancel();
+        else {
+          aliveRef(currentRoomId).child(myUid).remove();
+          if (!gameStartedFromRoom) roomRef(currentRoomId).child('players/' + myUid).remove();
+        }
+        if (myPlayerDisconnectRef) myPlayerDisconnectRef.cancel();
+        if (myAliveDisconnectRef) myAliveDisconnectRef.cancel();
+        if (roomDisconnectRef) roomDisconnectRef.cancel();
       } catch (e) {}
     }
-    myDisconnectRef = null; onlineMode = false; isRoomHost = false;
-    currentRoomId = null; lastRoomData = null; gameStartedFromRoom = false;
+    myPlayerDisconnectRef = null; myAliveDisconnectRef = null; roomDisconnectRef = null;
+    onlineMode = false; isRoomHost = false; currentRoomId = null;
+    lastRoomData = null; gameStartedFromRoom = false;
+    playerOrderUids = []; lastLobbyCount = 0;
     hideRoomCodeBig(); hideLobby();
     const cb = document.getElementById('roomCreateBtn'), jb = document.getElementById('roomJoinBtn');
     if (cb) cb.disabled = false;
@@ -1780,8 +1922,7 @@
     if (!db) return;
     if (onlineMode && myPlayerIndex !== 0) return;
     players.forEach((p, i) => {
-      if (p.isAI) return;
-      if (/^P\d{1,2}$/.test(p.name)) return;
+      if (p.isAI || /^P\d{1,2}$/.test(p.name)) return;
       const won = wTeam ? (p.team === wTeam) : (i === wIdx);
       db.ref('stats/' + statsKey(p.name)).transaction(cur => {
         cur = cur || { name: p.name, wins: 0, games: 0 };
@@ -1819,10 +1960,7 @@
     } catch (e) { body.textContent = '불러오기 실패: ' + e.message; }
   });
 
-  // ---------------------------------------------------------------------
-  // 액션 (fire / pass / pickup / fell)
-  //   ★ 다층 맵 때문에 fire·pickup에 y좌표도 함께 보낸다.
-  // ---------------------------------------------------------------------
+  // ---------------------- 액션 ----------------------
   function applyAction(a) {
     if (!a) return;
     if (!['fire', 'pass', 'pickup', 'fell'].includes(a.type)) return;
@@ -1834,12 +1972,12 @@
     if (a.player !== current) return;
     const sh = players[a.player];
     if (!sh) return;
-
     if (a.type === 'fell') {
-      doEliminate(sh);
+      doEliminate(sh, 'fall');
       if (state !== 'gameover') nextTurnSetup(false);
       return;
     }
+    if (!sh.alive) return; // 이미 탈락(끊김 등)한 사람의 늦은 액션은 무시
     if (a.type === 'pickup') {
       const idx = items.findIndex(it => it.id === a.item);
       if (idx < 0) return;
@@ -1855,9 +1993,7 @@
       if (typeof a.y === 'number') { sh.y = a.y; sh.falling = false; }
       sh.charging = false; sh.power = 0;
       fireProjectile(a.player, a.angle, a.power, a.weapon);
-    } else {
-      sfxMiss(); nextTurnSetup(false);
-    }
+    } else { sfxMiss(); nextTurnSetup(false); }
   }
   function drainPendingActions() {
     while (pendingActions.length && state === 'aiming') {
@@ -1883,9 +2019,7 @@
     NetworkHooks.sendAction({ type: 'pickup', player: current, turn: turnCount, item: it.id, x: p.x, y: p.y });
   }
 
-  // ---------------------------------------------------------------------
-  // 발사 / 폭발
-  // ---------------------------------------------------------------------
+  // ---------------------- 발사/폭발 ----------------------
   function makeProjectile(x, y, vx, vy, wi, owner, sub) {
     return { x, y, vx, vy, weapon: wi, owner, trail: [], spin: 0, sub: !!sub };
   }
@@ -1893,10 +2027,7 @@
     const p = players[pi];
     if (!WEAPONS[wi]) wi = 0;
     const w = WEAPONS[wi];
-    if (w.ammo !== Infinity) {
-      if (p.ammo[wi] <= 0) wi = 0;
-      else p.ammo[wi]--;
-    }
+    if (w.ammo !== Infinity) { if (p.ammo[wi] <= 0) wi = 0; else p.ammo[wi]--; }
     const rad = deg2rad(angle);
     const speed = (115 + (power / 100) * 400) * mapScale * resolveShotSpeedScale();
     const mx = p.x + Math.cos(rad) * 13, my = p.y - 6 - Math.sin(rad) * 13;
@@ -1957,8 +2088,7 @@
     if (kind === 'smoke') {
       smokeClouds.push({ x, y, r: spec.cloudRadius || 88, expiresTurn: turnCount + players.length,
         seed: Math.floor(currentShot ? currentShot.rnd() * 1e9 : 1) });
-      spawnSmokePuff(x, y, spec.cloudRadius || 88);
-      sfxSmoke(); return;
+      spawnSmokePuff(x, y, spec.cloudRadius || 88); sfxSmoke(); return;
     }
     if (kind === 'heal') {
       players.forEach(pl => {
@@ -1972,7 +2102,6 @@
     scorchRing(x, y, spec.radius);
     pushTerrainToCanvas(false);
     spawnExplosion(x, y, spec.radius, kind === 'nuke');
-    // ★ 아이템은 폭발로 부서지지 않는다. (발밑 땅이 사라지면 중력으로 떨어짐)
     if (kind === 'nuke') {
       shake = Math.max(shake, 46); flash = 2.2; sfxNuke();
       if (currentShot) currentShot.nuke = true;
@@ -2090,23 +2219,22 @@
     for (const c of smokeClouds) if (Math.hypot(x - c.x, y - c.y) < c.r * 0.9) return true;
     return false;
   }
+  // ★ 탈락한 탱크(장외/접속끊김/사망)는 화면에 안 보이게
   function tankHidden(i) {
     const p = players[i];
-    if (p.outOfBounds) return true;
-    if (!p.alive || !isInSmoke(p.x, p.y)) return false;
+    if (!p.alive) return true;
+    if (!isInSmoke(p.x, p.y)) return false;
     if (i === current && state === 'aiming') return false;
     return true;
   }
 
-  // ---------------------------------------------------------------------
-  // 입력
-  // ---------------------------------------------------------------------
+  // ---------------------- 입력 ----------------------
   const keys = {};
   function canControlNow() {
     if (state !== 'aiming') return false;
     if (onlineMode && current !== myPlayerIndex) return false;
     const p = players[current];
-    if (!p || p.isAI || p.falling) return false;
+    if (!p || p.isAI || p.falling || !p.alive) return false;
     return true;
   }
   function selectWeapon(i) {
@@ -2127,7 +2255,7 @@
     if (state !== 'aiming') return;
     if (onlineMode && current !== myPlayerIndex) return;
     const p = players[current];
-    if (!p.alive || p.falling) { p.charging = false; p.power = 0; return; }
+    if (!p || !p.alive || p.falling) { if (p) { p.charging = false; p.power = 0; } return; }
     if (p.charging) {
       p.charging = false;
       const pw = p.power; p.power = 0;
@@ -2136,9 +2264,6 @@
     }
   }
 
-  // ---------------------------------------------------------------------
-  // AI
-  // ---------------------------------------------------------------------
   function simulateLanding(x0, y0, ang, power) {
     const rad = deg2rad(ang);
     const speed = (115 + (power / 100) * 400) * mapScale * resolveShotSpeedScale();
@@ -2160,12 +2285,10 @@
     const target = cand[Math.floor(Math.random() * cand.length)] || players[(ai + 1) % players.length];
     const maxMove = 60 * mapScale * 1.4;
     let mt = null;
-    // 같은 층에 있는 가까운 아이템만 노림 (y 차이도 확인)
     const near = items.find(it => !it.falling && Math.abs(it.x - p.x) < maxMove && Math.abs(it.y - p.y) < 30);
     if (near && Math.random() < 0.6) mt = near.x;
     else if (Math.random() < d.moveChance) mt = clamp(p.x + (Math.random() * 2 - 1) * maxMove, 6, mapW - 6);
-    const sx = mt !== null ? mt : p.x;
-    const sy = p.y; // 자기 층 기준
+    const sx = mt !== null ? mt : p.x, sy = p.y;
     const nf = target.x < sx ? -1 : 1;
     let best = null;
     for (let a = 8; a <= 82; a += d.angleStep) {
@@ -2199,7 +2322,7 @@
         const dir = pl.moveTargetX > p.x ? 1 : -1;
         const moved = tryMoveTank(p, dir * 60 * mapScale * dt);
         if (moved > 0) { p.fuel = clamp(p.fuel - dt * 65, 0, 100); p.treadPhase += dt * 8; checkPickup(p); pl.stuck = 0; }
-        else { pl.stuck += dt; if (pl.stuck > 0.35) pl.phase = 'aiming'; } // 벽에 막히면 포기
+        else { pl.stuck += dt; if (pl.stuck > 0.35) pl.phase = 'aiming'; }
       } else pl.phase = 'aiming';
     } else if (pl.phase === 'aiming') {
       p.facing = pl.targetFacing;
@@ -2271,17 +2394,13 @@
     }
   });
 
-  // ---------------------------------------------------------------------
-  // 업데이트
-  // ---------------------------------------------------------------------
+  // ---------------------- 업데이트 ----------------------
   let lastT = performance.now(), bgTime = 0;
   function anyTankFalling() { return players.some(p => p.alive && p.falling); }
-
   function update(dt) {
     bgTime += dt;
     players.forEach(p => applyTankGravity(p, dt));
     items.forEach(it => applyItemGravity(it, dt));
-    // 맵 밖으로 떨어진 아이템 정리
     const before = items.length;
     items = items.filter(it => !it.gone);
     if (items.length < before) itemPopups.push({ x: camX + W / 2, y: camY + H - 60, text: '📦 상자 유실', color: PAL.uiDim, life: 1.2, maxLife: 1.2 });
@@ -2289,8 +2408,7 @@
     if (state === 'aiming') {
       drainPendingActions();
       if (state !== 'aiming') return;
-      // 현재 차례인 사람이 죽었거나 탈락했으면 턴을 넘김
-      if (!players[current].alive) {
+      if (!players[current] || !players[current].alive) {
         const r = checkGameOver();
         if (r.over) finishGame(r); else nextTurnSetup(false);
         return;
@@ -2299,18 +2417,16 @@
       if (turnMsgTimer > 0) turnMsgTimer -= dt;
       const isAI = p.isAI === true;
       const mine = !isAI && (!onlineMode || current === myPlayerIndex);
-      if (p.falling) {
-        // 낙하 중에는 조작 불가 (착지할 때까지 대기)
-      } else if (isAI) updateAITurn(p, dt);
+      if (p.falling) { /* 낙하 중 조작 불가 */ }
+      else if (isAI) updateAITurn(p, dt);
       else {
-        let moved = 0;
         if (mine && p.fuel > 0) {
           let dx = 0;
           if (keys['ArrowLeft']) dx -= 60 * mapScale * dt;
           if (keys['ArrowRight']) dx += 60 * mapScale * dt;
           if (dx) {
             const wasBlocked = p.climbBlocked;
-            moved = tryMoveTank(p, dx);
+            const moved = tryMoveTank(p, dx);
             if (p.climbBlocked > 0 && !wasBlocked) sfxBlocked();
             if (moved > 0) { p.fuel = clamp(p.fuel - dt * 65, 0, 100); p.treadPhase += dt * 8; checkPickup(p); }
           }
@@ -2335,7 +2451,8 @@
         }
       } else {
         turnOverdue += dt;
-        if (onlineMode && myPlayerIndex === 0 && !mine && turnOverdue > 4 && turnOverdue < 999) {
+        // 끊긴/멈춘 사람 차례면 방장이 대신 턴을 넘김 (3초)
+        if (onlineMode && myPlayerIndex === 0 && !mine && turnOverdue > 3 && turnOverdue < 999) {
           turnOverdue = 999;
           NetworkHooks.sendAction({ type: 'pass', player: current, turn: turnCount });
         }
@@ -2348,7 +2465,6 @@
       projectiles = alive.concat(projectiles);
       if (projectiles.length === 0 && state === 'firing') finishShot();
     } else if (state === 'resolving') {
-      // ★ 아직 떨어지고 있는 탱크가 있으면 턴을 넘기지 않고 기다림
       if (!anyTankFalling()) {
         resolveTimer -= dt;
         if (resolveTimer <= 0) {
@@ -2368,7 +2484,7 @@
           const r = checkGameOver();
           if (r.over) finishGame(r);
           else { nextTurnSetup(false); state = 'aiming'; }
-        } else missMsgTimer = 0.05; // 착지할 때까지 조금 더 대기
+        } else missMsgTimer = 0.05;
       }
     }
     particles.forEach(pt => {
@@ -2393,14 +2509,12 @@
     });
   }
 
-  // ---------------------------------------------------------------------
-  // 렌더링
-  // ---------------------------------------------------------------------
+  // ---------------------- 렌더링 ----------------------
   function updateCamera() {
     if (!fogMode) { camX = 0; camY = 0; return; }
     let tx, ty;
     if (state === 'firing' && projectiles.length) { tx = projectiles[0].x; ty = projectiles[0].y; }
-    else if (players[current]) { tx = players[current].x; ty = players[current].y; }
+    else if (players[current] && players[current].alive) { tx = players[current].x; ty = players[current].y; }
     else { tx = mapW / 2; ty = mapH / 2; }
     camX = clamp(tx - W / 2, 0, Math.max(0, mapW - W));
     camY = clamp(ty - H / 2, 0, Math.max(0, mapH - H));
@@ -2481,7 +2595,6 @@
     ctx.strokeStyle = p.colorDark; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(4, -9); ctx.lineTo(6, -15); ctx.stroke();
     ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(6, -15, 1, 0, Math.PI * 2); ctx.fill();
-    // 직전 발사 각도 잔상
     if (isCur && state === 'aiming' && p.lastShot) {
       const gr = deg2rad(p.facing > 0 ? p.lastShot.elev : 180 - p.lastShot.elev);
       ctx.save(); ctx.setLineDash([2, 3]);
@@ -2518,12 +2631,10 @@
         ctx.beginPath(); ctx.moveTo(-7, -14); ctx.arc(-7, -14, 2.6, a0, a0 + 1.0); ctx.closePath(); ctx.fill();
       }
     }
-    // 등판 실패 표시
     if (p.climbBlocked > 0) {
       ctx.globalAlpha = Math.min(1, p.climbBlocked * 1.5);
       ctx.fillStyle = PAL.danger;
-      const dir = p.facing;
-      ctx.fillRect(dir * 11 - 1, -10, 2, 14);
+      ctx.fillRect(p.facing * 11 - 1, -10, 2, 14);
       ctx.globalAlpha = 1;
     }
     if (isCur && state === 'aiming' && !p.falling) {
@@ -2654,13 +2765,19 @@
     ctx.fillStyle = 'rgba(255,255,255,0.25)';
     ctx.fillRect(sx + 3 * cellW + 3 * gap - 1, cy - 1, 1, cellH + 2);
   }
+  function statusMark(p) {
+    if (p.alive) return '';
+    if (p.disconnected) return '📵';
+    if (p.outOfBounds) return '↓';
+    return '×';
+  }
   function drawHPBarFull(p, x, y, w, id) {
     drawPanel(x - 3, y, w + 6, 24);
     const ns = w > 70 ? 11 : (w > 50 ? 9 : 8);
     const raw = (p.team ? p.team + ' ' : '') + (p.shield ? '🛡' : '') + p.name;
     lbl('hp-name-' + id, fitLabelText(raw, w - 4, ns), x, y + 8, ns, p.colorLight, 'left');
-    lbl('hp-num-' + id, p.outOfBounds ? '추락' : `${Math.max(0, Math.round(p.hp))}`, x + w, y + 8, p.outOfBounds ? 8 : 10,
-        p.outOfBounds ? PAL.danger : PAL.ui, 'right');
+    const num = p.alive ? `${Math.max(0, Math.round(p.hp))}` : (p.disconnected ? '끊김' : (p.outOfBounds ? '추락' : '탈락'));
+    lbl('hp-num-' + id, num, x + w, y + 8, p.alive ? 10 : 8, p.alive ? PAL.ui : PAL.danger, 'right');
     drawBar(x, y + 12, w, 8, p.hp / 100, pct =>
       pct > 0.5 ? { light: '#8fef7c', dark: '#4aa838' } :
       pct > 0.25 ? { light: '#ffe58c', dark: '#d19a2c' } : { light: '#ff8a7a', dark: '#c23a2c' });
@@ -2677,8 +2794,8 @@
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
     if (p.team) { ctx.fillStyle = TEAM_COLORS[TEAM_KEYS.indexOf(p.team)] || '#fff'; ctx.fillRect(x, y, 2.5, h); }
     if (p.shield) { ctx.fillStyle = PAL.shield; ctx.fillRect(x + w - 3, y, 3, h); }
-    lbl('chip-' + id, p.alive ? String(Math.round(p.hp)) : (p.outOfBounds ? '↓' : '×'), x + w / 2, y + h / 2, 8,
-        p.alive ? '#fff' : (p.outOfBounds ? PAL.danger : '#8a8878'), 'center', 'middle');
+    lbl('chip-' + id, p.alive ? String(Math.round(p.hp)) : statusMark(p), x + w / 2, y + h / 2, 8,
+        p.alive ? '#fff' : PAL.danger, 'center', 'middle');
     if (!p.alive) { ctx.save(); ctx.globalAlpha = 0.5; ctx.fillStyle = '#000'; ctx.fillRect(x, y, w, h); ctx.restore(); }
   }
   function drawAllHPBars() {
@@ -2740,8 +2857,9 @@
     ctx.restore();
   }
   function drawAimHUD() {
-    const p = players[current], w = WEAPONS[p.weapon];
-    const ph = 46;
+    const p = players[current];
+    if (!p) return;
+    const w = WEAPONS[p.weapon], ph = 46;
     drawPanel(0, H - ph, W, ph);
     lbl('turn-name', `▶ ${p.name}` + (p.team ? ` (${p.team}팀)` : ''), 8, H - 34, 11, p.colorLight, 'left');
     const ix0 = 92, slot = 20;
@@ -2781,9 +2899,7 @@
       ctx.fillStyle = p.color; ctx.fillRect(bx + 4, by + bh / 2 - 6, 3, 12);
       lbl('turn-banner', `${p.name}${p.team ? ` (${p.team}팀)` : ''} 의 턴!`, W / 2 + 4, by + bh / 2 + 1, 14, p.colorLight, 'center');
     } else lbl('turn-banner', '', 0, 0, 15, '#fff', 'center');
-    // 상태 안내
-    let note = '';
-    let noteColor = PAL.uiDim;
+    let note = '', noteColor = PAL.uiDim;
     if (p.falling) { note = '떨어지는 중…'; noteColor = PAL.danger; }
     else if (p.climbBlocked > 0) { note = '⛰ 너무 가팔라요! 돌아가거나 길을 뚫으세요'; noteColor = PAL.danger; }
     else if (onlineMode && current !== myPlayerIndex) note = '다른 사람 차례예요…';
@@ -2858,7 +2974,7 @@
     if (state === 'title') {
       drawSky();
       lbl('title-main', '온라인 포트리스', W / 2, H / 2 - 58, 26, PAL.ui, 'center');
-      lbl('title-sub', 'made by mini · 최대 20인 · 11개 맵 · 지형 파괴 · 장외 탈락', W / 2, H / 2 - 30, 9, PAL.uiDim, 'center');
+      lbl('title-sub', 'made by m00n · 최대 20인 · 11개 맵 · 지형 파괴 · 대기실 실시간 설정', W / 2, H / 2 - 30, 9, PAL.uiDim, 'center');
       ctx.save();
       drawTank({ x: W / 2 - 70, y: H / 2 + 2, angle: 55, facing: 1, color: PAL.p1, colorLight: PAL.p1Light, colorDark: PAL.p1Dark, recoil: 0, treadPhase: bgTime, bob: 0, alive: true, hitFlash: 0, healFlash: 0, ammo: [], climbBlocked: 0 }, false);
       drawTank({ x: W / 2 + 70, y: H / 2 + 2, angle: 55, facing: -1, color: PAL.p2, colorLight: PAL.p2Light, colorDark: PAL.p2Dark, recoil: 0, treadPhase: bgTime, bob: 3, alive: true, hitFlash: 0, healFlash: 0, ammo: [], climbBlocked: 0 }, false);
@@ -2957,6 +3073,7 @@
     render();
     syncMenuBtnVisibility();
     syncPassBtnVisibility();
+    syncSpectateBar();
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
