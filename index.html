@@ -200,6 +200,42 @@
     border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;
     font-size: 11px; font-weight: 700; color: #f0ece0; flex-shrink: 0;
   }
+  /* ---------- 퀴즈 ---------- */
+  #quizScreen { z-index: 22; }
+  .quiz-card { width: min(94vw, 520px); touch-action: pan-y; }
+  .quiz-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .quiz-who { font-weight: 700; font-size: 14px; color: #f0c95c; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .quiz-type { font-size: 11px; font-weight: 700; color: #2a2410; background: #f0c95c; border-radius: 10px; padding: 2px 9px; }
+  .quiz-time { font-size: 14px; font-weight: 700; color: #e8e4d8; font-variant-numeric: tabular-nums; min-width: 52px; text-align: right; }
+  .quiz-time.urgent { color: #ff8a7a; }
+  .quiz-q { color: #f4f1e6; font-size: 17px; font-weight: 700; line-height: 1.5; margin: 6px 0 14px; white-space: pre-wrap; word-break: keep-all; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opts.ox { flex-direction: row; }
+  .quiz-opt {
+    text-align: left; background: #1a1c24; border: 2px solid rgba(255,255,255,0.15); border-radius: 8px;
+    color: #e8e4d8; font-size: 15px; padding: 11px 12px; cursor: pointer; font-family: inherit; line-height: 1.35;
+  }
+  .quiz-opts.ox .quiz-opt { flex: 1; text-align: center; font-size: 30px; padding: 16px 0; }
+  .quiz-opt:hover:not(:disabled) { background: #23262f; border-color: #f0c95c; }
+  .quiz-opt:disabled { cursor: default; opacity: 0.5; }
+  .quiz-opt.right { border-color: #7cf29a; background: rgba(124,242,154,0.14); opacity: 1; }
+  .quiz-opt.wrong { border-color: #ff8a7a; background: rgba(255,138,122,0.14); opacity: 1; }
+  .quiz-short { display: flex; gap: 8px; }
+  .quiz-input {
+    flex: 1; min-width: 0; box-sizing: border-box; background: #1a1c24;
+    border: 2px solid rgba(255,255,255,0.15); border-radius: 8px;
+    color: #e8e4d8; font-size: 16px; padding: 10px 12px; font-family: inherit;
+    -webkit-user-select: text; user-select: text;
+  }
+  .quiz-input:focus { outline: none; border-color: #f0c95c; }
+  .quiz-fb { display: none; margin-top: 14px; border-radius: 8px; padding: 12px; border: 1px solid transparent; }
+  .quiz-fb.ok { display: block; border-color: rgba(124,242,154,0.5); background: rgba(124,242,154,0.1); }
+  .quiz-fb.no { display: block; border-color: rgba(255,138,122,0.5); background: rgba(255,138,122,0.1); }
+  .quiz-fb-title { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+  .quiz-fb.ok .quiz-fb-title { color: #7cf29a; }
+  .quiz-fb.no .quiz-fb-title { color: #ff8a7a; }
+  .quiz-fb-line { font-size: 13px; color: #e8e4d8; line-height: 1.5; white-space: pre-wrap; }
+  .quiz-status { margin: 4px 0 0 20px; font-size: 11px; color: #8a8878; }
 </style>
 </head>
 <body>
@@ -218,6 +254,11 @@
     <div class="howto-section">
       <div class="howto-section-title">🎯 목표</div>
       <div class="howto-row">상대 탱크를 맞춰서 HP를 먼저 0으로 만들면 승리! (팀전은 상대 팀 전멸)</div>
+    </div>
+    <div class="howto-section">
+      <div class="howto-section-title">🧠 퀴즈</div>
+      <div class="howto-row">내 차례가 되면 먼저 퀴즈가 나와요. <b>맞혀야</b> 움직이고 포를 쏠 수 있어요.</div>
+      <div class="howto-row"><b style="color:#ff8a7a">틀리거나 시간이 지나면 턴이 넘어가요.</b> 해설을 읽고 다음에 도전!</div>
     </div>
     <div class="howto-section">
       <div class="howto-section-title">⌨️ PC 조작</div>
@@ -264,6 +305,28 @@
     <div id="statsBody" style="min-height:60px;color:#b8b6a8;font-size:12px;">불러오는 중...</div>
     <div class="setup-actions">
       <button type="button" class="setup-btn ghost" id="statsCloseBtn">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ★ 퀴즈 창: 내 차례가 되면 뜬다 -->
+<div id="quizScreen" class="setup-overlay">
+  <div class="setup-card quiz-card">
+    <div class="quiz-head">
+      <span class="quiz-who" id="quizWho"></span>
+      <span class="quiz-type" id="quizType"></span>
+      <span class="quiz-time" id="quizTime"></span>
+    </div>
+    <div class="quiz-q" id="quizQ"></div>
+    <div id="quizBody"></div>
+    <div class="quiz-fb" id="quizFb">
+      <div class="quiz-fb-title" id="quizFbTitle"></div>
+      <div class="quiz-fb-line" id="quizFbAns"></div>
+      <div class="quiz-fb-line" id="quizFbExp"></div>
+      <div class="quiz-fb-line" id="quizFbNext" style="margin-top:6px;color:#b8b6a8;"></div>
+    </div>
+    <div class="setup-actions" id="quizActions" style="display:none;margin-top:14px;">
+      <button type="button" class="setup-btn primary" id="quizOkBtn">확인</button>
     </div>
   </div>
 </div>
@@ -342,6 +405,8 @@
       <label class="opt-label"><input type="checkbox" id="fogModeCheck"> 안개 모드 (상대가 화면에 안 보임)</label>
       <label class="opt-label"><input type="checkbox" id="itemDropCheck" checked> 아이템 드롭 (핵폭탄은 여기서만)</label>
       <label class="opt-label"><input type="checkbox" id="fallOutCheck" checked> 장외 탈락 (맵 아래로 떨어지면 탈락)</label>
+      <label class="opt-label"><input type="checkbox" id="quizModeCheck"> 🧠 퀴즈 모드 (문제를 맞혀야 내 턴을 할 수 있음)</label>
+      <div class="quiz-status" id="quizStatus"></div>
     </div>
     <div class="map-section" id="shotSection">
       <div class="map-section-title">
@@ -388,26 +453,36 @@
 
 <script>
 /* =========================================================================
-   온라인 포트리스 v6
+   온라인 포트리스 v7
    - 로컬/AI/온라인(최대 20인, 팀전)
    - 무기 7종(핵은 아이템 전용) / 아이템 4종 / 다층 지형 / 등판각 제한 / 장외 탈락
+   - 대기실 라이브 설정 / 접속 해제 = 탈락 / 관전 모드 (v6)
 
-   ★ v6에서 바뀐 것
-   1) 대기실 라이브 설정
-      - 방장: 방을 만든 뒤에도 맵/크기/팀/바람/속도/옵션을 바꿀 수 있고,
-        변경 즉시 rooms/{code}에 반영되어 모든 참가자 화면이 갱신된다.
-        맵을 바꿀 때는 mapSeed도 같이 새로 뽑는다(설정과 시드가 항상 한 쌍).
-      - 참가자: 이름/색/모양을 언제든 바꿀 수 있고 명단에 즉시 반영된다.
-        방장 설정 영역은 읽기 전용으로 보여준다(뭘 고를지 알 수 있게).
-   2) 접속 해제 = 탈락
-      - rooms/{code}/alive/{uid} 를 onDisconnect().remove() 로 걸어둔다.
-        브라우저가 죽어도 서버가 지워주므로 모두가 동시에 알 수 있다.
-      - 게임 중 그 노드가 사라지면 해당 플레이어를 즉시 탈락 처리하고
-        탱크를 화면에서 숨긴다.
-      - 탈락했지만 접속 중인 사람은 계속 관전한다(조작만 막힘).
-   3) 관전 모드
-      - 내 탱크가 죽거나 끊겨도 화면은 계속 돌아간다. 상단에 관전 배너 표시.
+   ★ v7에서 바뀐 것: 퀴즈 모드
+   1) 내 차례가 시작되면 퀴즈가 먼저 나온다. 맞히면 그 턴을 진행하고,
+      틀리거나 제한 시간이 지나면 턴이 바로 넘어간다. (AI는 퀴즈 없음)
+   2) 문제는 구글시트를 "웹에 게시(CSV)"한 주소에서 읽는다.
+      열: 유형 | 문제 | 보기1 | 보기2 | 보기3 | 보기4 | 정답 | 해설
+      유형은 4지선다 / OX / 단답형. 세 유형이 번갈아 골고루 나온다.
+   3) 답을 내면 정답·오답과 정답, 해설을 보여준다.
+   4) QUIZ_LOG_URL(앱스 스크립트 웹앱)을 넣으면 학생별 풀이 기록이 구글시트에 쌓인다.
+   5) 온라인에서는 퀴즈 결과만 액션({type:'quiz', ok})으로 공유한다.
+      퀴즈 모드 on/off는 방 설정(quizOn)이라 모든 참가자가 같은 값을 쓴다.
    ========================================================================= */
+
+  // ★★★★★ 퀴즈 설정 — 아래 두 주소만 본인 것으로 바꾸세요 ★★★★★
+  // ① 문제 시트: 구글시트 > 파일 > 공유 > 웹에 게시 > (문제 탭, CSV) 로 나온 주소
+  const QUIZ_SHEET_CSV_URL = '여기에_문제시트_웹게시_CSV_주소';
+  // ② 기록 시트: 기록용 구글시트에 붙인 앱스 스크립트 웹앱 주소 (/exec 로 끝남). 비워두면 기록 안 함
+  const QUIZ_LOG_URL = '여기에_기록용_웹앱_주소';
+  const QUIZ_TIME_LIMIT = 30;   // 문제 푸는 제한 시간(초)
+  const QUIZ_FEEDBACK_SEC = 8;  // 해설을 보여주는 시간(초). 확인을 누르면 바로 닫힘
+  // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+  const quizConfigured = /^https?:\/\//.test(QUIZ_SHEET_CSV_URL);
+  let quizOn = quizConfigured;      // 퀴즈 모드 (온라인에서는 방장 설정을 따름)
+  let quizGate = 'open';            // 'pending' = 이번 턴 퀴즈를 아직 안 풂
+  let quizTimeLeft = QUIZ_TIME_LIMIT, quizOverdue = 0;
+  let quizDoneTurn = -1;            // 내가 이미 답을 낸 턴 번호(창이 다시 뜨지 않게)
 
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
@@ -1025,7 +1100,7 @@
   let passBtnShown = false;
   function syncPassBtnVisibility() {
     const p = players[current];
-    const s = state === 'aiming' && p && !p.isAI && !p.charging && !p.falling && (!onlineMode || current === myPlayerIndex) && p.alive;
+    const s = state === 'aiming' && quizGate !== 'pending' && p && !p.isAI && !p.charging && !p.falling && (!onlineMode || current === myPlayerIndex) && p.alive;
     if (s !== passBtnShown) { passBtnShown = s; passBtn.style.display = s ? 'block' : 'none'; }
   }
   const spectateBar = document.getElementById('spectateBar');
@@ -1235,6 +1310,7 @@
     items = []; nextItemId = 1; itemPopups = [];
     pendingActions = []; pickupSentIds = new Set();
     prevWindLevel = 0; eventMsgTimer = 0;
+    quizDoneTurn = -1;
     nextTurnSetup(true);
     pushTerrainToCanvas(true);
     state = 'aiming';
@@ -1297,7 +1373,7 @@
         maxPlayers: selectedPlayerCount, teamCount,
         mapKey: resolvedRoomMapKey, mapSize: selectedMapSize, shotSpeed: selectedShotSpeed,
         windStrength: windStrengthPct, fogMode, itemDrops, fallOut: fallOutEnabled,
-        mapSeed
+        quizOn, mapSeed
       };
       roomRef(currentRoomId).update(payload).catch(e => console.warn('설정 반영 실패:', e));
     };
@@ -1377,6 +1453,7 @@
     bindCheck('fogModeCheck', v => { fogMode = v; });
     bindCheck('itemDropCheck', v => { itemDrops = v; });
     bindCheck('fallOutCheck', v => { fallOutEnabled = v; });
+    bindCheck('quizModeCheck', v => { quizOn = v && quizConfigured; });
 
     const ws = document.getElementById('windStrengthSlider');
     if (!ws.dataset.bound) {
@@ -1430,7 +1507,7 @@
     if (!isOnlineSelf && isTeamMode()) t += ` (${teamOf(pi)}팀)`;
     if (soloMode && pi === 1) t += ' (AI)';
     title.textContent = t; card.appendChild(title);
-    const nl = document.createElement('label'); nl.textContent = '닉네임 (전적 기록용)';
+    const nl = document.createElement('label'); nl.textContent = '닉네임 (전적·퀴즈 기록용)';
     const ni = document.createElement('input');
     ni.type = 'text'; ni.className = 'nick-input'; ni.dataset.p = pi;
     ni.maxLength = 8; ni.placeholder = 'P' + (pi + 1); ni.value = playerConfig[pi].name;
@@ -1522,6 +1599,9 @@
     document.getElementById('fogModeCheck').checked = fogMode;
     document.getElementById('itemDropCheck').checked = itemDrops;
     document.getElementById('fallOutCheck').checked = fallOutEnabled;
+    const qc = document.getElementById('quizModeCheck');
+    qc.checked = quizOn; qc.disabled = !quizConfigured;
+    Quiz.showStatus();
     document.getElementById('modeLocalBtn').classList.toggle('selected', !onlineMode && !soloMode);
     document.getElementById('modeSoloBtn').classList.toggle('selected', soloMode);
     document.getElementById('modeOnlineBtn').classList.toggle('selected', onlineMode);
@@ -1562,8 +1642,10 @@
   }
 
   function openSetupScreen() {
+    Quiz.forceClose();
     leaveOnlineRoom(); buildSetupUI(); rebuildPlayerCards(); refreshSetupSelection();
     state = 'setup'; setupScreen.style.display = 'flex';
+    Quiz.load(); // 설정 화면을 열 때마다 시트를 다시 읽어 최신 문제를 반영
   }
   document.getElementById('setup-start-btn').addEventListener('click', () => {
     readNickInputs(); setupScreen.style.display = 'none'; resetMatchWins(); startGame();
@@ -1595,6 +1677,10 @@
     aiPlan = null; pickupSentIds = new Set();
     const p = players[current];
     if (p.weapon > 0 && p.ammo[p.weapon] <= 0) p.weapon = 0;
+    // ★ 퀴즈: 사람 차례면 이번 턴은 퀴즈부터 (모든 참가자 화면에서 똑같이 계산됨)
+    Quiz.forceClose();
+    quizTimeLeft = QUIZ_TIME_LIMIT; quizOverdue = 0;
+    quizGate = (quizOn && p.alive && !p.isAI) ? 'pending' : 'open';
   }
 
   // ---------------------- Firebase ----------------------
@@ -1684,7 +1770,7 @@
         status: 'waiting', maxPlayers: selectedPlayerCount, teamCount,
         mapKey: resolvedRoomMapKey, mapSize: selectedMapSize, shotSpeed: selectedShotSpeed,
         windStrength: windStrengthPct, fogMode, itemDrops, fallOut: fallOutEnabled,
-        mapSeed, hostUid: myUid, players: pl,
+        quizOn, mapSeed, hostUid: myUid, players: pl,
         createdAt: firebase.database.ServerValue.TIMESTAMP
       });
       roomDisconnectRef = roomRef(roomId).onDisconnect();
@@ -1750,6 +1836,7 @@
     fogMode = !!d.fogMode;
     itemDrops = (d.itemDrops !== false);
     fallOutEnabled = (d.fallOut !== false);
+    quizOn = !!d.quizOn;
     teamCount = d.teamCount || 0;
     selectedPlayerCount = d.maxPlayers || 2;
     mapSeed = d.mapSeed;
@@ -1963,7 +2050,7 @@
   // ---------------------- 액션 ----------------------
   function applyAction(a) {
     if (!a) return;
-    if (!['fire', 'pass', 'pickup', 'fell'].includes(a.type)) return;
+    if (!['fire', 'pass', 'pickup', 'fell', 'quiz'].includes(a.type)) return;
     if (state === 'title' || state === 'setup' || state === 'gameover') return;
     const t = (typeof a.turn === 'number') ? a.turn : turnCount;
     if (t > turnCount) { pendingActions.push(a); return; }
@@ -1978,6 +2065,21 @@
       return;
     }
     if (!sh.alive) return; // 이미 탈락(끊김 등)한 사람의 늦은 액션은 무시
+    // ★ 퀴즈 결과: 정답이면 이번 턴 조작이 풀리고, 오답이면 턴이 넘어간다
+    if (a.type === 'quiz') {
+      if (quizGate !== 'pending') return;
+      if (a.ok) {
+        quizGate = 'open'; turnTimeLeft = turnTimeLimit; turnOverdue = 0;
+        showEvent(a.skipped ? `${sh.name} — 문제를 못 불러와 통과` : `⭕ ${sh.name} 정답! 발사 준비`, PAL.heal);
+        sfxPickup();
+      } else {
+        showEvent(`❌ ${sh.name} 오답 — 턴이 넘어가요`, PAL.danger);
+        sfxMiss(); nextTurnSetup(false);
+      }
+      return;
+    }
+    // 퀴즈를 풀기 전에는 발사·아이템 줍기 불가
+    if (quizGate === 'pending' && (a.type === 'fire' || a.type === 'pickup')) return;
     if (a.type === 'pickup') {
       const idx = items.findIndex(it => it.id === a.item);
       if (idx < 0) return;
@@ -2018,6 +2120,283 @@
     pickupSentIds.add(it.id);
     NetworkHooks.sendAction({ type: 'pickup', player: current, turn: turnCount, item: it.id, x: p.x, y: p.y });
   }
+
+  // ---------------------- 퀴즈 ----------------------
+  // 문제 불러오기(구글시트 CSV) · 유형별 골고루 뽑기 · 채점 · 피드백 · 기록 전송
+  const Quiz = (() => {
+    const TYPE_LABEL = { mc: '4지선다', ox: 'OX', short: '단답형' };
+    const el = id => document.getElementById(id);
+    let bank = { mc: [], ox: [], short: [] }, decks = {}, typeQueue = [];
+    let loading = null;
+    let loadMsg = quizConfigured ? '' : '문제 시트 주소가 아직 없어요. (코드 맨 위 QUIZ_SHEET_CSV_URL)';
+    let opened = false, phase = 'idle', curQ = null, curP = null, result = null;
+    let fbTimer = null, fbLeft = 0;
+
+    function total() { return bank.mc.length + bank.ox.length + bank.short.length; }
+    function shuffle(a) {
+      for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; }
+      return a;
+    }
+    // 채점용 정규화: 띄어쓰기·문장부호·대소문자 무시
+    function norm(s) { return String(s == null ? '' : s).toLowerCase().replace(/[\s.,!?'"·~\-()]/g, ''); }
+    function normOX(s) {
+      const t = norm(s);
+      if (['o', 'ㅇ', '○', '⭕', '참', '예', '네', 'true', '맞다', '맞음'].includes(t)) return 'O';
+      if (['x', '×', '✕', '❌', '거짓', '아니오', 'false', '틀리다', '틀림'].includes(t)) return 'X';
+      return null;
+    }
+    function parseCSV(text) {
+      const rows = []; let row = [], cell = '', q = false;
+      text = text.replace(/^\uFEFF/, '');
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (q) {
+          if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+          else cell += c;
+        } else if (c === '"') q = true;
+        else if (c === ',') { row.push(cell); cell = ''; }
+        else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+        else if (c !== '\r') cell += c;
+      }
+      if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+      return rows;
+    }
+    function buildBank(rows) {
+      const nb = { mc: [], ox: [], short: [] }; let bad = 0;
+      if (!rows.length) return { nb, bad };
+      const head = rows[0].map(h => norm(h));
+      const hasHead = head.some(h => h.includes('문제') || h.includes('유형'));
+      const col = (names, def) => {
+        if (!hasHead) return def;
+        const i = head.findIndex(h => names.some(n => h.includes(n)));
+        return i >= 0 ? i : def;
+      };
+      const cT = col(['유형', '종류'], 0), cQ = col(['문제', '질문'], 1);
+      const cO = [1, 2, 3, 4].map(k => col(['보기' + k, '선택' + k], 1 + k));
+      const cA = col(['정답'], 6), cE = col(['해설', '설명', '피드백'], 7);
+      for (let r = hasHead ? 1 : 0; r < rows.length; r++) {
+        const R = rows[r], g = i => String(R[i] == null ? '' : R[i]).trim();
+        const text = g(cQ), ansRaw = g(cA);
+        if (!text && !ansRaw) continue;           // 빈 줄
+        if (!text || !ansRaw) { bad++; continue; } // 문제나 정답이 비어 있음
+        const opts = cO.map(g), tRaw = norm(g(cT));
+        let type = /4|선다|객관|선택/.test(tRaw) ? 'mc'
+          : (/ox|o\/x|참거짓/.test(tRaw) ? 'ox' : (/단답|주관|서술/.test(tRaw) ? 'short' : ''));
+        if (!type) type = opts.filter(Boolean).length >= 2 ? 'mc' : (normOX(ansRaw) ? 'ox' : 'short');
+        const q = { type, text, explain: g(cE) };
+        if (type === 'mc') {
+          let right = '';
+          const m = ansRaw.match(/^[\s(]*([1-4①②③④])[\s)번.]*$/);
+          if (m) { const k = '1234'.indexOf(m[1]) >= 0 ? '1234'.indexOf(m[1]) : '①②③④'.indexOf(m[1]); right = opts[k]; }
+          if (!right) right = opts.find(o => o && norm(o) === norm(ansRaw)) || '';
+          q.choices = opts.filter(Boolean);
+          q.correct = right ? q.choices.indexOf(right) : -1;
+          if (q.choices.length < 2 || q.correct < 0) { bad++; continue; }
+          q.answerText = `${q.correct + 1}번 ${right}`;
+        } else if (type === 'ox') {
+          q.correct = normOX(ansRaw);
+          if (!q.correct) { bad++; continue; }
+          q.answerText = q.correct;
+        } else {
+          const raw = ansRaw.split(/[,，|]/).map(s => s.trim()).filter(Boolean);
+          q.answers = raw.map(norm).filter(Boolean);
+          if (!q.answers.length) { bad++; continue; }
+          q.answerText = raw[0];
+        }
+        nb[type].push(q);
+      }
+      return { nb, bad };
+    }
+    function showStatus(m) {
+      const s = el('quizStatus');
+      if (s) s.textContent = m || loadMsg;
+    }
+    function load() {
+      if (!quizConfigured) { showStatus(); return Promise.resolve(false); }
+      if (loading) return loading;
+      showStatus('문제를 불러오는 중…');
+      loading = fetch(QUIZ_SHEET_CSV_URL, { cache: 'no-store' })
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(t => {
+          if (/^\s*<(!doctype|html)/i.test(t)) throw new Error('CSV가 아니에요. 웹에 게시할 때 형식을 CSV로 골랐는지 확인하세요.');
+          const { nb, bad } = buildBank(parseCSV(t));
+          const n = nb.mc.length + nb.ox.length + nb.short.length;
+          if (n) { bank = nb; decks = {}; typeQueue = []; }
+          loadMsg = n
+            ? `문제 ${n}개 불러옴 (4지선다 ${nb.mc.length} · OX ${nb.ox.length} · 단답형 ${nb.short.length})` + (bad ? ` · 형식이 안 맞는 ${bad}줄은 제외` : '')
+            : '시트에서 쓸 수 있는 문제를 찾지 못했어요. 열 이름과 정답 칸을 확인하세요.';
+        })
+        .catch(e => { loadMsg = '문제 시트를 불러오지 못했어요: ' + e.message; })
+        .then(() => { loading = null; showStatus(); return total() > 0; });
+      return loading;
+    }
+    // 유형을 한 바퀴씩 돌려가며(순서는 매 바퀴 섞음) 뽑아서 세 유형이 골고루 나오게 한다.
+    // 같은 유형 안에서는 다 나올 때까지 같은 문제가 반복되지 않는다.
+    function pick() {
+      const types = ['mc', 'ox', 'short'].filter(t => bank[t].length);
+      if (!types.length) return null;
+      typeQueue = typeQueue.filter(t => bank[t].length);
+      if (!typeQueue.length) typeQueue = shuffle(types.slice());
+      const t = typeQueue.shift();
+      if (!decks[t] || !decks[t].length) decks[t] = shuffle(bank[t].slice());
+      return decks[t].pop();
+    }
+    function hide() {
+      opened = false; phase = 'idle'; curQ = null; curP = null; result = null;
+      if (fbTimer) { clearInterval(fbTimer); fbTimer = null; }
+      el('quizScreen').style.display = 'none';
+    }
+    function send(ok, skipped) {
+      const a = { type: 'quiz', player: current, turn: turnCount, ok };
+      if (skipped) a.skipped = true;
+      NetworkHooks.sendAction(a);
+    }
+    function skip() { // 문제를 못 불러온 경우: 게임이 멈추지 않게 그냥 통과
+      quizDoneTurn = turnCount; hide(); send(true, true);
+    }
+    function open(p) {
+      opened = true; phase = 'ask'; curP = p; curQ = null; result = null;
+      for (const k in keys) keys[k] = false;
+      el('quizWho').textContent = `🧠 ${p.name}의 퀴즈`;
+      el('quizType').textContent = ''; el('quizTime').textContent = '';
+      el('quizFb').className = 'quiz-fb';
+      el('quizActions').style.display = 'none';
+      el('quizBody').innerHTML = '';
+      el('quizScreen').style.display = 'flex';
+      if (total()) { present(); return; }
+      el('quizQ').textContent = '문제를 불러오는 중…';
+      load().then(() => {
+        if (!opened || phase !== 'ask' || curQ || curP !== p) return;
+        if (total()) present(); else skip();
+      });
+    }
+    function present() {
+      const q = curQ = pick();
+      if (!q) { skip(); return; }
+      el('quizType').textContent = TYPE_LABEL[q.type];
+      el('quizQ').textContent = q.text;
+      const body = el('quizBody'); body.innerHTML = '';
+      if (q.type === 'short') {
+        const w = document.createElement('div'); w.className = 'quiz-short';
+        const inp = document.createElement('input');
+        inp.type = 'text'; inp.className = 'quiz-input'; inp.maxLength = 40;
+        inp.placeholder = '정답을 입력하세요'; inp.autocomplete = 'off';
+        const btn = document.createElement('button');
+        btn.type = 'button'; btn.className = 'setup-btn primary'; btn.textContent = '제출';
+        const submit = () => {
+          const v = inp.value.trim();
+          if (!v) { inp.focus(); return; }
+          finish(q.answers.includes(norm(v)), v, -1);
+        };
+        btn.addEventListener('click', submit);
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); submit(); } });
+        w.appendChild(inp); w.appendChild(btn); body.appendChild(w);
+        setTimeout(() => { try { inp.focus(); } catch (e) {} }, 60);
+      } else {
+        const isOX = q.type === 'ox';
+        const w = document.createElement('div'); w.className = 'quiz-opts' + (isOX ? ' ox' : '');
+        (isOX ? ['O', 'X'] : q.choices).forEach((t, i) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'quiz-opt';
+          b.textContent = isOX ? (t === 'O' ? '⭕' : '❌') : `${i + 1}. ${t}`;
+          b.addEventListener('click', () => finish(isOX ? t === q.correct : i === q.correct, t, i));
+          w.appendChild(b);
+        });
+        body.appendChild(w);
+      }
+    }
+    // given === null 이면 시간 초과
+    function finish(ok, given, idx) {
+      if (!opened || phase !== 'ask' || !curQ) return;
+      phase = 'feedback'; quizDoneTurn = turnCount;
+      const q = curQ, timeout = given === null;
+      result = { ok };
+      const body = el('quizBody');
+      body.querySelectorAll('button, input').forEach(b => { b.disabled = true; });
+      body.querySelectorAll('.quiz-opt').forEach((b, i) => {
+        const right = q.type === 'ox' ? ['O', 'X'][i] === q.correct : i === q.correct;
+        if (right) b.classList.add('right');
+        else if (i === idx) b.classList.add('wrong');
+      });
+      el('quizFb').className = 'quiz-fb ' + (ok ? 'ok' : 'no');
+      el('quizFbTitle').textContent = ok ? '⭕ 정답이에요!' : (timeout ? '⏰ 시간 초과!' : '❌ 아쉬워요, 오답이에요');
+      el('quizFbAns').textContent = `정답: ${q.answerText}`;
+      el('quizFbExp').textContent = q.explain ? `해설: ${q.explain}` : '';
+      el('quizFbNext').textContent = ok ? '이제 조준하고 포를 쏘세요!' : '이번 턴은 넘어가요. 다음 차례에 다시 도전!';
+      el('quizTime').textContent = ''; el('quizTime').classList.remove('urgent');
+      if (ok) sfxHeal(); else sfxMiss();
+      logResult(q, timeout ? '(시간 초과)' : given, ok);
+      el('quizActions').style.display = 'flex';
+      fbLeft = QUIZ_FEEDBACK_SEC;
+      const okBtn = el('quizOkBtn');
+      okBtn.textContent = `확인 (${fbLeft})`;
+      if (fbTimer) clearInterval(fbTimer);
+      fbTimer = setInterval(() => {
+        fbLeft--;
+        if (fbLeft <= 0) close(); else okBtn.textContent = `확인 (${fbLeft})`;
+      }, 1000);
+    }
+    // 해설을 다 본 뒤 닫을 때 결과를 게임에 알린다
+    function close() {
+      if (!opened) return;
+      const r = result;
+      hide();
+      if (r) send(r.ok, false);
+    }
+    // 턴이 바뀌었거나 게임이 끝났을 때: 결과를 보내지 않고 창만 닫는다
+    function forceClose() { if (opened) hide(); }
+    function timeUp() {
+      if (!opened) return;
+      if (phase === 'ask' && curQ) finish(false, null, -1);
+      else if (phase === 'ask') skip();
+    }
+    function tick() { // 매 프레임: 남은 시간 표시
+      if (!opened || phase !== 'ask') return;
+      const t = el('quizTime'), s = Math.ceil(quizTimeLeft);
+      const txt = `⏱ ${s}s`;
+      if (t.textContent !== txt) { t.textContent = txt; t.classList.toggle('urgent', s <= 6); }
+    }
+    function key(e) { // 키보드: 1~4 / O·X / Enter
+      if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+      if (phase === 'feedback') { if (e.key === 'Enter') { e.preventDefault(); close(); } return; }
+      if (phase !== 'ask' || !curQ || e.repeat) return;
+      const btns = el('quizBody').querySelectorAll('.quiz-opt');
+      if (curQ.type === 'mc' && e.key >= '1' && e.key <= '4') { const b = btns[Number(e.key) - 1]; if (b) b.click(); }
+      else if (curQ.type === 'ox') {
+        const k = e.key.toLowerCase();
+        if (k === 'o' || k === 'ㅐ') btns[0].click();
+        else if (k === 'x' || k === 'ㅌ') btns[1].click();
+      }
+    }
+    // 구글시트(앱스 스크립트 웹앱)로 풀이 기록 전송 — 답을 낸 사람의 기기에서 한 번만 보낸다
+    function logResult(q, given, ok) {
+      if (!/^https?:\/\//.test(QUIZ_LOG_URL)) return;
+      try {
+        fetch(QUIZ_LOG_URL, {
+          method: 'POST', mode: 'no-cors', keepalive: true,
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            room: onlineMode ? (currentRoomId || '') : (soloMode ? 'AI대전' : '로컬'),
+            name: curP ? curP.name : '', type: TYPE_LABEL[q.type], question: q.text,
+            given: String(given), correct: !!ok, answer: q.answerText
+          })
+        }).catch(e => console.warn('퀴즈 기록 전송 실패:', e));
+      } catch (e) { console.warn('퀴즈 기록 전송 실패:', e); }
+    }
+    el('quizOkBtn').addEventListener('click', close);
+    return { load, open, forceClose, timeUp, tick, key, showStatus, isOpen: () => opened, phase: () => phase };
+  })();
+  // 내 차례 + 퀴즈 미해결이면 창을 띄우고, 상황이 바뀌면 닫는다 (매 프레임 호출)
+  function syncQuizOverlay() {
+    if (state !== 'aiming') { Quiz.forceClose(); return; }
+    const p = players[current];
+    const need = quizGate === 'pending' && p && p.alive && !p.isAI
+      && (!onlineMode || current === myPlayerIndex) && quizDoneTurn !== turnCount;
+    if (need && !Quiz.isOpen()) Quiz.open(p);
+    else if (!need && Quiz.isOpen() && Quiz.phase() === 'ask') Quiz.forceClose();
+    Quiz.tick();
+  }
+  Quiz.load();
 
   // ---------------------- 발사/폭발 ----------------------
   function makeProjectile(x, y, vx, vy, wi, owner, sub) {
@@ -2232,6 +2611,7 @@
   const keys = {};
   function canControlNow() {
     if (state !== 'aiming') return false;
+    if (quizGate === 'pending') return false; // 퀴즈를 풀기 전에는 조작 불가
     if (onlineMode && current !== myPlayerIndex) return false;
     const p = players[current];
     if (!p || p.isAI || p.falling || !p.alive) return false;
@@ -2347,6 +2727,10 @@
       return;
     }
     if (howtoScreen.style.display !== 'none') return;
+    // 퀴즈 창이 떠 있으면 키 입력은 퀴즈가 받는다 (게임 조작으로 넘기지 않음)
+    if (Quiz.isOpen()) { Quiz.key(e); return; }
+    // 글자를 입력하는 칸에서는 게임 단축키를 막지 않는다 (띄어쓰기 등)
+    if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
     if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '].includes(e.key)) e.preventDefault();
     keys[e.key] = true;
     if (e.key >= '1' && e.key <= '7') selectWeapon(Number(e.key) - 1);
@@ -2417,44 +2801,60 @@
       if (turnMsgTimer > 0) turnMsgTimer -= dt;
       const isAI = p.isAI === true;
       const mine = !isAI && (!onlineMode || current === myPlayerIndex);
-      if (p.falling) { /* 낙하 중 조작 불가 */ }
-      else if (isAI) updateAITurn(p, dt);
-      else {
-        if (mine && p.fuel > 0) {
-          let dx = 0;
-          if (keys['ArrowLeft']) dx -= 60 * mapScale * dt;
-          if (keys['ArrowRight']) dx += 60 * mapScale * dt;
-          if (dx) {
-            const wasBlocked = p.climbBlocked;
-            const moved = tryMoveTank(p, dx);
-            if (p.climbBlocked > 0 && !wasBlocked) sfxBlocked();
-            if (moved > 0) { p.fuel = clamp(p.fuel - dt * 65, 0, 100); p.treadPhase += dt * 8; checkPickup(p); }
+      if (quizGate === 'pending') {
+        // ★ 퀴즈를 푸는 동안: 조작과 턴 타이머는 멈추고 퀴즈 제한 시간만 흐른다
+        p.charging = false; p.power = 0;
+        if (quizTimeLeft > 0) {
+          quizTimeLeft = Math.max(0, quizTimeLeft - dt);
+          if (quizTimeLeft <= 0 && mine) Quiz.timeUp();
+        } else {
+          quizOverdue += dt;
+          // 퀴즈 중에 멈춘/끊긴 사람이면 방장이 대신 턴을 넘김 (해설 읽는 시간을 감안해 12초)
+          if (onlineMode && myPlayerIndex === 0 && !mine && quizOverdue > 12 && quizOverdue < 999) {
+            quizOverdue = 999;
+            NetworkHooks.sendAction({ type: 'pass', player: current, turn: turnCount });
           }
-        }
-        if (mine && !p.falling) {
-          const s = 55 * dt;
-          if (keys['ArrowUp']) p.angle = clamp(p.angle + s, 2, 88);
-          if (keys['ArrowDown']) p.angle = clamp(p.angle - s, 2, 88);
-          if (keys[' ']) {
-            p.charging = true;
-            p.power += p.chargeDir * 112 * dt;
-            if (p.power >= 100) { p.power = 100; p.chargeDir = -1; }
-            if (p.power <= 0) { p.power = 0; p.chargeDir = 1; }
-          }
-        }
-      }
-      if (turnTimeLeft > 0) {
-        turnTimeLeft = Math.max(0, turnTimeLeft - dt);
-        if (turnTimeLeft <= 0 && (isAI || mine) && !p.falling) {
-          if (p.charging) releaseFire();
-          else NetworkHooks.sendAction({ type: 'pass', player: current, turn: turnCount });
         }
       } else {
-        turnOverdue += dt;
-        // 끊긴/멈춘 사람 차례면 방장이 대신 턴을 넘김 (3초)
-        if (onlineMode && myPlayerIndex === 0 && !mine && turnOverdue > 3 && turnOverdue < 999) {
-          turnOverdue = 999;
-          NetworkHooks.sendAction({ type: 'pass', player: current, turn: turnCount });
+        if (p.falling) { /* 낙하 중 조작 불가 */ }
+        else if (isAI) updateAITurn(p, dt);
+        else {
+          if (mine && p.fuel > 0) {
+            let dx = 0;
+            if (keys['ArrowLeft']) dx -= 60 * mapScale * dt;
+            if (keys['ArrowRight']) dx += 60 * mapScale * dt;
+            if (dx) {
+              const wasBlocked = p.climbBlocked;
+              const moved = tryMoveTank(p, dx);
+              if (p.climbBlocked > 0 && !wasBlocked) sfxBlocked();
+              if (moved > 0) { p.fuel = clamp(p.fuel - dt * 65, 0, 100); p.treadPhase += dt * 8; checkPickup(p); }
+            }
+          }
+          if (mine && !p.falling) {
+            const s = 55 * dt;
+            if (keys['ArrowUp']) p.angle = clamp(p.angle + s, 2, 88);
+            if (keys['ArrowDown']) p.angle = clamp(p.angle - s, 2, 88);
+            if (keys[' ']) {
+              p.charging = true;
+              p.power += p.chargeDir * 112 * dt;
+              if (p.power >= 100) { p.power = 100; p.chargeDir = -1; }
+              if (p.power <= 0) { p.power = 0; p.chargeDir = 1; }
+            }
+          }
+        }
+        if (turnTimeLeft > 0) {
+          turnTimeLeft = Math.max(0, turnTimeLeft - dt);
+          if (turnTimeLeft <= 0 && (isAI || mine) && !p.falling) {
+            if (p.charging) releaseFire();
+            else NetworkHooks.sendAction({ type: 'pass', player: current, turn: turnCount });
+          }
+        } else {
+          turnOverdue += dt;
+          // 끊긴/멈춘 사람 차례면 방장이 대신 턴을 넘김 (3초)
+          if (onlineMode && myPlayerIndex === 0 && !mine && turnOverdue > 3 && turnOverdue < 999) {
+            turnOverdue = 999;
+            NetworkHooks.sendAction({ type: 'pass', player: current, turn: turnCount });
+          }
         }
       }
     } else if (state === 'firing') {
@@ -2875,9 +3275,12 @@
       ctx.globalAlpha = 1;
       lbl('wammo-' + i, wd.ammo === Infinity ? '∞' : String(p.ammo[i]), cx + 8, cy - 5, 7, has ? PAL.ui : '#6b6b6b', 'right');
     });
-    const urgent = turnTimeLeft <= 6;
-    lbl('turn-timer', `⏱ ${Math.ceil(turnTimeLeft)}s`, W - 8, H - 34, 11, urgent ? PAL.danger : PAL.ui, 'right');
-    drawBar(W - 58, H - 29, 50, 5, turnTimeLeft / turnTimeLimit, () =>
+    // 퀴즈를 푸는 동안에는 턴 타이머 자리에 퀴즈 남은 시간을 보여준다
+    const qPend = quizGate === 'pending';
+    const tLeft = qPend ? quizTimeLeft : turnTimeLeft, tMax = qPend ? QUIZ_TIME_LIMIT : turnTimeLimit;
+    const urgent = tLeft <= 6;
+    lbl('turn-timer', `${qPend ? '🧠' : '⏱'} ${Math.ceil(tLeft)}s`, W - 8, H - 34, 11, urgent ? PAL.danger : PAL.ui, 'right');
+    drawBar(W - 58, H - 29, 50, 5, tLeft / tMax, () =>
       urgent ? { light: '#ff8a7a', dark: '#c23a2c' } : { light: '#9fe0ff', dark: '#3c8cc2' });
     lbl('turn-angle', `각도 ${Math.round(p.angle)}°`, 8, H - 12, 9, PAL.ui, 'left');
     lbl('weapon-name', `${p.weapon + 1}.${w.name}`, 66, H - 12, 9, PAL.uiAccent, 'left');
@@ -2901,6 +3304,7 @@
     } else lbl('turn-banner', '', 0, 0, 15, '#fff', 'center');
     let note = '', noteColor = PAL.uiDim;
     if (p.falling) { note = '떨어지는 중…'; noteColor = PAL.danger; }
+    else if (qPend) { note = `🧠 ${p.name} 퀴즈 푸는 중… 맞혀야 쏠 수 있어요`; noteColor = PAL.uiAccent; }
     else if (p.climbBlocked > 0) { note = '⛰ 너무 가팔라요! 돌아가거나 길을 뚫으세요'; noteColor = PAL.danger; }
     else if (onlineMode && current !== myPlayerIndex) note = '다른 사람 차례예요…';
     else if (p.isAI) note = 'AI가 생각 중…';
@@ -2974,7 +3378,7 @@
     if (state === 'title') {
       drawSky();
       lbl('title-main', '온라인 포트리스', W / 2, H / 2 - 58, 26, PAL.ui, 'center');
-      lbl('title-sub', 'made by m00n · 최대 20인 · 11개 맵 · 지형 파괴 · 대기실 실시간 설정', W / 2, H / 2 - 30, 9, PAL.uiDim, 'center');
+      lbl('title-sub', 'made by m00n · 최대 20인 · 11개 맵 · 지형 파괴 · 🧠 퀴즈 모드', W / 2, H / 2 - 30, 9, PAL.uiDim, 'center');
       ctx.save();
       drawTank({ x: W / 2 - 70, y: H / 2 + 2, angle: 55, facing: 1, color: PAL.p1, colorLight: PAL.p1Light, colorDark: PAL.p1Dark, recoil: 0, treadPhase: bgTime, bob: 0, alive: true, hitFlash: 0, healFlash: 0, ammo: [], climbBlocked: 0 }, false);
       drawTank({ x: W / 2 + 70, y: H / 2 + 2, angle: 55, facing: -1, color: PAL.p2, colorLight: PAL.p2Light, colorDark: PAL.p2Dark, recoil: 0, treadPhase: bgTime, bob: 3, alive: true, hitFlash: 0, healFlash: 0, ammo: [], climbBlocked: 0 }, false);
@@ -3074,6 +3478,7 @@
     syncMenuBtnVisibility();
     syncPassBtnVisibility();
     syncSpectateBar();
+    syncQuizOverlay();
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
