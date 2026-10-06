@@ -240,7 +240,7 @@
 </head>
 <body>
 <div id="stage"><div id="canvasWrap"><canvas id="game"></canvas><div id="hud"></div></div></div>
-<div id="hint">← → 이동 　 ↑ ↓ 조준 　 SPACE 발사(누르고 있으면 파워 충전) 　 1~7 무기변경 　 F 방향전환 　 ESC 나가기</div>
+<div id="hint">← → 이동 　 ↑ ↓ 조준 　 SPACE 발사(누르고 있으면 파워 충전) 　 1~8 무기변경 　 9 더블탄 　 F 방향전환 　 ESC 나가기</div>
 <div id="spectateBar">👁 관전 중 — 탈락했지만 경기는 계속 볼 수 있어요</div>
 <button type="button" id="muteBtn" class="topbtn">🔊</button>
 <button type="button" id="statsBtn" class="topbtn">🏆</button>
@@ -264,7 +264,7 @@
       <div class="howto-section-title">⌨️ PC 조작</div>
       <div class="howto-row"><span class="howto-key">◀ ▶</span> 좌우 이동 　 <span class="howto-key">▲ ▼</span> 대포 각도</div>
       <div class="howto-row"><span class="howto-key">SPACE</span> 누르고 있으면 파워 충전, 떼면 발사</div>
-      <div class="howto-row"><span class="howto-key">1 ~ 7</span> 무기 선택 　 <span class="howto-key">F</span> 방향 전환</div>
+      <div class="howto-row"><span class="howto-key">1 ~ 8</span> 무기 선택 　 <span class="howto-key">9</span> 더블탄 켜기/끄기 　 <span class="howto-key">F</span> 방향 전환</div>
       <div class="howto-row"><span class="howto-key">ESC</span> 대전 중 나가기 메뉴 열기</div>
     </div>
     <div class="howto-section">
@@ -276,6 +276,8 @@
       <div class="howto-section-title">💣 무기</div>
       <div class="howto-row">기본포(무제한) · 강력포 ×3 · 지진탄 ×2 · 분열탄 ×2</div>
       <div class="howto-row">연막탄 ×2 (넓게 가려요) · 회복탄 ×2 (나 포함 회복)</div>
+      <div class="howto-row"><b style="color:#d8c4ff">이동탄</b> ×2: 포탄이 떨어진 곳으로 내 탱크가 순간이동! 맵 밖으로 나가면 실패.</div>
+      <div class="howto-row"><b style="color:#ffd24a">더블탄</b> ×1: 켜고(9 또는 ×2 버튼) 다른 탄을 쏘면 같은 탄이 한 번 더 나가요. 핵폭탄은 안 돼요.</div>
       <div class="howto-row"><b style="color:#ff8a7a">핵폭탄</b>: 기본으로 없어요! 탄약상자를 주워야만 얻습니다.</div>
     </div>
     <div class="howto-section">
@@ -341,6 +343,7 @@
     <div style="display:flex;flex-direction:column;gap:6px;">
       <button type="button" class="tc-weapon" id="tcWeaponCycle">무기</button>
       <button type="button" class="tc-weapon" id="tcFlip">⇄</button>
+      <button type="button" class="tc-weapon" id="tcDouble">×2</button>
     </div>
     <button type="button" class="tc-btn" data-key="ArrowUp">▲</button>
     <button type="button" class="tc-btn" data-key="ArrowDown">▼</button>
@@ -453,9 +456,10 @@
 
 <script>
 /* =========================================================================
-   온라인 포트리스 v7
+   온라인 포트리스 v8
    - 로컬/AI/온라인(최대 20인, 팀전)
-   - 무기 7종(핵은 아이템 전용) / 아이템 4종 / 다층 지형 / 등판각 제한 / 장외 탈락
+   - v8: 이동탄(순간이동)·더블탄(같은 탄 2연사) 추가, 탄약상자 핵폭탄 확률 약 2배
+   - 무기 9종(핵은 아이템 전용) / 아이템 4종 / 다층 지형 / 등판각 제한 / 장외 탈락
    - 대기실 라이브 설정 / 접속 해제 = 탈락 / 관전 모드 (v6)
 
    ★ v7에서 바뀐 것: 퀴즈 모드
@@ -472,9 +476,9 @@
 
   // ★★★★★ 퀴즈 설정 — 아래 두 주소만 본인 것으로 바꾸세요 ★★★★★
   // ① 문제 시트: 구글시트 > 파일 > 공유 > 웹에 게시 > (문제 탭, CSV) 로 나온 주소
-  const QUIZ_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSGdhRtWk4FE8yZfneHRD10vaQhKgyu1jMD6_zw5J3PeuofNrSBwOaUMXqcJMyfwamL_9uvXscCB3uT/pub?gid=0&single=true&output=csv';
+  const QUIZ_SHEET_CSV_URL = '여기에_문제시트_웹게시_CSV_주소';
   // ② 기록 시트: 기록용 구글시트에 붙인 앱스 스크립트 웹앱 주소 (/exec 로 끝남). 비워두면 기록 안 함
-  const QUIZ_LOG_URL = 'https://script.google.com/macros/s/AKfycbwzuH5j8AiP_Ov5HXnI5C76Oj2QVTWiCusgTgRJ4znGO9ApdNmEY4WC9_FOr0jHOG61CQ/exec';
+  const QUIZ_LOG_URL = '여기에_기록용_웹앱_주소';
   const QUIZ_TIME_LIMIT = 30;   // 문제 푸는 제한 시간(초)
   const QUIZ_FEEDBACK_SEC = 8;  // 해설을 보여주는 시간(초). 확인을 누르면 바로 닫힘
   // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
@@ -938,9 +942,14 @@
     { name: '분열탄', kind: 'cluster', ammo: 2, dropWeight: 4, radius: 12, dmg: 15, glowColor: '#ffe27a', coreColor: '#b08a2a', highlightColor: '#fff2b0', icon: 'cluster', sub: { kind: 'normal', radius: 14, dmg: 18 }, subCount: 4 },
     { name: '연막탄', kind: 'smoke', ammo: 2, dropWeight: 4, radius: 0, dmg: 0, cloudRadius: 88, glowColor: '#d0d4dc', coreColor: '#6a6f7a', highlightColor: '#f0f2f5', icon: 'smoke' },
     { name: '회복탄', kind: 'heal', ammo: 2, dropWeight: 4, radius: 30, dmg: 0, healAmt: 35, glowColor: '#7cf29a', coreColor: '#2f8a4a', highlightColor: '#d8ffe4', icon: 'heal' },
-    { name: '핵폭탄', kind: 'nuke', ammo: 0, dropWeight: 1, radius: 256, dmg: 95, glowColor: '#ff5a3c', coreColor: '#3a3a3a', highlightColor: '#ffcf5c', icon: 'nuke' }
+    { name: '핵폭탄', kind: 'nuke', ammo: 0, dropWeight: 3, radius: 256, dmg: 95, glowColor: '#ff5a3c', coreColor: '#3a3a3a', highlightColor: '#ffcf5c', icon: 'nuke' },
+    // 이동탄: 포탄이 떨어진 곳으로 내 탱크가 순간이동 (맵 밖으로 나가면 효과 없음)
+    { name: '이동탄', kind: 'move', ammo: 2, dropWeight: 4, radius: 0, dmg: 0, glowColor: '#b48cff', coreColor: '#5a3fc4', highlightColor: '#e6d8ff', icon: 'move' },
+    // 더블탄: 직접 쏘는 탄이 아니라 스위치. 켜고 다른 탄을 쏘면 같은 탄이 한 번 더 나간다 (핵폭탄 제외)
+    { name: '더블탄', kind: 'double', ammo: 1, dropWeight: 3, radius: 0, dmg: 0, glowColor: '#ffd24a', coreColor: '#c88a1a', highlightColor: '#fff2b0', icon: 'double' }
   ];
-  const NUKE_IDX = 6;
+  // 탄약상자 무기 비율: 핵폭탄 3/30 = 10% (v7의 1/21 ≈ 4.8%에서 약 두 배)
+  const NUKE_IDX = 6, MOVE_IDX = 7, DOUBLE_IDX = 8;
 
   const ITEM_TYPES = [
     { key: 'hp', label: '구급상자', weight: 3, color: '#ff6a5c' },
@@ -1134,6 +1143,7 @@
   let winner = -1, winnerTeam = null;
   let mapSeed = 1;
   let pendingActions = [], pickupSentIds = new Set();
+  let doubleNext = null; // 더블탄: 첫 발이 끝난 뒤 쏠 둘째 발 정보
   function showEvent(text, color) { eventMsg = text; eventMsgColor = color || PAL.ui; eventMsgTimer = 2.4; }
 
   let matchWins = [], matchWinsTeam = {}, matchDraws = 0;
@@ -1172,7 +1182,7 @@
       fuel: 100, ammo: WEAPONS.map(w => w.ammo === Infinity ? Infinity : w.ammo), weapon: 0,
       alive: true, recoil: 0, treadPhase: 0, hitFlash: 0, healFlash: 0, bob: Math.random() * 10,
       falling: false, fallStartY: 0, team: null, isAI: false, shield: false,
-      lastShot: null, outOfBounds: false, disconnected: false, fellSent: false, climbBlocked: 0
+      lastShot: null, doubleOn: false, outOfBounds: false, disconnected: false, fellSent: false, climbBlocked: 0
     };
   }
   function toAbsoluteAngle(p) { return p.facing > 0 ? p.angle : 180 - p.angle; }
@@ -1310,7 +1320,7 @@
     items = []; nextItemId = 1; itemPopups = [];
     pendingActions = []; pickupSentIds = new Set();
     prevWindLevel = 0; eventMsgTimer = 0;
-    quizDoneTurn = -1;
+    quizDoneTurn = -1; doubleNext = null;
     nextTurnSetup(true);
     pushTerrainToCanvas(true);
     state = 'aiming';
@@ -1677,6 +1687,7 @@
     aiPlan = null; pickupSentIds = new Set();
     const p = players[current];
     if (p.weapon > 0 && p.ammo[p.weapon] <= 0) p.weapon = 0;
+    p.doubleOn = false; doubleNext = null;
     // ★ 퀴즈: 사람 차례면 이번 턴은 퀴즈부터 (모든 참가자 화면에서 똑같이 계산됨)
     Quiz.forceClose();
     quizTimeLeft = QUIZ_TIME_LIMIT; quizOverdue = 0;
@@ -2094,7 +2105,13 @@
       if (typeof a.x === 'number') sh.x = a.x;
       if (typeof a.y === 'number') { sh.y = a.y; sh.falling = false; }
       sh.charging = false; sh.power = 0;
-      fireProjectile(a.player, a.angle, a.power, a.weapon);
+      // ★ 더블탄: 더블탄 1개를 쓰고 같은 탄을 한 번 더 쏜다 (핵폭탄·탄약 없는 탄은 불가)
+      let dbl = false;
+      const fw = WEAPONS[a.weapon];
+      if (a.double && sh.ammo[DOUBLE_IDX] > 0 && fw && fw.kind !== 'double' && a.weapon !== NUKE_IDX
+          && (fw.ammo === Infinity || sh.ammo[a.weapon] > 0)) { sh.ammo[DOUBLE_IDX]--; dbl = true; }
+      sh.doubleOn = false;
+      fireProjectile(a.player, a.angle, a.power, a.weapon, dbl ? 1 : 0);
     } else { sfxMiss(); nextTurnSetup(false); }
   }
   function drainPendingActions() {
@@ -2402,16 +2419,18 @@
   function makeProjectile(x, y, vx, vy, wi, owner, sub) {
     return { x, y, vx, vy, weapon: wi, owner, trail: [], spin: 0, sub: !!sub };
   }
-  function fireProjectile(pi, angle, power, wi) {
+  // again: 0 = 보통, 1 = 더블탄 첫 발(뒤에 한 발 더), 2 = 더블탄 둘째 발(탄약 안 씀)
+  function fireProjectile(pi, angle, power, wi, again) {
     const p = players[pi];
-    if (!WEAPONS[wi]) wi = 0;
-    const w = WEAPONS[wi];
-    if (w.ammo !== Infinity) { if (p.ammo[wi] <= 0) wi = 0; else p.ammo[wi]--; }
+    if (!WEAPONS[wi] || WEAPONS[wi].kind === 'double') wi = 0;
+    if (again !== 2 && WEAPONS[wi].ammo !== Infinity) { if (p.ammo[wi] <= 0) wi = 0; else p.ammo[wi]--; }
     const rad = deg2rad(angle);
     const speed = (115 + (power / 100) * 400) * mapScale * resolveShotSpeedScale();
     const mx = p.x + Math.cos(rad) * 13, my = p.y - 6 - Math.sin(rad) * 13;
     projectiles = [makeProjectile(p.x, p.y - Math.sin(rad) * 11, Math.cos(rad) * speed, -Math.sin(rad) * speed, wi, pi, false)];
-    currentShot = { rnd: mulberry32(mapSeed + turnCount * 104729 + pi * 131 + 3), exploded: false, nuke: false };
+    currentShot = { rnd: mulberry32(mapSeed + turnCount * 104729 + pi * 131 + 3 + (again === 2 ? 17 : 0)), exploded: false, nuke: false,
+      again: again || 0, pi, angle, power, wi };
+    if (again === 2) showEvent('더블탄! 한 발 더', PAL.uiAccent);
     p.lastShot = { elev: Math.round(angle <= 90 ? angle : 180 - angle), power: Math.round(power) };
     p.recoil = 1;
     spawnMuzzleFlash(mx, my, rad);
@@ -2487,9 +2506,31 @@
     } else { shake = Math.max(shake, spec.radius * 0.35); flash = 1; sfxExplosion(spec.radius); }
     dealSplashDamage(x, y, spec.radius, spec.dmg);
   }
+  // ★ 이동탄: 포탄이 닿은 곳으로 쏜 사람의 탱크를 옮긴다
+  function teleportTank(p, proj, x, y) {
+    if (!p || !p.alive) return;
+    const fail = () => {
+      itemPopups.push({ x: p.x, y: p.y - 16, text: '이동 실패', color: PAL.uiDim, life: 1.3, maxLife: 1.3 });
+      sfxMiss();
+    };
+    if (y >= mapH - 1) { fail(); return; } // 맵 바닥 밖으로 떨어진 경우
+    const tx = clamp(Math.round(proj.x), 6, mapW - 6);
+    let fy = Math.round(proj.y), g = 0;      // 포탄이 마지막으로 있던 빈 공간
+    while (g++ < 80 && fy > 0 && terrainSolid(tx, fy)) fy--;
+    if (terrainSolid(tx, fy)) { fail(); return; } // 설 자리를 못 찾음
+    const ox = p.x, oy = p.y;
+    p.x = tx; p.y = fy - TANK_FOOT;
+    p.falling = true; p.fallStartY = p.y;      // 발밑이 비어 있으면 자연스럽게 내려앉는다
+    spawnPickupSparkle(ox, oy, '#b48cff'); spawnPickupSparkle(p.x, p.y, '#e6d8ff');
+    particles.push({ x: ox, y: oy, vx: 0, vy: 0, life: 0.3, maxLife: 0.3, kind: 'ring', color: '#b48cff', radius: 12 });
+    particles.push({ x: p.x, y: p.y, vx: 0, vy: 0, life: 0.4, maxLife: 0.4, kind: 'ring', color: '#e6d8ff', radius: 16 });
+    itemPopups.push({ x: p.x, y: p.y - 18, text: '순간이동!', color: '#d8c4ff', life: 1.3, maxLife: 1.3 });
+    sfxTone({ freq: 300, freqEnd: 1300, dur: 0.22, type: 'triangle', vol: 0.18 });
+  }
   function detonate(proj, x, y) {
     if (currentShot) currentShot.exploded = true;
     const w = WEAPONS[proj.weapon];
+    if (w.kind === 'move') { teleportTank(players[proj.owner], proj, x, y); return; }
     explodeAt(x, y, proj.sub ? w.sub : w);
     if (!proj.sub && w.kind === 'cluster' && currentShot) {
       const c = w.subCount || 4;
@@ -2526,6 +2567,10 @@
   function finishShot() {
     const s = currentShot;
     projectiles = []; currentShot = null;
+    if (s && s.again === 1) { // 더블탄: 첫 발이 정리된 뒤 둘째 발을 쏜다
+      doubleNext = { pi: s.pi, angle: s.angle, power: s.power, wi: s.wi };
+      state = 'resolving'; resolveTimer = 0.6; return;
+    }
     if (s && s.exploded) { state = 'resolving'; resolveTimer = s.nuke ? 1.6 : 0.5; }
     else missAndSwitch('맵 밖으로 벗어남');
   }
@@ -2617,16 +2662,32 @@
     if (!p || p.isAI || p.falling || !p.alive) return false;
     return true;
   }
+  function noDoubleNote(p) {
+    itemPopups.push({ x: p.x, y: p.y - 18, text: '핵폭탄에는 더블탄을 못 써요', color: PAL.danger, life: 1.4, maxLife: 1.4 });
+  }
   function selectWeapon(i) {
     if (!canControlNow() || !WEAPONS[i]) return;
-    if (WEAPONS[i].ammo !== Infinity && players[current].ammo[i] <= 0) return;
-    players[current].weapon = i;
+    if (WEAPONS[i].kind === 'double') { toggleDouble(); return; }
+    const p = players[current];
+    if (WEAPONS[i].ammo !== Infinity && p.ammo[i] <= 0) return;
+    p.weapon = i;
+    if (i === NUKE_IDX && p.doubleOn) { p.doubleOn = false; noDoubleNote(p); }
+  }
+  // 더블탄 켜기/끄기 — 켠 채로 발사해야 더블탄 1개가 소모된다
+  function toggleDouble() {
+    if (!canControlNow()) return;
+    const p = players[current];
+    if (p.doubleOn) { p.doubleOn = false; return; }
+    if (p.ammo[DOUBLE_IDX] <= 0) return;
+    if (p.weapon === NUKE_IDX) { noDoubleNote(p); return; }
+    p.doubleOn = true;
   }
   function cycleWeapon() {
     if (!canControlNow()) return;
     const p = players[current];
     for (let k = 1; k <= WEAPONS.length; k++) {
       const i = (p.weapon + k) % WEAPONS.length;
+      if (WEAPONS[i].kind === 'double') continue;
       if (WEAPONS[i].ammo === Infinity || p.ammo[i] > 0) { p.weapon = i; return; }
     }
   }
@@ -2640,7 +2701,7 @@
       p.charging = false;
       const pw = p.power; p.power = 0;
       NetworkHooks.sendAction({ type: 'fire', player: current, turn: turnCount,
-        angle: toAbsoluteAngle(p), power: pw, weapon: p.weapon, facing: p.facing, x: p.x, y: p.y });
+        angle: toAbsoluteAngle(p), power: pw, weapon: p.weapon, facing: p.facing, x: p.x, y: p.y, double: !!p.doubleOn });
     }
   }
 
@@ -2733,7 +2794,7 @@
     if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
     if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '].includes(e.key)) e.preventDefault();
     keys[e.key] = true;
-    if (e.key >= '1' && e.key <= '7') selectWeapon(Number(e.key) - 1);
+    if (e.key >= '1' && e.key <= '9') selectWeapon(Number(e.key) - 1);
     if (e.key === 'f' || e.key === 'F') flipFacing();
   });
   window.addEventListener('keyup', e => {
@@ -2759,6 +2820,7 @@
   bindHold(document.getElementById('tcFire'), ' ');
   document.getElementById('tcWeaponCycle').addEventListener('pointerdown', e => { e.preventDefault(); cycleWeapon(); });
   document.getElementById('tcFlip').addEventListener('pointerdown', e => { e.preventDefault(); flipFacing(); });
+  document.getElementById('tcDouble').addEventListener('pointerdown', e => { e.preventDefault(); toggleDouble(); });
   canvas.addEventListener('click', e => {
     const r = canvas.getBoundingClientRect();
     const mx = (e.clientX - r.left) / r.width * W, my = (e.clientY - r.top) / r.height * H;
@@ -2871,7 +2933,9 @@
           particles = particles.filter(p => p.life > 0);
           players.forEach(p => { if (p.hp <= 0) p.alive = false; });
           const r = checkGameOver();
+          const dn = doubleNext; doubleNext = null;
           if (r.over) finishGame(r);
+          else if (dn && players[dn.pi] && players[dn.pi].alive) fireProjectile(dn.pi, dn.angle, dn.power, dn.wi, 2);
           else { nextTurnSetup(false); state = 'aiming'; }
         }
       }
@@ -3242,6 +3306,16 @@
     } else if (w.icon === 'heal') {
       ctx.fillStyle = '#e8fff0'; ctx.beginPath(); ctx.arc(0, 0, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#3cb85c'; ctx.fillRect(-1.3, -3.5, 2.6, 7); ctx.fillRect(-3.5, -1.3, 7, 2.6);
+    } else if (w.icon === 'move') {
+      ctx.fillStyle = w.coreColor; ctx.beginPath(); ctx.arc(0, 0, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = w.highlightColor;
+      ctx.beginPath(); ctx.moveTo(4, 0); ctx.lineTo(0, -3.6); ctx.lineTo(0, -1.3); ctx.lineTo(-3.6, -1.3);
+      ctx.lineTo(-3.6, 1.3); ctx.lineTo(0, 1.3); ctx.lineTo(0, 3.6); ctx.closePath(); ctx.fill();
+    } else if (w.icon === 'double') {
+      ctx.fillStyle = w.coreColor;
+      [[-2.6, 1.6], [2.6, -1.6]].forEach(c => { ctx.beginPath(); ctx.arc(c[0], c[1], 3.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
+      ctx.fillStyle = w.highlightColor;
+      [[-3.6, 0.6], [1.6, -2.6]].forEach(c => { ctx.beginPath(); ctx.arc(c[0], c[1], 1, 0, Math.PI * 2); ctx.fill(); });
     } else if (w.icon === 'nuke') {
       ctx.fillStyle = '#ffd24a'; ctx.beginPath(); ctx.arc(0, 0, 5.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#2a2a2a';
@@ -3266,7 +3340,7 @@
     WEAPONS.forEach((wd, i) => {
       const cx = ix0 + i * slot, cy = H - 35;
       const has = wd.ammo === Infinity || p.ammo[i] > 0;
-      if (i === p.weapon) {
+      if (i === p.weapon || (wd.kind === 'double' && p.doubleOn)) {
         ctx.fillStyle = 'rgba(240,201,92,0.22)'; ctx.fillRect(cx - 9, cy - 9, 18, 18);
         ctx.strokeStyle = PAL.uiAccent; ctx.lineWidth = 1; ctx.strokeRect(cx - 8.5, cy - 8.5, 17, 17);
       }
@@ -3283,7 +3357,7 @@
     drawBar(W - 58, H - 29, 50, 5, tLeft / tMax, () =>
       urgent ? { light: '#ff8a7a', dark: '#c23a2c' } : { light: '#9fe0ff', dark: '#3c8cc2' });
     lbl('turn-angle', `각도 ${Math.round(p.angle)}°`, 8, H - 12, 9, PAL.ui, 'left');
-    lbl('weapon-name', `${p.weapon + 1}.${w.name}`, 66, H - 12, 9, PAL.uiAccent, 'left');
+    lbl('weapon-name', `${p.weapon + 1}.${w.name}` + (p.doubleOn ? ' ×2' : ''), 66, H - 12, 9, PAL.uiAccent, 'left');
     lbl('fuel-label', '연료', 136, H - 12, 9, PAL.uiAccent, 'left');
     drawBar(158, H - 16, 44, 6, p.fuel / 100, () => ({ light: '#9fe0ff', dark: '#3c8cc2' }));
     lbl('power-label', '파워', 210, H - 12, 9, PAL.uiAccent, 'left');
@@ -3378,7 +3452,7 @@
     if (state === 'title') {
       drawSky();
       lbl('title-main', '온라인 포트리스', W / 2, H / 2 - 58, 26, PAL.ui, 'center');
-      lbl('title-sub', 'made by min · 최대 20인 · 11개 맵 · 지형 파괴 · 🧠 퀴즈 모드', W / 2, H / 2 - 30, 9, PAL.uiDim, 'center');
+      lbl('title-sub', 'made by m00n · 최대 20인 · 11개 맵 · 지형 파괴 · 🧠 퀴즈 모드', W / 2, H / 2 - 30, 9, PAL.uiDim, 'center');
       ctx.save();
       drawTank({ x: W / 2 - 70, y: H / 2 + 2, angle: 55, facing: 1, color: PAL.p1, colorLight: PAL.p1Light, colorDark: PAL.p1Dark, recoil: 0, treadPhase: bgTime, bob: 0, alive: true, hitFlash: 0, healFlash: 0, ammo: [], climbBlocked: 0 }, false);
       drawTank({ x: W / 2 + 70, y: H / 2 + 2, angle: 55, facing: -1, color: PAL.p2, colorLight: PAL.p2Light, colorDark: PAL.p2Dark, recoil: 0, treadPhase: bgTime, bob: 3, alive: true, hitFlash: 0, healFlash: 0, ammo: [], climbBlocked: 0 }, false);
