@@ -1,8 +1,14 @@
-/* 우리 반 배포 단어장
- * 선생님 메뉴 → [③ 우리 반 전체에 배포] → [배포 파일 내려받기]로 만든 파일로 이 파일을 덮어쓰세요.
- * GitHub 저장소에 올리면 1~2분 뒤 모든 학생 화면의 "우리 반 단어장"에 나타납니다. */
+/* 우리 반 배포 단어장 — 타자 서바이벌 선생님 메뉴에서 만든 파일입니다.
+ * [학생들에게 배포하기]를 누르면 이 파일이 자동으로 바뀝니다. */
 window.CLASS_WORDSETS = {
-  "updated": "2026-10-15",
+  "updated": "2026-10-15 22:03",
+  "settings": {
+    "diff": "normal",
+    "kbd": true,
+    "meaning": true,
+    "lock": false,
+    "scoreUrl": "https://script.google.com/macros/s/AKfycbwXsllfMb6gStHzH8ebO_aP9HO3Cw6tBEYI9Y2mMHypOYHtGORNitx458JbcaEn8we7/exec"
+  },
   "sets": [
     {
       "name": "예시) 4학년 과학 · 화산과 지진",
