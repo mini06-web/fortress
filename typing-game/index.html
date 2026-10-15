@@ -60,8 +60,19 @@
   .btn.diff.active { border-color: var(--accent); color: var(--accent); background: var(--panel); }
 
   /* ── 교사용 단어장 편집 ── */
-  #wordEditor { display: none; flex-direction: column; gap: 10px; width: min(520px, 90vw); }
-  #wordEditor.open { display: flex; }
+  #wordEditor, #adminGate { display: none; flex-direction: column; gap: 10px; width: min(520px, 90vw); }
+  #wordEditor.open, #adminGate.open { display: flex; }
+  #adminGate > div { display: flex; flex-direction: column; gap: 10px; }
+  #adminGate small, #wordEditor small { line-height: 1.6; }
+  #adminGate a { color: var(--accent); }
+  .msg { font-size: 14px; font-weight: 700; min-height: 20px; }
+  .msg.ok { color: #3f6e46; } .msg.err { color: var(--accent); }
+  .set-grid { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; font-size: 14px; }
+  .set-grid select { font-family: inherit; font-size: 14px; padding: 6px 8px; border: 1.5px solid var(--line); border-radius: 4px; background: var(--panel); color: var(--ink); }
+  .set-grid label { display: flex; align-items: center; gap: 6px; }
+  .admin-hidden { display: none !important; }
+  #lockNote { display: none; font-size: 13px; color: var(--sub); }
+  #lockNote.show { display: block; }
   #customWordsInput {
     font-family: inherit; font-size: 15px; font-weight: 500; color: var(--ink);
     width: 100%; height: 140px; resize: vertical;
@@ -202,9 +213,43 @@
     <button class="btn sub mini" id="kbdBtn">키보드 안내: 켬</button>
     <button class="btn sub mini" id="meaningBtn">뜻 보고 치기: 켬</button>
   </div>
+  <div id="lockNote">난이도와 학습 설정은 선생님이 정해 두셨어요.</div>
   <div id="classSets">
     <div class="label">우리 반 단어장</div>
     <div class="btn-row" id="classSetBtns"></div>
+  </div>
+  <div id="adminGate">
+    <div id="gateLogin">
+      <div class="ed-title">선생님 메뉴 · 관리자 확인</div>
+      <div class="ed-row">
+        <input type="password" id="adminPw" class="ed-input" placeholder="관리자 비밀번호" autocomplete="current-password">
+        <button class="btn primary" id="adminLoginBtn">확인</button>
+      </div>
+      <div class="msg" id="loginMsg"></div>
+      <small><a href="#" id="gotoSetup">처음 설정하기 · 비밀번호를 잊었어요</a></small>
+    </div>
+    <div id="gateSetup">
+      <div class="ed-title">관리자 처음 설정 (한 번만 하면 돼요)</div>
+      <small>게임 화면에서 바로 배포하려면 GitHub <b>토큰</b>이 한 번 필요해요.<br>
+        1. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">토큰 만들기 페이지</a>를 엽니다. (GitHub 로그인)<br>
+        2. <b>Repository access</b> → <b>Only select repositories</b> → 이 게임이 있는 저장소 선택<br>
+        3. <b>Permissions → Contents</b> → <b>Read and write</b> 선택 → 맨 아래 <b>Generate token</b><br>
+        4. 만들어진 토큰(github_pat_…)을 복사해 아래에 붙여 넣고, 관리자 비밀번호를 정하세요.<br>
+        토큰은 비밀번호로 <b>암호화</b>되어 저장되고, 비밀번호를 아는 사람만 설정을 바꿀 수 있어요.</small>
+      <div class="ed-row">
+        <input id="cfgOwner" class="ed-input" placeholder="GitHub 아이디">
+        <input id="cfgRepo" class="ed-input" placeholder="저장소 이름">
+        <input id="cfgDir" class="ed-input" placeholder="폴더 (없으면 비움)">
+      </div>
+      <input type="password" id="cfgToken" class="ed-input" placeholder="GitHub 토큰 (github_pat_로 시작)" autocomplete="off">
+      <input type="password" id="cfgPw" class="ed-input" placeholder="새 관리자 비밀번호 (8자 이상)" autocomplete="new-password">
+      <input type="password" id="cfgPw2" class="ed-input" placeholder="비밀번호 한 번 더" autocomplete="new-password">
+      <div class="btn-row">
+        <button class="btn sub" id="setupCancelBtn">취소</button>
+        <button class="btn primary" id="setupBtn">설정 완료</button>
+      </div>
+      <div class="msg" id="setupMsg"></div>
+    </div>
   </div>
   <div id="wordEditor">
     <div class="ed-title">① 단어장 자동 생성</div>
@@ -233,15 +278,38 @@
     <input id="linkOut" class="ed-input" readonly placeholder="링크가 여기에 표시됩니다" style="display:none; font-size:13px; font-weight:500;">
     <small id="linkHint" style="display:none;">링크가 복사되었어요! 학생들에게 보내면, 열자마자 이 단어장으로 게임할 수 있어요.</small>
 
-    <div class="ed-title">③ 우리 반 전체에 배포 (관리자)</div>
+    <div class="ed-title">③ 우리 반 단어장 배포</div>
     <div id="deployList" class="ed-list"></div>
     <div class="btn-row">
       <button class="btn sub" id="deployAddBtn">지금 단어장을 배포 목록에 추가</button>
-      <button class="btn primary" id="deployDownloadBtn">배포 파일 내려받기</button>
     </div>
-    <small>배포 목록을 정리한 뒤 <b>배포 파일 내려받기</b>를 누르면 <b>class-wordsets.js</b> 파일이 저장돼요.<br>
-    GitHub 저장소 → <b>Add file → Upload files</b>로 이 파일을 올려 <b>덮어쓰면</b>, 1~2분 뒤 모든 학생의 시작 화면에
-    <b>우리 반 단어장</b>으로 나타납니다.</small>
+
+    <div class="ed-title">④ 우리 반 학습 설정</div>
+    <div class="set-grid">
+      <span>기본 난이도</span>
+      <select id="setDiff"><option value="easy">쉬움</option><option value="normal">보통</option><option value="hard">어려움</option></select>
+      <span>키보드 안내</span>
+      <label><input type="checkbox" id="setKbd"> 켜기</label>
+      <span>뜻 보고 치기</span>
+      <label><input type="checkbox" id="setMeaning"> 켜기 (뜻이 있는 단어장만)</label>
+      <span>학생 설정</span>
+      <label><input type="checkbox" id="setLock"> 학생이 바꾸지 못하게 잠그기</label>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn primary" id="publishBtn">학생들에게 배포하기 (③ + ④)</button>
+    </div>
+    <div class="msg" id="publishMsg"></div>
+    <small>배포하면 1~2분 뒤 모든 학생의 시작 화면에 반영돼요. (학생은 새로고침)
+      · <a href="#" id="deployDownloadBtn">파일로 내려받기</a></small>
+
+    <div class="ed-title">⑤ 관리자</div>
+    <div class="ed-row">
+      <input type="password" id="newPw" class="ed-input" placeholder="새 비밀번호 (8자 이상)" autocomplete="new-password">
+      <button class="btn sub" id="changePwBtn">비밀번호 바꾸기</button>
+    </div>
+    <div class="msg" id="pwMsg"></div>
+    <div class="btn-row"><button class="btn sub" id="lockBtn">선생님 메뉴 잠그기</button></div>
   </div>
 </div>
 
@@ -2419,11 +2487,12 @@ function renderSetList() {
   }
 }
 
-document.getElementById('editBtn').addEventListener('click', () => {
+function openEditor() {
   customWordsInput.value = localStorage.getItem('typingGameWords') || '';
   renderSetList();
-  wordEditor.classList.toggle('open');
-});
+  wordEditor.classList.add('open');
+}
+document.getElementById('editBtn').addEventListener('click', () => TeacherMenu.toggle());
 
 document.getElementById('saveWordsBtn').addEventListener('click', () => {
   const name = document.getElementById('setName').value.trim() || '이름 없는 단어장';
@@ -2556,9 +2625,11 @@ const Keyboard = (() => {
 })();
 
 // 시작 화면 설정 토글 (키보드 안내 / 뜻 보고 치기)
+const toggleSyncs = [];
 function bindToggle(id, key, label) {
   const b = document.getElementById(id);
   const sync = () => { b.textContent = `${label}: ${localStorage.getItem(key) === 'off' ? '끔' : '켬'}`; };
+  toggleSyncs.push(sync);
   b.addEventListener('click', () => {
     localStorage.setItem(key, localStorage.getItem(key) === 'off' ? 'on' : 'off');
     sync();
@@ -2740,20 +2811,44 @@ const Deploy = {
     const list = this.load().filter(s => s.name !== name);   // 같은 이름은 새 내용으로 교체
     list.push({ name, words: splitEntries(raw).join(', ') });
     this.save(list);
-    alert(`'${name}'을(를) 배포 목록에 넣었어요.\n[배포 파일 내려받기]를 눌러 GitHub에 올리면 학생들에게 나타납니다.`);
+    alert(`'${name}'을(를) 배포 목록에 넣었어요.\n[학생들에게 배포하기]를 누르면 학생 화면에 나타납니다.`);
+  },
+
+  payload() {
+    const d = new Date();
+    return {
+      updated: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ` +
+               `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`,
+      settings: ClassSettings.readForm(),
+      sets: this.load()
+    };
+  },
+  fileText(payload) {
+    return '/* 우리 반 배포 단어장 — 타자 서바이벌 선생님 메뉴에서 만든 파일입니다.\n' +
+      ' * [학생들에게 배포하기]를 누르면 이 파일이 자동으로 바뀝니다. */\n' +
+      'window.CLASS_WORDSETS = ' + JSON.stringify(payload, null, 2) + ';\n';
+  },
+
+  async publish() {
+    const msg = document.getElementById('publishMsg');
+    const payload = this.payload();
+    if (!payload.sets.length && !confirm('배포 목록이 비어 있어요. 빈 목록으로 배포하면 학생 화면에서 우리 반 단어장이 사라집니다. 계속할까요?')) return;
+    showMsg(msg, '배포하는 중…');
+    try {
+      await Admin.putFile('class-wordsets.js', this.fileText(payload), `우리 반 단어장 배포 (${payload.sets.length}개)`);
+      window.CLASS_WORDSETS = payload;
+      renderClassSets();
+      ClassSettings.apply();
+      this.render();
+      showMsg(msg, `배포 완료! 단어장 ${payload.sets.length}개 · 1~2분 뒤 학생 화면에 반영돼요.`, 'ok');
+    } catch (e) {
+      showMsg(msg, e.message, 'err');
+    }
   },
 
   download() {
-    const list = this.load();
-    if (!list.length && !confirm('배포 목록이 비어 있어요. 빈 목록으로 배포하면 학생 화면에서 우리 반 단어장이 사라집니다. 계속할까요?')) return;
-    const d = new Date();
-    const payload = {
-      updated: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
-      sets: list
-    };
-    const text = '/* 우리 반 배포 단어장 — 타자 서바이벌 선생님 메뉴에서 만든 파일입니다.\n' +
-      ' * GitHub 저장소의 class-wordsets.js를 이 파일로 덮어쓰면 모든 학생에게 적용됩니다. */\n' +
-      'window.CLASS_WORDSETS = ' + JSON.stringify(payload, null, 2) + ';\n';
+    const payload = this.payload();
+    const text = this.fileText(payload);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
     a.download = 'class-wordsets.js';
@@ -2762,10 +2857,7 @@ const Deploy = {
   }
 };
 document.getElementById('deployAddBtn').addEventListener('click', () => Deploy.add());
-document.getElementById('deployDownloadBtn').addEventListener('click', () => Deploy.download());
-document.getElementById('editBtn').addEventListener('click', () => {
-  if (wordEditor.classList.contains('open')) Deploy.render();
-});
+document.getElementById('deployDownloadBtn').addEventListener('click', e => { e.preventDefault(); Deploy.download(); });
 
 // ── 학생 시작 화면: 우리 반 단어장 버튼 ──
 function renderClassSets() {
@@ -2793,10 +2885,252 @@ function renderClassSets() {
   s.src = 'class-wordsets.js?t=' + Date.now();
   s.onload = s.onerror = () => {
     renderClassSets();
-    if (wordEditor.classList.contains('open')) Deploy.render();
+    ClassSettings.apply();
+    if (wordEditor.classList.contains('open')) { Deploy.render(); ClassSettings.fillForm(); }
   };
   document.head.appendChild(s);
+  const a = document.createElement('script');
+  a.src = 'admin-config.js?t=' + Date.now();
+  document.head.appendChild(a);
 })();
+/* ================================================================
+ * 10. 관리자 — 비밀번호 잠금 + 게임 화면에서 바로 배포 (GitHub API)
+ *  GitHub 토큰은 관리자 비밀번호로 암호화해 admin-config.js에 저장
+ *  (PBKDF2-SHA256 31만 회 → AES-GCM). 비밀번호가 맞아야만 토큰이 풀림.
+ * ================================================================ */
+function showMsg(el, text, kind = '') {
+  el.textContent = text;
+  el.className = 'msg' + (kind ? ' ' + kind : '');
+}
+const b64 = {
+  fromBytes: bytes => { let s = ''; for (const b of new Uint8Array(bytes)) s += String.fromCharCode(b); return btoa(s); },
+  toBytes: str => Uint8Array.from(atob(str), c => c.charCodeAt(0)),
+  utf8: text => b64.fromBytes(new TextEncoder().encode(text))
+};
+
+const Admin = {
+  token: null,
+  ITER: 310000,
+
+  // github.io 주소에서 아이디/저장소/폴더 추정 (설정 화면 기본값)
+  guessRepo() {
+    const c = window.ADMIN_CONFIG;
+    if (c) return { owner: c.owner, repo: c.repo, dir: c.dir || '' };
+    const host = location.hostname;
+    if (host.endsWith('.github.io')) {
+      const parts = location.pathname.split('/').filter(Boolean);
+      if (parts.length && /\.html?$/.test(parts[parts.length - 1])) parts.pop();
+      const owner = host.split('.')[0];
+      return parts.length ? { owner, repo: parts[0], dir: parts.slice(1).join('/') } : { owner, repo: host, dir: '' };
+    }
+    return { owner: 'mini06-web', repo: 'fortress', dir: 'typing-game' };
+  },
+
+  async key(pw, salt, iter) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' },
+      base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  },
+  async encrypt(token, pw) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const k = await this.key(pw, salt, this.ITER);
+    const data = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k, new TextEncoder().encode(token));
+    return { salt: b64.fromBytes(salt), iv: b64.fromBytes(iv), iter: this.ITER, data: b64.fromBytes(data) };
+  },
+  async decrypt(cfg, pw) {
+    const k = await this.key(pw, b64.toBytes(cfg.salt), cfg.iter);
+    const out = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.toBytes(cfg.iv) }, k, b64.toBytes(cfg.data));
+    return new TextDecoder().decode(out);
+  },
+
+  async api(repo, path, opts = {}, token = this.token) {
+    const res = await fetch(`https://api.github.com/repos/${repo.owner}/${repo.repo}${path}`, {
+      ...opts,
+      headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`,
+                 'X-GitHub-Api-Version': '2022-11-28', ...(opts.headers || {}) }
+    });
+    return res;
+  },
+  explain(res) {
+    if (res.status === 401) return '토큰이 만료되었거나 올바르지 않아요. [처음 설정하기]에서 새 토큰을 넣어 주세요.';
+    if (res.status === 403) return '토큰에 쓰기 권한이 없어요. 토큰의 Contents 권한을 Read and write로 만들어 주세요.';
+    if (res.status === 404) return '저장소를 찾을 수 없어요. 아이디·저장소 이름과 토큰의 저장소 선택을 확인해 주세요.';
+    return `GitHub 오류 (${res.status})가 났어요. 잠시 뒤 다시 해 주세요.`;
+  },
+
+  // 저장소의 파일을 새 내용으로 덮어쓰기 (없으면 새로 만듦)
+  async putFile(name, text, message, repo = window.ADMIN_CONFIG, token = this.token) {
+    if (!token || !repo) throw new Error('관리자 확인이 필요해요.');
+    const path = (repo.dir ? `${repo.dir}/` : '') + name;
+    const enc = path.split('/').map(encodeURIComponent).join('/');
+    const ref = repo.branch ? `?ref=${encodeURIComponent(repo.branch)}` : '';
+    let sha;
+    let res;
+    try {
+      res = await this.api(repo, `/contents/${enc}${ref}`, {}, token);
+    } catch (e) { throw new Error('인터넷 연결을 확인해 주세요. (GitHub에 연결할 수 없어요)'); }
+    if (res.ok) sha = (await res.json()).sha;
+    else if (res.status !== 404) throw new Error(this.explain(res));
+    res = await this.api(repo, `/contents/${enc}`, {
+      method: 'PUT',
+      body: JSON.stringify({ message, content: b64.utf8(text), sha, ...(repo.branch ? { branch: repo.branch } : {}) })
+    }, token);
+    if (!res.ok) throw new Error(this.explain(res));
+  },
+
+  configText(cfg) {
+    return '/* 관리자 설정 — 게임 화면의 [선생님 메뉴 → 처음 설정]에서 자동으로 만들어집니다. 직접 고치지 마세요.\n' +
+      ' * GitHub 토큰은 관리자 비밀번호로 암호화(AES-GCM, PBKDF2)되어 있어 비밀번호 없이는 쓸 수 없습니다. */\n' +
+      'window.ADMIN_CONFIG = ' + JSON.stringify(cfg, null, 2) + ';\n';
+  },
+
+  async login(pw) {
+    const cfg = window.ADMIN_CONFIG;
+    if (!cfg) throw new Error('아직 관리자 설정을 하지 않았어요. [처음 설정하기]를 눌러 주세요.');
+    try { this.token = await this.decrypt(cfg.secret, pw); }
+    catch (e) { throw new Error('비밀번호가 맞지 않아요.'); }
+  },
+
+  async setup({ owner, repo, dir, token, pw }) {
+    const target = { owner, repo, dir };
+    let res;
+    try { res = await this.api(target, '', {}, token); }
+    catch (e) { throw new Error('인터넷 연결을 확인해 주세요. (GitHub에 연결할 수 없어요)'); }
+    if (!res.ok) throw new Error(this.explain(res));
+    const info = await res.json();
+    if (info.permissions && !info.permissions.push) throw new Error('이 토큰으로는 저장소에 쓸 수 없어요. 토큰의 Contents 권한을 Read and write로 만들어 주세요.');
+    const cfg = { owner, repo, dir, branch: info.default_branch || 'main', secret: await this.encrypt(token, pw) };
+    // 실제로 저장소에 써 보는 것으로 권한 확인 겸 설정 저장
+    await this.putFile('admin-config.js', this.configText(cfg), '타자 서바이벌 관리자 설정', cfg, token);
+    window.ADMIN_CONFIG = cfg;
+    this.token = token;
+  },
+
+  async changePassword(pw) {
+    const cfg = { ...window.ADMIN_CONFIG, secret: await this.encrypt(this.token, pw) };
+    await this.putFile('admin-config.js', this.configText(cfg), '타자 서바이벌 관리자 비밀번호 변경', cfg);
+    window.ADMIN_CONFIG = cfg;
+  },
+
+  lock() { this.token = null; }
+};
+
+// ── 우리 반 학습 설정 (배포 파일의 settings) ──
+const ClassSettings = {
+  defaults: { diff: 'normal', kbd: true, meaning: true, lock: false },
+  current() { return { ...this.defaults, ...(window.CLASS_WORDSETS.settings || {}) }; },
+  fillForm() {
+    const st = this.current();
+    document.getElementById('setDiff').value = st.diff;
+    document.getElementById('setKbd').checked = !!st.kbd;
+    document.getElementById('setMeaning').checked = !!st.meaning;
+    document.getElementById('setLock').checked = !!st.lock;
+  },
+  readForm() {
+    return {
+      diff: document.getElementById('setDiff').value,
+      kbd: document.getElementById('setKbd').checked,
+      meaning: document.getElementById('setMeaning').checked,
+      lock: document.getElementById('setLock').checked
+    };
+  },
+  // 잠금이면 선생님 설정으로 고정하고 학생용 버튼을 숨김, 아니면 처음 한 번만 기본값으로
+  apply() {
+    if (!window.CLASS_WORDSETS.settings) return;
+    const st = this.current();
+    const pairs = [['typingGameDiff', st.diff], ['typingGameKbd', st.kbd ? 'on' : 'off'], ['typingGameMeaning', st.meaning ? 'on' : 'off']];
+    for (const [k, v] of pairs) {
+      try { if (st.lock || localStorage.getItem(k) === null) localStorage.setItem(k, v); } catch (e) { /* 저장 불가 환경 */ }
+    }
+    for (const id of ['diffRow', 'kbdBtn', 'meaningBtn']) document.getElementById(id).classList.toggle('admin-hidden', !!st.lock);
+    document.getElementById('lockNote').classList.toggle('show', !!st.lock);
+    syncDiffButtons();
+    toggleSyncs.forEach(f => f());
+  }
+};
+
+// ── 선생님 메뉴 열기: 관리자 확인 → 편집 화면 ──
+const gate = document.getElementById('adminGate');
+const TeacherMenu = {
+  close() { gate.classList.remove('open'); wordEditor.classList.remove('open'); },
+  toggle() {
+    if (gate.classList.contains('open') || wordEditor.classList.contains('open')) { this.close(); return; }
+    if (Admin.token) { this.openEditor(); return; }
+    gate.classList.add('open');
+    this.show(window.ADMIN_CONFIG ? 'login' : 'setup');
+  },
+  show(which) {
+    document.getElementById('gateLogin').style.display = which === 'login' ? '' : 'none';
+    document.getElementById('gateSetup').style.display = which === 'setup' ? '' : 'none';
+    if (which === 'setup') {
+      const g = Admin.guessRepo();
+      document.getElementById('cfgOwner').value = g.owner;
+      document.getElementById('cfgRepo').value = g.repo;
+      document.getElementById('cfgDir').value = g.dir;
+      showMsg(document.getElementById('setupMsg'), '');
+    } else {
+      showMsg(document.getElementById('loginMsg'), '');
+      setTimeout(() => document.getElementById('adminPw').focus(), 0);
+    }
+  },
+  openEditor() {
+    gate.classList.remove('open');
+    openEditor();
+    Deploy.render();
+    ClassSettings.fillForm();
+    showMsg(document.getElementById('publishMsg'), '');
+    showMsg(document.getElementById('pwMsg'), '');
+  }
+};
+
+async function doLogin() {
+  const msg = document.getElementById('loginMsg');
+  const pw = document.getElementById('adminPw').value;
+  if (!pw) return;
+  showMsg(msg, '확인하는 중…');
+  try {
+    await Admin.login(pw);
+    document.getElementById('adminPw').value = '';
+    TeacherMenu.openEditor();
+  } catch (e) { showMsg(msg, e.message, 'err'); }
+}
+document.getElementById('adminLoginBtn').addEventListener('click', doLogin);
+document.getElementById('adminPw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('gotoSetup').addEventListener('click', e => { e.preventDefault(); TeacherMenu.show('setup'); });
+document.getElementById('setupCancelBtn').addEventListener('click', () => {
+  if (window.ADMIN_CONFIG) TeacherMenu.show('login'); else TeacherMenu.close();
+});
+document.getElementById('setupBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('setupMsg');
+  const v = id => document.getElementById(id).value.trim();
+  const form = { owner: v('cfgOwner'), repo: v('cfgRepo'), dir: v('cfgDir').replace(/^\/+|\/+$/g, ''),
+                 token: v('cfgToken'), pw: document.getElementById('cfgPw').value };
+  if (!form.owner || !form.repo) return showMsg(msg, 'GitHub 아이디와 저장소 이름을 넣어 주세요.', 'err');
+  if (!form.token) return showMsg(msg, 'GitHub 토큰을 붙여 넣어 주세요.', 'err');
+  if (form.pw.length < 8) return showMsg(msg, '비밀번호는 8자 이상으로 정해 주세요.', 'err');
+  if (form.pw !== document.getElementById('cfgPw2').value) return showMsg(msg, '두 비밀번호가 서로 달라요.', 'err');
+  showMsg(msg, '저장소에 연결하는 중…');
+  try {
+    await Admin.setup(form);
+    ['cfgToken', 'cfgPw', 'cfgPw2'].forEach(id => { document.getElementById(id).value = ''; });
+    alert('관리자 설정이 끝났어요! 다음부터는 비밀번호만 넣으면 선생님 메뉴가 열려요.');
+    TeacherMenu.openEditor();
+  } catch (e) { showMsg(msg, e.message, 'err'); }
+});
+document.getElementById('publishBtn').addEventListener('click', () => Deploy.publish());
+document.getElementById('changePwBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('pwMsg');
+  const pw = document.getElementById('newPw').value;
+  if (pw.length < 8) return showMsg(msg, '비밀번호는 8자 이상으로 정해 주세요.', 'err');
+  showMsg(msg, '바꾸는 중…');
+  try {
+    await Admin.changePassword(pw);
+    document.getElementById('newPw').value = '';
+    showMsg(msg, '비밀번호를 바꿨어요. 1~2분 뒤부터 새 비밀번호로 들어올 수 있어요.', 'ok');
+  } catch (e) { showMsg(msg, e.message, 'err'); }
+});
+document.getElementById('lockBtn').addEventListener('click', () => { Admin.lock(); TeacherMenu.close(); });
 </script>
 
 </body>
