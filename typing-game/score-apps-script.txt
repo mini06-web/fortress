@@ -1,0 +1,65 @@
+/**
+ * 타자 서바이벌 — 우리 반 점수판 서버 (Google Apps Script)
+ *
+ * 설치 방법
+ *  1. 구글 드라이브에서 새 구글 시트를 만듭니다. (이름 예: 타자 서바이벌 점수)
+ *  2. 메뉴 [확장 프로그램] → [Apps Script]를 엽니다.
+ *  3. 원래 있던 코드를 모두 지우고, 이 파일 내용을 통째로 붙여 넣은 뒤 저장(💾)합니다.
+ *  4. 오른쪽 위 [배포] → [새 배포] → 톱니바퀴에서 [웹 앱] 선택
+ *       - 다음 사용자 인증 정보로 실행: 나
+ *       - 액세스 권한이 있는 사용자: 모든 사용자
+ *     → [배포] → (처음이면 [액세스 승인] → 내 계정 선택 → [고급] → [안전하지 않은 페이지로 이동] → [허용])
+ *  5. 나오는 "웹 앱 URL"(https://script.google.com/macros/s/…/exec)을 복사해
+ *     게임의 [선생님 메뉴 → ④ 우리 반 학습 설정 → 점수 공유 주소]에 붙여 넣고 [학생들에게 배포하기]를 누릅니다.
+ *
+ * 기록은 이 시트의 "scores" 탭에 쌓입니다. 새 학기에는 2행부터 지우면 순위가 초기화됩니다.
+ */
+const SHEET = 'scores';
+const HEADER = ['시간', '단어장', '이름', '점수', '타수', '정확도', '레벨', '칭호', '최고콤보', '버틴시간(초)'];
+
+function doGet(e) {
+  const p = (e && e.parameter) || {};
+  const sh = sheet_();
+  if (p.action === 'submit') {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+    try {
+      sh.appendRow([new Date(), text_(p.set, 60), text_(p.name, 20), num_(p.score), num_(p.cpm), num_(p.acc),
+                    num_(p.level), text_(p.title, 30), num_(p.combo), num_(p.time)]);
+    } finally {
+      lock.releaseLock();
+    }
+    return json_({ ok: true });
+  }
+  // 목록: 단어장 이름(set)이 있으면 그 단어장만, 최근 3000개까지
+  const n = sh.getLastRow() - 1;
+  const rows = n > 0 ? sh.getRange(2, 1, n, HEADER.length).getValues() : [];
+  const out = [];
+  for (let i = Math.max(0, rows.length - 3000); i < rows.length; i++) {
+    const r = rows[i];
+    if (p.set && String(r[1]) !== p.set) continue;
+    out.push({ t: r[0] instanceof Date ? r[0].getTime() : 0, set: String(r[1]), name: String(r[2]), score: Number(r[3]) || 0,
+               cpm: Number(r[4]) || 0, acc: Number(r[5]) || 0, level: Number(r[6]) || 0, title: String(r[7]),
+               combo: Number(r[8]) || 0, time: Number(r[9]) || 0 });
+  }
+  return json_({ ok: true, rows: out });
+}
+
+function sheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = ss.getSheetByName(SHEET) || ss.insertSheet(SHEET);
+  if (sh.getLastRow() === 0) sh.appendRow(HEADER);
+  return sh;
+}
+// 시트 수식으로 해석되지 않도록 = + - @ 로 시작하면 앞에 '를 붙임
+function text_(v, max) {
+  const s = String(v || '').slice(0, max);
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+function num_(v) {
+  const x = Number(v);
+  return isFinite(x) ? Math.max(0, Math.min(x, 1e9)) : 0;
+}
+function json_(o) {
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+}

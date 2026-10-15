@@ -181,6 +181,33 @@
   .weak b { color: var(--accent); }
   .weak .ttl { color: var(--ink); font-weight: 800; text-align: center; margin-bottom: 4px; }
 
+  /* ── 게임 중 나가기 ── */
+  #quitBtn { position: fixed; left: 16px; top: 48px; z-index: 6; display: none; }
+  #quitBtn.show { display: block; }
+
+  /* ── 이름 입력 / 순위판 ── */
+  #nameRow { display: none; align-items: center; gap: 8px; font-size: 14px; color: var(--sub); }
+  #nameRow.show { display: flex; }
+  #nameRow input { width: 160px; }
+  .rank-line { font-size: 15px; color: var(--ink); margin-top: 10px; font-weight: 700; }
+  .rank-line b { color: var(--accent); }
+  .title-chip { display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 12px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; }
+  #boardScreen { justify-content: flex-start; padding-top: 40px; }
+  #boardScreen h1 { font-size: 34px; }
+  .board-ctrl { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .board-ctrl select { font-family: inherit; font-size: 15px; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 4px; background: var(--panel); color: var(--ink); max-width: 80vw; }
+  .board-wrap { width: min(760px, 100%); overflow-x: auto; }
+  table.board { width: 100%; border-collapse: collapse; font-size: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+  table.board th { font-size: 12px; color: var(--sub); letter-spacing: 1px; font-weight: 700; padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+  table.board td { padding: 10px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.board td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.board tr.top1 td { font-weight: 800; color: var(--accent); }
+  table.board tr.me td { background: #efe3d6; }
+  table.board .t { font-size: 12px; color: var(--sub); font-weight: 600; }
+  #boardStatus { font-size: 13px; color: var(--sub); }
+  #boardStatus .live { color: #3f6e46; font-weight: 700; }
+  #scoreGuide { width: 100%; height: 120px; font-family: ui-monospace, monospace; font-size: 11px; background: var(--panel); border: 1.5px solid var(--line); border-radius: 4px; padding: 8px; color: var(--ink); }
+
   /* 실제 키 입력을 받는 숨김 input (IME 조합이 여기서 일어남) */
   #hiddenInput { position: fixed; left: -9999px; top: 0; opacity: 0; }
 </style>
@@ -190,6 +217,7 @@
 <canvas id="gameCanvas"></canvas>
 <div id="credit">원작: 경남 황산초등학교 윤희류 · 개작: 김해외동초등학교 이영민 · v2.0</div>
 <div id="kbd"></div>
+<button class="btn sub mini" id="quitBtn">나가기</button>
 <input id="hiddenInput" autocomplete="off" autocapitalize="off" spellcheck="false">
 
 <!-- 시작 화면 -->
@@ -214,6 +242,11 @@
     <button class="btn sub mini" id="meaningBtn">뜻 보고 치기: 켬</button>
   </div>
   <div id="lockNote">난이도와 학습 설정은 선생님이 정해 두셨어요.</div>
+  <div id="nameRow">
+    <span>내 이름</span>
+    <input id="playerName" class="ed-input" maxlength="12" placeholder="예: 3번 김민지">
+    <button class="btn sub mini" id="boardBtn">우리 반 순위판</button>
+  </div>
   <div id="classSets">
     <div class="label">우리 반 단어장</div>
     <div class="btn-row" id="classSetBtns"></div>
@@ -295,6 +328,20 @@
       <span>학생 설정</span>
       <label><input type="checkbox" id="setLock"> 학생이 바꾸지 못하게 잠그기</label>
     </div>
+    <small><b>점수 공유</b> — 구글 시트로 우리 반 점수·순위·칭호를 함께 봐요. <a href="#" id="scoreGuideBtn">설정 방법 보기</a></small>
+    <div id="scoreGuideBox" style="display:none; flex-direction:column; gap:8px;">
+      <small>1) 구글 드라이브에서 새 구글 시트 → [확장 프로그램] → [Apps Script]<br>
+        2) 원래 코드를 지우고 아래 코드를 붙여 넣고 저장 → [배포] → [새 배포] → 유형 [웹 앱]<br>
+        3) 실행: <b>나</b> · 액세스: <b>모든 사용자</b> → [배포] → 권한 승인<br>
+        4) 나오는 <b>웹 앱 URL</b>을 아래 칸에 붙여 넣고 [연결 확인] → [학생들에게 배포하기]</small>
+      <textarea id="scoreGuide" readonly></textarea>
+      <div class="btn-row"><button class="btn sub mini" id="copyScriptBtn">코드 복사</button></div>
+    </div>
+    <div class="ed-row">
+      <input id="setScoreUrl" class="ed-input" placeholder="점수 공유 주소 (https://script.google.com/macros/s/…/exec) · 비우면 끔">
+      <button class="btn sub" id="testScoreBtn">연결 확인</button>
+    </div>
+    <div class="msg" id="scoreMsg"></div>
 
     <div class="btn-row">
       <button class="btn primary" id="publishBtn">학생들에게 배포하기 (③ + ④)</button>
@@ -327,11 +374,27 @@
     <div class="label">점수</div>
     <div class="big" id="finalScore">0</div>
     <div class="detail" id="finalStats"></div>
+    <div id="finalTitle"></div>
+    <div id="finalRank"></div>
   </div>
   <div class="btn-row">
     <button class="btn primary" id="retryBtn">다시 하기</button>
+    <button class="btn sub" id="overBoardBtn" style="display:none;">순위판 보기</button>
     <button class="btn sub" id="menuBtn">처음으로</button>
   </div>
+</div>
+
+<!-- 우리 반 순위판 -->
+<div id="boardScreen" class="overlay hidden">
+  <h1>우리 반 <span>순위판</span></h1>
+  <div class="board-ctrl">
+    <select id="boardSet"></select>
+    <select id="boardPeriod"><option value="today">오늘</option><option value="week">이번 주</option><option value="all">전체</option></select>
+    <button class="btn sub mini" id="boardRefresh">새로고침</button>
+    <button class="btn sub mini" id="boardClose">닫기</button>
+  </div>
+  <div id="boardStatus"></div>
+  <div class="board-wrap"><table class="board" id="boardTable"></table></div>
 </div>
 
 <script>window.CURRICULUM = []; window.CLASS_WORDSETS = { sets: [] };</script>
@@ -736,8 +799,10 @@ const Game = {
   // 초등학생에게 익숙한 "타수"(분당 입력 글자 수)로 통일 — 영어 모드도 동일
   speedLabel() { return `타수 ${this.cpm}`; },
 
-  start(mode) {
+  start(mode, setKey = null) {
     this.mode = mode;
+    this.setKey = setKey;   // 순위판에서 같은 단어장끼리 묶는 이름 (null이면 기록 공유 안 함)
+    QuitBtn.show(true);
     this.diff = DIFFICULTY[localStorage.getItem('typingGameDiff') || 'normal'];
     this.enemies = [];
     this.effects = [];
@@ -2078,6 +2143,8 @@ const Game = {
       `평균 <b>${this.speedLabel()}</b> · 정확도 <b>${this.accuracy}%</b> · 입력한 단어 <b>${this.wordsDone}</b>개<br>` +
       `레벨 <b>${this.level}</b> · 보스 처치 <b>${this.bossCount}</b> · 물리친 몬스터 <b>${this.kills}</b>마리 · 최고 콤보 <b>x${this.maxCombo}</b> · 버틴 시간 <b>${Math.floor(this.elapsed)}초</b>`;
     document.getElementById('finalStats').appendChild(this.weakReport());
+    QuitBtn.show(false);
+    Scores.onGameOver(this);
     Keyboard.update();
     document.getElementById('gameOverScreen').classList.remove('hidden');
   },
@@ -2295,7 +2362,7 @@ document.querySelectorAll('[data-mode]').forEach(btn => {
       return;
     }
     startScreen.classList.add('hidden');
-    Game.start(mode);
+    Game.start(mode, { ko: '한글 낱말', en: '영어 단어' }[mode] || null);
   });
 });
 
@@ -2511,7 +2578,7 @@ document.getElementById('saveWordsBtn').addEventListener('click', () => {
 
 document.getElementById('retryBtn').addEventListener('click', () => {
   gameOverScreen.classList.add('hidden');
-  Game.start(Game.mode);
+  Game.start(Game.mode, Game.setKey);
 });
 
 document.getElementById('menuBtn').addEventListener('click', () => {
@@ -2872,7 +2939,7 @@ function renderClassSets() {
     b.addEventListener('click', () => {
       if (!WordBank.loadCustom(String(set.words))) { alert('이 단어장에 단어가 없어요.'); return; }
       startScreen.classList.add('hidden');
-      Game.start('custom');
+      Game.start('custom', String(set.name));
     });
     btns.appendChild(b);
   }
@@ -3018,7 +3085,7 @@ const Admin = {
 
 // ── 우리 반 학습 설정 (배포 파일의 settings) ──
 const ClassSettings = {
-  defaults: { diff: 'normal', kbd: true, meaning: true, lock: false },
+  defaults: { diff: 'normal', kbd: true, meaning: true, lock: false, scoreUrl: '' },
   current() { return { ...this.defaults, ...(window.CLASS_WORDSETS.settings || {}) }; },
   fillForm() {
     const st = this.current();
@@ -3026,17 +3093,20 @@ const ClassSettings = {
     document.getElementById('setKbd').checked = !!st.kbd;
     document.getElementById('setMeaning').checked = !!st.meaning;
     document.getElementById('setLock').checked = !!st.lock;
+    document.getElementById('setScoreUrl').value = st.scoreUrl || '';
   },
   readForm() {
     return {
       diff: document.getElementById('setDiff').value,
       kbd: document.getElementById('setKbd').checked,
       meaning: document.getElementById('setMeaning').checked,
-      lock: document.getElementById('setLock').checked
+      lock: document.getElementById('setLock').checked,
+      scoreUrl: document.getElementById('setScoreUrl').value.trim()
     };
   },
   // 잠금이면 선생님 설정으로 고정하고 학생용 버튼을 숨김, 아니면 처음 한 번만 기본값으로
   apply() {
+    Scores.syncStartScreen();
     if (!window.CLASS_WORDSETS.settings) return;
     const st = this.current();
     const pairs = [['typingGameDiff', st.diff], ['typingGameKbd', st.kbd ? 'on' : 'off'], ['typingGameMeaning', st.meaning ? 'on' : 'off']];
@@ -3131,6 +3201,243 @@ document.getElementById('changePwBtn').addEventListener('click', async () => {
   } catch (e) { showMsg(msg, e.message, 'err'); }
 });
 document.getElementById('lockBtn').addEventListener('click', () => { Admin.lock(); TeacherMenu.close(); });
+/* ================================================================
+ * 11. 우리 반 점수판 — 칭호, 기록 공유(구글 시트 Apps Script), 순위판, 나가기
+ * ================================================================ */
+const QuitBtn = {
+  el: document.getElementById('quitBtn'),
+  show(on) { this.el.classList.toggle('show', on); }
+};
+QuitBtn.el.addEventListener('click', e => {
+  e.stopPropagation();
+  if (!Game.running) return;
+  const wasPaused = Game.paused;
+  Game.paused = true;
+  if (!confirm('게임을 그만두고 처음 화면으로 갈까요?\n(이번 판 기록은 저장되지 않아요)')) {
+    Game.paused = wasPaused;
+    hiddenInput.focus();
+    return;
+  }
+  Game.running = false;
+  Game.paused = false;
+  Loot.cards = [];
+  document.getElementById('lootScreen').classList.add('hidden');
+  Typing.reset();
+  hiddenInput.blur();
+  QuitBtn.show(false);
+  Keyboard.update();
+  startScreen.classList.remove('hidden');
+});
+
+// 칭호: 타수 단계 + 특별 기록
+function titlesFor(g) {
+  const cpm = g.cpm;
+  const base = cpm >= 500 ? '전설의 타자왕' : cpm >= 400 ? '타자 장인' : cpm >= 300 ? '번개 손가락'
+             : cpm >= 200 ? '날쌘 손가락' : cpm >= 100 ? '성장하는 타자' : '새싹 타자';
+  const extra = [];
+  if (g.accuracy === 100 && g.wordsDone >= 10) extra.push('정확의 달인');
+  if (g.maxCombo >= 30) extra.push('콤보 마스터');
+  if (g.bossCount >= 2) extra.push('보스 사냥꾼');
+  if (g.elapsed >= 300) extra.push('끈기왕');
+  return [base, ...extra];
+}
+
+const Scores = {
+  url() {
+    const u = (window.CLASS_WORDSETS.settings || {}).scoreUrl || '';
+    return /^https:\/\/script\.google(usercontent)?\.com\//.test(u) ? u : '';
+  },
+  name() { try { return (localStorage.getItem('typingGameName') || '').trim(); } catch (e) { return ''; } },
+
+  async call(params, url = this.url()) {
+    const q = new URLSearchParams(params).toString();
+    const res = await fetch(`${url}?${q}`, { redirect: 'follow' });
+    if (!res.ok) throw new Error(`점수 서버 오류 (${res.status})`);
+    const data = await res.json();
+    if (!data.ok) throw new Error('점수 서버 응답이 올바르지 않아요.');
+    return data;
+  },
+
+  // 같은 이름은 최고 기록 하나만, 점수 높은 순
+  rank(rows, period) {
+    const now = new Date();
+    const start = period === 'today' ? new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+      : period === 'week' ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7)).getTime() : 0;
+    const best = new Map();
+    for (const r of rows) {
+      if (r.t < start || !r.name) continue;
+      const cur = best.get(r.name);
+      if (!cur || r.score > cur.score) best.set(r.name, { ...r, plays: (cur ? cur.plays : 0) + 1 });
+      else cur.plays++;
+    }
+    return [...best.values()].sort((a, b) => b.score - a.score || b.cpm - a.cpm);
+  },
+
+  syncStartScreen() {
+    const on = !!this.url();
+    document.getElementById('nameRow').classList.toggle('show', on);
+    document.getElementById('playerName').value = this.name();
+  },
+
+  async onGameOver(g) {
+    const titles = titlesFor(g);
+    const tbox = document.getElementById('finalTitle');
+    tbox.textContent = '';
+    for (const t of titles) {
+      const c = document.createElement('span');
+      c.className = 'title-chip';
+      c.style.marginRight = '6px';
+      c.textContent = t;
+      tbox.appendChild(c);
+    }
+    const rankEl = document.getElementById('finalRank');
+    rankEl.textContent = '';
+    const boardBtn = document.getElementById('overBoardBtn');
+    boardBtn.style.display = 'none';
+    if (!this.url() || !g.setKey || g.score <= 0) return;
+    const name = this.name();
+    const line = document.createElement('div');
+    line.className = 'rank-line';
+    rankEl.appendChild(line);
+    if (!name) { line.textContent = '처음 화면에서 이름을 넣으면 우리 반 순위에 기록돼요.'; return; }
+    line.textContent = '우리 반 순위에 기록하는 중…';
+    try {
+      await this.call({ action: 'submit', set: g.setKey, name, score: g.score, cpm: g.cpm, acc: g.accuracy,
+                        level: g.level, title: titles.join(' · '), combo: g.maxCombo, time: Math.floor(g.elapsed) });
+      const { rows } = await this.call({ action: 'list', set: g.setKey });
+      const list = this.rank(rows, 'today');
+      const i = list.findIndex(r => r.name === name);
+      const mine = list[i];
+      line.textContent = '';
+      const b = document.createElement('b');
+      b.textContent = `${i + 1}위`;
+      line.append(`오늘 '${g.setKey}' 우리 반 `, b, ` / ${list.length}명`);
+      if (mine && mine.score > g.score) line.append(` (내 최고 ${mine.score}점)`);
+      boardBtn.style.display = '';
+    } catch (e) {
+      line.textContent = '기록을 보내지 못했어요. 인터넷 연결을 확인해 주세요.';
+    }
+  }
+};
+
+// ── 순위판 (열려 있는 동안 10초마다 자동 새로고침 → 교실 화면에 띄워 두면 실시간) ──
+const Board = {
+  el: document.getElementById('boardScreen'),
+  timer: null, rows: [],
+  open(setKey) {
+    this.el.classList.remove('hidden');
+    this.preferred = setKey || this.preferred;
+    this.refresh();
+    clearInterval(this.timer);
+    this.timer = setInterval(() => this.refresh(), 10000);
+  },
+  close() {
+    this.el.classList.add('hidden');
+    clearInterval(this.timer);
+  },
+  async refresh() {
+    const status = document.getElementById('boardStatus');
+    try {
+      const { rows } = await Scores.call({ action: 'list' });
+      this.rows = rows;
+      this.fillSets();
+      this.render();
+      status.textContent = '';
+      const live = document.createElement('span');
+      live.className = 'live';
+      live.textContent = '● 실시간';
+      const d = new Date();
+      status.append(live, ` · ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')} 갱신 (10초마다)`);
+    } catch (e) {
+      status.textContent = '순위를 불러오지 못했어요. 인터넷 연결이나 점수 공유 주소를 확인해 주세요.';
+    }
+  },
+  fillSets() {
+    const sel = document.getElementById('boardSet');
+    const names = new Set([...(window.CLASS_WORDSETS.sets || []).map(s => String(s.name)), '한글 낱말', '영어 단어',
+                           ...this.rows.map(r => r.set)]);
+    const cur = sel.value || this.preferred;
+    sel.textContent = '';
+    for (const n of names) {
+      if (!n) continue;
+      const o = document.createElement('option');
+      o.value = o.textContent = n;
+      sel.appendChild(o);
+    }
+    if (cur && names.has(cur)) sel.value = cur;
+  },
+  render() {
+    const set = document.getElementById('boardSet').value;
+    const list = Scores.rank(this.rows.filter(r => r.set === set), document.getElementById('boardPeriod').value);
+    const me = Scores.name();
+    const table = document.getElementById('boardTable');
+    table.textContent = '';
+    const head = table.insertRow();
+    for (const h of ['순위', '이름', '칭호', '점수', '타수', '정확도', '판 수']) {
+      const th = document.createElement('th');
+      th.textContent = h;
+      head.appendChild(th);
+    }
+    if (!list.length) {
+      const td = table.insertRow().insertCell();
+      td.colSpan = 7;
+      td.textContent = '아직 기록이 없어요. 첫 번째 주인공이 되어 보세요!';
+      return;
+    }
+    list.slice(0, 50).forEach((r, i) => {
+      const tr = table.insertRow();
+      if (i === 0) tr.className = 'top1';
+      if (me && r.name === me) tr.className += ' me';
+      const cells = [`${i + 1}`, r.name, r.title, r.score, r.cpm, `${r.acc}%`, r.plays];
+      cells.forEach((v, ci) => {
+        const td = tr.insertCell();
+        td.textContent = String(v);
+        if (ci >= 3) td.className = 'num';
+        if (ci === 2) td.className = 't';
+      });
+    });
+  }
+};
+document.getElementById('boardBtn').addEventListener('click', () => Board.open());
+document.getElementById('overBoardBtn').addEventListener('click', () => Board.open(Game.setKey));
+document.getElementById('boardClose').addEventListener('click', () => Board.close());
+document.getElementById('boardRefresh').addEventListener('click', () => Board.refresh());
+document.getElementById('boardSet').addEventListener('change', () => Board.render());
+document.getElementById('boardPeriod').addEventListener('change', () => Board.render());
+document.getElementById('playerName').addEventListener('input', e => {
+  try { localStorage.setItem('typingGameName', e.target.value.trim().slice(0, 12)); } catch (err) { /* 저장 불가 */ }
+});
+
+// ── 선생님 메뉴: 점수 공유 주소 설정 ──
+document.getElementById('scoreGuideBtn').addEventListener('click', async e => {
+  e.preventDefault();
+  const box = document.getElementById('scoreGuideBox');
+  box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+  const ta = document.getElementById('scoreGuide');
+  if (!ta.value) {
+    try { ta.value = await (await fetch('score-apps-script.txt')).text(); }
+    catch (err) { ta.value = '코드를 불러오지 못했어요. 저장소의 typing-game/score-apps-script.txt 파일 내용을 복사해 주세요.'; }
+  }
+});
+document.getElementById('copyScriptBtn').addEventListener('click', () => {
+  const ta = document.getElementById('scoreGuide');
+  ta.select();
+  try { navigator.clipboard.writeText(ta.value); } catch (e) { /* 선택된 상태라 수동 복사 가능 */ }
+});
+document.getElementById('testScoreBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('scoreMsg');
+  const url = document.getElementById('setScoreUrl').value.trim();
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(url)) {
+    return showMsg(msg, '주소가 올바르지 않아요. https://script.google.com/macros/s/…/exec 형태여야 해요.', 'err');
+  }
+  showMsg(msg, '연결하는 중…');
+  try {
+    const { rows } = await Scores.call({ action: 'list' }, url);
+    showMsg(msg, `연결 성공! 지금까지 기록 ${rows.length}개. [학생들에게 배포하기]를 누르면 적용돼요.`, 'ok');
+  } catch (e) {
+    showMsg(msg, '연결하지 못했어요. 웹 앱 배포의 액세스 권한이 "모든 사용자"인지 확인해 주세요.', 'err');
+  }
+});
 </script>
 
 </body>
