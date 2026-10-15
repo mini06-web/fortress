@@ -1,0 +1,2803 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>타자 서바이벌 v2</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23e9e6df'/%3E%3Cpath d='M32 15 L51 49 L13 49 Z' fill='%23a04a4a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root {
+    --bg: #e9e6df;         /* 따뜻한 종이색 배경 */
+    --panel: #f2f0ea;
+    --ink: #3f3d3a;        /* 잉크 회색 */
+    --sub: #8b8880;
+    --line: #d6d2c8;
+    --accent: #a04a4a;     /* 버건디 포인트 */
+    --accent2: #4e6e8e;    /* 청회색 (영어 모드) */
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
+  body {
+    font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont,
+                 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  #gameCanvas { display: block; width: 100%; height: 100%; }
+
+  /* ── 화면을 덮는 오버레이(시작/게임오버) ── */
+  .overlay {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 20px;
+    background: rgba(233, 230, 223, 0.97); z-index: 10;
+    overflow-y: auto; justify-content: safe center; padding: 48px 16px;
+  }
+  .overlay.hidden { display: none; }
+  .overlay h1 { font-size: 42px; font-weight: 800; letter-spacing: -1px; }
+  .overlay h1 span { color: var(--accent); }
+  .overlay p { color: var(--sub); font-size: 16px; line-height: 1.7; text-align: center; }
+  .overlay p b { color: var(--ink); }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: 16px; font-weight: 700; color: #f5f3ee;
+    background: #55534e; border: none; border-radius: 4px;
+    padding: 13px 24px; cursor: pointer; letter-spacing: 0.5px;
+  }
+  .btn:hover { background: var(--ink); }
+  .btn.primary { background: var(--accent); }
+  .btn.primary:hover { background: #8b3a3a; }
+  .btn.sub {
+    background: transparent; color: var(--ink);
+    border: 1.5px solid var(--line);
+  }
+  .btn.sub:hover { background: var(--panel); border-color: var(--sub); }
+  .btn.en { background: var(--accent2); }
+  .btn.en:hover { background: #3f5c78; }
+  .btn.mini { padding: 6px 12px; font-size: 13px; border-radius: 3px; }
+  .btn.diff { padding: 9px 22px; font-size: 15px; }
+  .btn.diff.active { border-color: var(--accent); color: var(--accent); background: var(--panel); }
+
+  /* ── 교사용 단어장 편집 ── */
+  #wordEditor { display: none; flex-direction: column; gap: 10px; width: min(520px, 90vw); }
+  #wordEditor.open { display: flex; }
+  #customWordsInput {
+    font-family: inherit; font-size: 15px; font-weight: 500; color: var(--ink);
+    width: 100%; height: 140px; resize: vertical;
+    background: var(--panel); border: 1.5px solid var(--line);
+    border-radius: 4px; padding: 12px;
+  }
+  #customWordsInput:focus { outline: none; border-color: var(--sub); }
+  #wordEditor small { color: var(--sub); }
+  .ed-title { font-size: 15px; font-weight: 800; color: var(--ink); margin-top: 10px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .ed-title:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+  .ed-input {
+    width: 100%; font-family: inherit; font-size: 15px; font-weight: 600; color: var(--ink);
+    background: var(--panel); border: 1.5px solid var(--line); border-radius: 4px; padding: 10px 12px;
+  }
+  .ed-input:focus { outline: none; border-color: var(--sub); }
+  .ed-row { display: flex; gap: 8px; }
+  .ed-row .ed-input { flex: 1; }
+  .ed-list { display: flex; flex-direction: column; gap: 6px; }
+  .ed-item {
+    display: flex; align-items: center; gap: 8px; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 4px; padding: 8px 12px;
+  }
+  .ed-item .name { flex: 1; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ed-item .meta { font-size: 12px; color: var(--sub); font-weight: 500; }
+  .ed-tag { font-size: 11px; color: var(--accent); border: 1px solid var(--accent); border-radius: 3px; padding: 1px 5px; margin-right: 6px; }
+
+  /* ── 우리 반 단어장 (배포된 단어장, 학생 시작 화면) ── */
+  #classSets { display: none; flex-direction: column; align-items: center; gap: 8px; }
+  #classSets.show { display: flex; }
+  #classSets .label { font-size: 13px; color: var(--sub); letter-spacing: 2px; }
+
+  /* ── 게임오버 통계 카드 ── */
+  .stat-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+    padding: 22px 40px; text-align: center;
+  }
+  .stat-card .big { font-size: 40px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .stat-card .label { font-size: 13px; color: var(--sub); letter-spacing: 2px; margin-bottom: 4px; }
+  .stat-card .detail { font-size: 14px; color: var(--sub); margin-top: 10px; }
+  .stat-card .detail b { color: var(--ink); }
+
+  /* ── 전리품(레벨업 카드) 화면 — Glyphica 스타일 ── */
+  #lootScreen {
+    position: fixed; inset: 0; z-index: 8; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 0;
+    background: rgba(200, 196, 186, 0.45);
+  }
+  #lootScreen.hidden { display: none; }
+  .loot-band {
+    width: 100%; background: #6b6963; color: #f5f3ee; text-align: center;
+    font-size: 26px; font-weight: 700; padding: 14px 0; letter-spacing: 6px;
+  }
+  .loot-cards { display: flex; gap: 22px; margin: 36px 0 20px; }
+  .card {
+    width: min(250px, 28vw); background: var(--panel); border: 1px solid var(--line);
+    border-radius: 6px; padding: 26px 20px 0; text-align: center;
+    display: flex; flex-direction: column;
+    box-shadow: 0 2px 10px rgba(63, 61, 58, 0.08);
+  }
+  .card-icon { font-size: 40px; color: var(--accent); line-height: 1; }
+  .card-name { font-size: 22px; font-weight: 800; margin-top: 14px; }
+  .card-rarity { font-size: 13px; color: var(--sub); margin: 4px 0 16px; }
+  .card-rarity.rare { color: var(--accent); }
+  .card-desc { font-size: 15px; color: #5f5d58; line-height: 1.6; min-height: 96px; }
+  .card-word {
+    margin: 18px -20px 0; background: #83817b; color: #f5f3ee;
+    font-size: 24px; font-weight: 700; padding: 12px 0; letter-spacing: 3px;
+    border-radius: 0 0 6px 6px;
+  }
+  .card-word .done { color: #f7c8c8; }
+  .loot-hint { color: #6b6963; font-size: 14px; }
+  .loot-hint b { color: var(--ink); }
+
+  /* ── 제작자 표기 (우측 상단 고정) ── */
+  #credit {
+    position: fixed; top: 12px; right: 16px; z-index: 11;
+    font-size: 13px; color: var(--sub); letter-spacing: 0.3px;
+  }
+
+  /* ── 화면 키보드 손가락 안내 ── */
+  #kbd {
+    position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%) scale(var(--kbd-scale, 1));
+    transform-origin: bottom center; z-index: 5; pointer-events: none;
+    display: none; flex-direction: column; align-items: center; gap: 4px;
+    background: rgba(242, 240, 234, 0.88); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px 6px;
+  }
+  #kbd.show { display: flex; }
+  #kbd .row { display: flex; gap: 4px; }
+  #kbd .key {
+    width: 34px; height: 34px; border-radius: 4px; border: 1px solid var(--line);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;
+    font-size: 15px; font-weight: 700; color: var(--ink); position: relative;
+  }
+  #kbd .key small { font-size: 9px; color: var(--sub); font-weight: 600; margin-top: 2px; }
+  #kbd .key.wide { width: 58px; font-size: 11px; }
+  #kbd .key.home::after { content: ''; position: absolute; bottom: 4px; width: 8px; height: 2px; background: var(--sub); border-radius: 1px; }
+  #kbd .key.on { background: var(--accent) !important; color: #fff; border-color: var(--accent); transform: translateY(-2px); }
+  #kbd .key.on small { color: #f7c8c8; }
+  #kbd .tip { font-size: 13px; color: var(--ink); font-weight: 700; min-height: 18px; }
+  #kbd .tip span { color: var(--accent); }
+  .f0 { background: #eadbd6; } .f1 { background: #e9e2cf; } .f2 { background: #dfe6d3; } .f3 { background: #d6e3e3; }
+  .f4 { background: #d9dfec; } .f5 { background: #e3dbea; } .f6 { background: #ecdbe4; } .f7 { background: #e6e2dc; }
+
+  /* ── 게임오버: 틀린 글자 분석 ── */
+  .weak { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; color: var(--sub); line-height: 1.8; text-align: left; }
+  .weak b { color: var(--accent); }
+  .weak .ttl { color: var(--ink); font-weight: 800; text-align: center; margin-bottom: 4px; }
+
+  /* 실제 키 입력을 받는 숨김 input (IME 조합이 여기서 일어남) */
+  #hiddenInput { position: fixed; left: -9999px; top: 0; opacity: 0; }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+<div id="credit">원작: 경남 황산초등학교 윤희류 · 개작: 김해외동초등학교 이영민 · v2.0</div>
+<div id="kbd"></div>
+<input id="hiddenInput" autocomplete="off" autocapitalize="off" spellcheck="false">
+
+<!-- 시작 화면 -->
+<div id="startScreen" class="overlay">
+  <h1>타자 <span>서바이벌</span></h1>
+  <p>몬스터 옆의 단어를 입력해서 물리치세요!<br>
+     오타 없이 연속으로 맞히면 <b>콤보 보너스</b>, 레벨이 오르면 <b>전리품 카드</b>를 얻습니다.</p>
+  <div class="btn-row" id="diffRow">
+    <button class="btn sub diff" data-diff="easy">쉬움</button>
+    <button class="btn sub diff" data-diff="normal">보통</button>
+    <button class="btn sub diff" data-diff="hard">어려움</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn primary" data-mode="ko">한글 낱말</button>
+    <button class="btn en" data-mode="en">영어 단어</button>
+    <button class="btn" data-mode="custom">내 단어장</button>
+    <button class="btn sub" id="editBtn">선생님 메뉴</button>
+    <button class="btn sub" id="soundBtn">효과음: 켬</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn sub mini" id="kbdBtn">키보드 안내: 켬</button>
+    <button class="btn sub mini" id="meaningBtn">뜻 보고 치기: 켬</button>
+  </div>
+  <div id="classSets">
+    <div class="label">우리 반 단어장</div>
+    <div class="btn-row" id="classSetBtns"></div>
+  </div>
+  <div id="wordEditor">
+    <div class="ed-title">① 단어장 자동 생성</div>
+    <div class="ed-row">
+      <input id="genQuery" class="ed-input" placeholder="과목과 단원을 입력하세요 (예: 과학 화산, 5학년 사회, 영어 동물)">
+      <button class="btn primary" id="genBtn">찾기</button>
+    </div>
+    <div id="genResults" class="ed-list"></div>
+    <small>단원을 누르면 아래 단어장에 단어가 채워져요. 여러 단원을 누르면 <b>합쳐집니다</b>.</small>
+
+    <div class="ed-title">② 단어 다듬기 · 직접 추가</div>
+    <input id="setName" class="ed-input" placeholder="단어장 이름 (예: 3단원 식물의 구조)">
+    <textarea id="customWordsInput" placeholder="단어를 쉼표나 줄바꿈으로 구분해 입력하세요&#10;예) 광합성, 증산작용, 잎맥, 뿌리털"></textarea>
+    <small><b>뜻 보고 치기</b>: <b>단어=뜻</b> 형식으로 넣으면 학생 화면에 뜻과 초성 힌트만 보여요. (예: 광합성=식물이 빛으로 양분을 만드는 일)<br>
+    단어를 자유롭게 <b>추가하거나 지울 수</b> 있어요. <b>띄어쓰기가 있는 문장</b>은 보스 전투 문장이 됩니다. (예: 식물은 빛으로 양분을 만든다)<br>
+    [단어장 저장]은 <b>이 컴퓨터·이 브라우저에만</b> 저장돼요. 저장한 단어장은 ①의 검색에도 나타납니다.</small>
+    <div class="btn-row">
+      <button class="btn sub" id="clearWordsBtn">비우기</button>
+      <button class="btn sub" id="templateBtn">엑셀 템플릿 받기</button>
+      <button class="btn sub" id="uploadBtn">엑셀 업로드</button>
+      <button class="btn sub" id="saveWordsBtn">단어장 저장</button>
+      <button class="btn sub" id="linkBtn">학생용 링크 만들기</button>
+    </div>
+    <div id="setList" class="ed-list"></div>
+    <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" style="display:none;">
+    <input id="linkOut" class="ed-input" readonly placeholder="링크가 여기에 표시됩니다" style="display:none; font-size:13px; font-weight:500;">
+    <small id="linkHint" style="display:none;">링크가 복사되었어요! 학생들에게 보내면, 열자마자 이 단어장으로 게임할 수 있어요.</small>
+
+    <div class="ed-title">③ 우리 반 전체에 배포 (관리자)</div>
+    <div id="deployList" class="ed-list"></div>
+    <div class="btn-row">
+      <button class="btn sub" id="deployAddBtn">지금 단어장을 배포 목록에 추가</button>
+      <button class="btn primary" id="deployDownloadBtn">배포 파일 내려받기</button>
+    </div>
+    <small>배포 목록을 정리한 뒤 <b>배포 파일 내려받기</b>를 누르면 <b>class-wordsets.js</b> 파일이 저장돼요.<br>
+    GitHub 저장소 → <b>Add file → Upload files</b>로 이 파일을 올려 <b>덮어쓰면</b>, 1~2분 뒤 모든 학생의 시작 화면에
+    <b>우리 반 단어장</b>으로 나타납니다.</small>
+  </div>
+</div>
+
+<!-- 전리품(레벨업) 화면 -->
+<div id="lootScreen" class="hidden">
+  <div class="loot-band">전 리 품</div>
+  <div class="loot-cards" id="lootCards"></div>
+  <p class="loot-hint">카드 아래의 <b>단어를 입력</b>해서 선택하세요 · <b>스페이스</b> = 다른 선택지 (1회)</p>
+</div>
+
+<!-- 게임 오버 화면 -->
+<div id="gameOverScreen" class="overlay hidden">
+  <h1>게임 <span>오버</span></h1>
+  <div class="stat-card">
+    <div class="label">점수</div>
+    <div class="big" id="finalScore">0</div>
+    <div class="detail" id="finalStats"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn primary" id="retryBtn">다시 하기</button>
+    <button class="btn sub" id="menuBtn">처음으로</button>
+  </div>
+</div>
+
+<script>window.CURRICULUM = []; window.CLASS_WORDSETS = { sets: [] };</script>
+<script src="curriculum.js"></script>
+<script>
+'use strict';
+
+/* ================================================================
+ * 1. Hangul — 한글 자모 분해 유틸
+ * ================================================================ */
+const Hangul = (() => {
+  const CHO  = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+  const JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  const SPLIT = {
+    'ㅘ':'ㅗㅏ','ㅙ':'ㅗㅐ','ㅚ':'ㅗㅣ','ㅝ':'ㅜㅓ','ㅞ':'ㅜㅔ','ㅟ':'ㅜㅣ','ㅢ':'ㅡㅣ',
+    'ㄳ':'ㄱㅅ','ㄵ':'ㄴㅈ','ㄶ':'ㄴㅎ','ㄺ':'ㄹㄱ','ㄻ':'ㄹㅁ','ㄼ':'ㄹㅂ',
+    'ㄽ':'ㄹㅅ','ㄾ':'ㄹㅌ','ㄿ':'ㄹㅍ','ㅀ':'ㄹㅎ','ㅄ':'ㅂㅅ'
+  };
+  const expand = j => j && (SPLIT[j] ? SPLIT[j].split('') : [j]);
+
+  function decompose(str) {
+    const out = [];
+    for (const ch of str) {
+      const code = ch.charCodeAt(0);
+      if (code >= 0xAC00 && code <= 0xD7A3) {
+        const idx = code - 0xAC00;
+        out.push(...expand(CHO[Math.floor(idx / 588)]));
+        out.push(...expand(JUNG[Math.floor((idx % 588) / 28)]));
+        const jong = JONG[idx % 28];
+        if (jong) out.push(...expand(jong));
+      } else if (code >= 0x3131 && code <= 0x3163) {
+        out.push(...expand(ch));
+      } else {
+        out.push(ch.toLowerCase());
+      }
+    }
+    return out;
+  }
+
+  const isPrefix = (a, b) => a.length <= b.length && a.every((j, i) => j === b[i]);
+
+  function charsCovered(word, jamoCount) {
+    let acc = 0;
+    for (let i = 0; i < word.length; i++) {
+      acc += decompose(word[i]).length;
+      if (acc > jamoCount) return i;
+    }
+    return word.length;
+  }
+
+  return { decompose, isPrefix, charsCovered };
+})();
+
+console.assert(Hangul.decompose('학교').join('') === 'ㅎㅏㄱㄱㅛ', 'decompose 학교');
+console.assert(Hangul.decompose('닭').join('') === 'ㄷㅏㄹㄱ', 'decompose 겹받침');
+console.assert(Hangul.decompose('과').join('') === 'ㄱㅗㅏ', 'decompose 복합모음');
+console.assert(Hangul.isPrefix(Hangul.decompose('간'), Hangul.decompose('가나')), 'IME 중간상태 간→가나');
+console.assert(!Hangul.isPrefix(Hangul.decompose('강'), Hangul.decompose('가나')), '오타 판정');
+
+// 뜻 보고 치기 힌트: 완성한 글자 이후는 초성(한글) / 밑줄(영어, 첫 글자만 공개)
+function hintOf(word, from) {
+  let out = '';
+  for (let i = from; i < word.length; i++) {
+    const ch = word[i], code = ch.charCodeAt(0);
+    if (code >= 0xAC00 && code <= 0xD7A3) out += Hangul.decompose(ch)[0];
+    else out += (i === 0 ? ch : (/[a-z]/i.test(ch) ? '_' : ch));
+  }
+  return out;
+}
+function wrapText(text, n) {
+  const lines = [];
+  let cur = '';
+  for (const w of text.split(' ')) {
+    if (cur && (cur + ' ' + w).length > n) { lines.push(cur); cur = w; }
+    else cur = cur ? cur + ' ' + w : w;
+  }
+  if (cur) lines.push(cur);
+  if (lines.length > 3) { lines.length = 3; lines[2] += '…'; }
+  return lines;
+}
+
+/* ================================================================
+ * 2. Sound — WebAudio 합성 효과음 (오디오 파일 불필요)
+ * ================================================================ */
+const Sound = (() => {
+  let ac = null;
+  let enabled = localStorage.getItem('typingGameSound') !== 'off';
+  const ctx = () => ac || (ac = new (window.AudioContext || window.webkitAudioContext)());
+
+  function beep(freq, dur, type = 'square', vol = 0.12, slideTo = 0) {
+    if (!enabled) return;
+    try {
+      const a = ctx(), o = a.createOscillator(), g = a.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, a.currentTime);
+      if (slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(40, slideTo), a.currentTime + dur);
+      g.gain.setValueAtTime(vol, a.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + dur);
+      o.connect(g); g.connect(a.destination);
+      o.start(); o.stop(a.currentTime + dur);
+    } catch (e) { /* 오디오 미지원 환경은 조용히 무시 */ }
+  }
+  const seq = notes => notes.forEach(([f, d, delay], i) =>
+    setTimeout(() => beep(f, d, 'sine', 0.13), delay));
+
+  return {
+    kill:      () => { beep(880, 0.07, 'square', 0.09); beep(1318, 0.1, 'square', 0.05); },
+    shoot:     () => beep(1500, 0.05, 'square', 0.06, 900),
+    bolt:      () => beep(1800, 0.12, 'sawtooth', 0.08, 200),
+    pickup:    () => { beep(784, 0.08, 'sine', 0.12); beep(1175, 0.12, 'sine', 0.1); },
+    miss:      () => beep(170, 0.18, 'sawtooth', 0.13, 90),
+    playerHit: () => beep(110, 0.3, 'sawtooth', 0.18, 60),
+    shield:    () => beep(660, 0.12, 'triangle', 0.12),
+    milestone: () => { beep(1046, 0.09, 'triangle', 0.12); beep(1568, 0.14, 'triangle', 0.09); },
+    loot:      () => seq([[523, 0.1, 0], [659, 0.1, 90], [784, 0.16, 180]]),
+    fever:     () => seq([[523, 0.09, 0], [659, 0.09, 70], [784, 0.09, 140], [1046, 0.2, 210]]),
+    bossHit:   () => beep(440, 0.14, 'square', 0.13, 220),
+    bossSpawn: () => { beep(98, 0.4, 'sawtooth', 0.16); setTimeout(() => beep(87, 0.5, 'sawtooth', 0.16), 320); },
+    get enabled() { return enabled; },
+    toggle() { enabled = !enabled; localStorage.setItem('typingGameSound', enabled ? 'on' : 'off'); return enabled; }
+  };
+})();
+
+/* ================================================================
+ * 3. WordBank — 단어 목록 (교사 커스텀 단어는 localStorage)
+ *    기본 단어는 초등 교육과정 수준의 일상·학습 어휘
+ * ================================================================ */
+const WordBank = {
+  ko: {
+    short: ['나무','바다','구름','연필','학교','노래','우유','기차','사과','토끼','거울','안경','약속','마음','친구','시계','바람','하늘','지구',
+            '가방','가위','거미','겨울','고래','공원','과자','교실','구두','국수','그네','기린','김밥','나비','낙엽','낚시','냄비','노을','눈물',
+            '단추','달력','담요','당근','도장','동생','돼지','두부','딸기','땅콩','떡국','마늘','마당','모자','무릎','문어','물감','바지','반지',
+            '배추','버섯','베개','병원','봄비','부엌','비누','사슴','사탕','상어','새우','생선','서랍','선물','세수','소금','소풍','수박','숙제',
+            '시장','신발','아침','악어','안개','야구','약국','양말','어깨','여름','여우','연못','열쇠','엽서','오리','오이','왕관','요리','우산',
+            '우표','은행','음악','의자','이불','인형','자석','장갑','장미','접시','제비','종이','주스','지도','지갑','참새','창문','채소','청소',
+            '치마','치즈','침대','칫솔','카드','탁구','태양','파도','편지','포도','표범','풍선','피자','하마','항구','해변','호박','화분','화가','휴지',
+            '태풍','지진','화산','계곡','폭포','갯벌','등대','송편','늑대','낙타','손톱','꿀벌','튤립','헬멧','밧줄','얼음','웃음','칭찬','필통','볼펜',
+            '시소','짝꿍','급식','방학','눈썹','팔찌','한복','부채','팽이','김치','만두','라면','튀김','호떡','서점','의사','가수','배우','농부','어부'],
+    long:  ['지우개','무지개','도서관','미끄럼틀','운동장','삼각형','계산기','태극기','줄넘기','부지런하다','아름답다','책가방','선생님','현장학습',
+            '사각형','원기둥','받아쓰기','알림장','급식실','보건실','도화지','색종이','스케치북','크레파스','리코더','탬버린','실로폰','눈사람',
+            '개구리','고슴도치','다람쥐','딱따구리','진달래','개나리','민들레','해바라기','코스모스','소나기','무더위','함박눈','고드름','장마철',
+            '바닷가','기차역','정류장','횡단보도','신호등','소방차','구급차','경찰서','우체국',
+            '박물관','미술관','놀이터','문방구','편의점','떡볶이','비빔밥','불고기','윷놀이','제기차기','팽이치기','연날리기','태권도',
+            '줄다리기','숨바꼭질','술래잡기','공기놀이','딱지치기','종이접기','그림일기','일기예보','텔레비전','냉장고','세탁기','청소기','선풍기',
+            '에어컨','컴퓨터','스마트폰','원숭이','코끼리','호랑이','강아지','고양이','병아리','너구리','두루미','부엉이','올빼미','거북이',
+            '여름방학','겨울방학','급식시간','쉬는시간','재활용품','환경보호','세계지도','우주비행사','북두칠성','인공위성','전기자동차','고속열차','놀이동산','눈썰매장','운동회','학예회','태양계','별자리','보름달','과학자','반짝반짝','알록달록','데굴데굴','소곤소곤','두근두근',
+            '붕어빵','간호사','소방관','경찰관','요리사','초등학교','사물함','실내화','운동화','화장실','미술시간','체육시간','점심시간','애벌레','번데기','잠자리','메뚜기','귀뚜라미','무당벌레','달팽이','지렁이','두꺼비','제비꽃','나팔꽃','은행나무','단풍나무','소나무','대나무','눈싸움','물놀이','모래성','캠핑장']
+  },
+  en: {
+    short: ['cat','dog','sun','sky','run','red','box','pen','cup','ant','egg','fox','bee','map','hat','car','bus','pig','owl','jam',
+            'bat','bed','bag','big','boy','bug','cow','cry','cut','day','ear','eat','end','eye','fan','far','dad','bad','fly','fog',
+            'fun','get','ask','dry','hop','hot','ice','now','ham','you','jog','joy','key','kid','job','leg','lip','gym','low','man',
+            'mat','mix','mom','mud','net','new','nut','nap','off','oil','old','one','out','pan','dot','wow','pet','pie','pin','pot',
+            'rat','sit','yum','sad','she','sea','see','six','ski','son','can','tag','arm','put','tea','ten','tie','cap','pop','toe',
+            'top','toy','air','two','van','vet','hug','web','wet','mad','win','dig','yes','zoo','zip',
+            'bear','bird','blue','boat','book','cake','coin','corn','crab','deer','dish','door','drum','duck','farm','fire','fish','flag','frog','gift','girl','goat','gold','hand','home','jump','king','kite','lake','lamp','leaf','lion','milk','moon','nest','park','pink','rain','ring','rock','rose','sand','ship','shoe','snow','sock','song','star','swim','tree','wind','wolf','wood',
+            'baby','ball','bell','belt','bike','coat','desk','doll','face','foot','four','five','game','hair','hill','kick','knee','mask','nose','pear','play','pool','read','road','sail','salt','seed','sing','soap','soup','tail','walk','wall','wave','well','zero'],
+    long:  ['apple','school','tiger','happy','water','music','green','friend','family','rabbit','orange','pencil','flower','window','summer',
+            'banana','brother','camera','castle','cheese','chicken','circle','cloudy','cookie','crayon','dinner','dolphin','dragon','eraser',
+            'evening','forest','garden','giraffe','guitar','hamster','island','jungle','kitten','ladder','lemon','letter','library','magnet',
+            'market','monkey','morning','mountain','notebook','ocean','panda','parrot','peach','pillow','pirate','planet','pocket','potato',
+            'puppy','purple','puzzle','rainbow','river','robot','rocket','ruler','sandwich','scissors','season','shadow','sister','smile',
+            'snowman','soccer','spider','spring','station','strawberry','street','student','sugar','teacher','tennis','ticket','tomato',
+            'travel','triangle','turtle','umbrella','vacation','village','violin','waffle','whale','winter','yellow','zebra',
+            'airplane','alphabet','birthday','broccoli','butterfly','calendar','chocolate','computer','crocodile','dinosaur','elephant','favorite','festival','homework','hospital','kangaroo','keyboard','ladybug','lighthouse','medicine','pineapple','playground','rectangle','scientist','spaceship','submarine','sunflower','telephone','telescope','tomorrow','treasure','vegetable','waterfall','watermelon','wonderful','basketball','dragonfly',
+            'bicycle','breakfast','children','classroom','firefighter','goldfish','grandma','grandpa','holiday','lettuce','lunchbox','mermaid','mushroom','necklace','octopus','penguin','picture','princess','question','sailboat','seashell','seaweed','shoulder','snowball','starfish','swimming','toothbrush','weekend','whistle','windmill']
+  },
+  custom: { short: [], long: [], sentences: [] },
+
+  // 보스 문장 (어절 단위로 쪼개 순서대로 타이핑)
+  sentences: {
+    ko: ['가는 말이 고와야 오는 말이 곱다','백지장도 맞들면 낫다','티끌 모아 태산',
+         '우물 안 개구리','소 잃고 외양간 고친다','하늘의 별 따기','등잔 밑이 어둡다',
+         '원숭이도 나무에서 떨어진다','바늘 도둑이 소도둑 된다','고생 끝에 낙이 온다'],
+    en: ['the quick brown fox jumps','practice makes perfect','slow and steady wins the race',
+         'a friend in need is a friend indeed','every cloud has a silver lining',
+         'better late than never','no pain no gain','the early bird catches the worm','actions speak louder than words']
+  },
+
+  pickSentence(mode) {
+    // 커스텀 모드: 선생님이 넣은 문장(띄어쓰기 포함 항목)이 있으면 우선 사용
+    if (mode === 'custom' && this.custom.sentences.length) {
+      return this.custom.sentences[Math.floor(Math.random() * this.custom.sentences.length)];
+    }
+    const pool = this.sentences[mode];
+    if (pool) return pool[Math.floor(Math.random() * pool.length)];
+    // 문장이 없으면 단어장에서 4개를 이어 문장처럼 사용
+    return this.pickDistinct('custom', 4).join(' ');
+  },
+
+  linkWords: null,   // 링크(#w=)로 전달받은 선생님 단어장
+  meanings: new Map(),   // 단어 → 뜻 (내 단어장의 "단어=뜻" 항목)
+
+  loadCustom(source) {
+    const raw = source ?? this.linkWords ?? localStorage.getItem('typingGameWords') ?? '';
+    const entries = raw.split(/[,\n]/).map(w => w.trim()).filter(Boolean);
+    // "단어=뜻" 항목은 뜻 보고 치기용 / 띄어쓰기 포함 항목 = 보스 문장 / 나머지 = 일반 단어
+    this.meanings = new Map();
+    const plain = [];
+    for (const e of entries) {
+      const eq = e.indexOf('=');
+      if (eq > 0) {
+        const w = e.slice(0, eq).trim(), m = e.slice(eq + 1).trim();
+        if (w && !w.includes(' ')) { plain.push(w); if (m) this.meanings.set(w, m); }
+      } else plain.push(e);
+    }
+    this.custom.sentences = plain.filter(w => w.includes(' '));
+    const words = [...new Set(plain.filter(w => !w.includes(' ')))];
+    this.custom.short = words.filter(w => Hangul.decompose(w).length <= 6);
+    this.custom.long  = words.filter(w => Hangul.decompose(w).length > 6);
+    if (!this.custom.short.length) this.custom.short = words;
+    if (!this.custom.long.length)  this.custom.long  = words;
+    return words.length > 0;   // 단어(문장 제외)가 있어야 게임 진행 가능
+  },
+
+  // 서로 접두사 관계가 아닌 단어 n개 뽑기 (카드 선택 단어용)
+  pickDistinct(mode, n) {
+    const pool = [...this[mode].short].sort(() => Math.random() - 0.5);
+    const out = [];
+    for (const w of pool) {
+      const j = Hangul.decompose(w);
+      if (out.every(o => !Hangul.isPrefix(j, o.j) && !Hangul.isPrefix(o.j, j))) {
+        out.push({ w, j });
+        if (out.length === n) break;
+      }
+    }
+    return out.map(o => o.w);
+  }
+};
+
+/* ================================================================
+ * 난이도 프리셋 — 스폰 간격·적 속도·긴 단어 비율·보스 타이밍
+ * ================================================================ */
+const DIFFICULTY = {
+  // fastCPM: 이 타수 이상으로 단어를 완성하면 "빠른 입력" 보너스 (데미지 2배)
+  easy:   { spawnBase: 3.2, spawnMin: 1.4, spawnRamp: 0.015, speedMult: 0.75, speedRamp: 0.002, longRamp: 0.004, bossFirst: 120, bossNext: 100, fastCPM: 220 },
+  normal: { spawnBase: 2.4, spawnMin: 0.8, spawnRamp: 0.02,  speedMult: 1,    speedRamp: 0.004, longRamp: 0.006, bossFirst: 90,  bossNext: 75,  fastCPM: 280 },
+  hard:   { spawnBase: 1.8, spawnMin: 0.6, spawnRamp: 0.025, speedMult: 1.25, speedRamp: 0.006, longRamp: 0.008, bossFirst: 75,  bossNext: 60,  fastCPM: 340 }
+};
+
+/* ================================================================
+ * 4. Upgrades — 전리품 카드 정의 (로그라이크 강화)
+ * ================================================================ */
+const UPGRADES = [
+  { id: 'sentry',   icon: '◎', name: '수호자 드론', rarity: '고급', max: 3,
+    desc: '드론이 주위를 돌며 6초마다 가장 가까운 몬스터를 자동으로 격추합니다.',
+    apply: g => g.sentries.push({ angle: Math.random() * Math.PI * 2, timer: 3 }) },
+  { id: 'blast',    icon: '✦', name: '폭발 사격', rarity: '고급', max: 3,
+    desc: '단어를 완성해 격추하면 주변 몬스터도 폭발에 휘말립니다. (범위 +80)',
+    apply: g => g.blastRadius += 80 },
+  { id: 'slow',     icon: '◆', name: '감속장', rarity: '일반', max: 4,
+    desc: '모든 몬스터의 이동 속도가 12% 느려집니다.',
+    apply: g => g.speedMult *= 0.88 },
+  { id: 'medkit',   icon: '＋', name: '의료 팩', rarity: '일반', max: 99,
+    desc: '성벽의 체력을 2 회복합니다.',
+    apply: g => g.player.hp = Math.min(g.player.maxHp, g.player.hp + 2) },
+  { id: 'vitality', icon: '■', name: '강화 성벽', rarity: '일반', max: 3,
+    desc: '최대 체력이 1 늘어나고, 체력을 1 회복합니다.',
+    apply: g => { g.player.maxHp++; g.player.hp++; } },
+  { id: 'greed',    icon: '●', name: '점수 증폭', rarity: '일반', max: 4,
+    desc: '몬스터를 격추할 때 얻는 점수가 25% 증가합니다.',
+    apply: g => g.scoreMult += 0.25 },
+  { id: 'blades',   icon: '✕', name: '회전 칼날', rarity: '고급', max: 3,
+    desc: '칼날이 성벽 주위를 돌며 닿은 몬스터를 처치합니다. (칼날 +1)',
+    apply: g => g.blades++ },
+  { id: 'mine',     icon: '▦', name: '지뢰 설치', rarity: '고급', max: 3,
+    desc: '필드에 주기적으로 지뢰가 깔리고, 밟은 몬스터 주변이 폭발합니다. (설치 속도 증가)',
+    apply: g => {} },   // upgradeLevels.mine 수치 자체를 사용
+  { id: 'chain',    icon: '∞', name: '연쇄 광선', rarity: '고급', max: 3,
+    desc: '단어를 완성해 격추하면 광선이 가까운 몬스터에게 한 번 더 튕깁니다. (+1회)',
+    apply: g => g.chainJumps++ },
+  { id: 'shield',   icon: '◠', name: '콤보 보호막', rarity: '고급', max: 2,
+    desc: '보호막이 오타 1회를 대신 막아 콤보를 지켜줍니다. (30초마다 재충전)',
+    apply: g => { g.shield.max++; g.shield.charges++; } },
+  { id: 'lifesteal', icon: '↺', name: '흡수', rarity: '일반', max: 2,
+    desc: '몬스터 15마리를 직접 격추할 때마다 체력을 1 회복합니다. (중복 획득 시 8마리)',
+    apply: g => g.lifesteal.need = g.lifesteal.need ? 8 : 15 },
+  { id: 'xpamp',    icon: '↑', name: '성장 촉진', rarity: '일반', max: 3,
+    desc: '경험치 획득량이 30% 증가해 레벨이 더 빨리 오릅니다.',
+    apply: g => g.xpMult += 0.3 },
+  { id: 'frost',    icon: '❄', name: '냉동탄', rarity: '고급', max: 3,
+    desc: '단어 격추 시 주변 몬스터가 2초간 얼어붙어 느려집니다. (범위 +40)',
+    apply: g => g.frostRadius += g.frostRadius ? 40 : 130 },
+  { id: 'storm',    icon: '↯', name: '번개 폭풍', rarity: '고급', max: 3,
+    desc: '16초마다 하늘에서 번개가 떨어져 무작위 몬스터를 격추합니다. (+1발)',
+    apply: g => g.stormLevel++ },
+  { id: 'pierce',   icon: '→', name: '관통 사격', rarity: '고급', max: 2,
+    desc: '단어 격추 시 탄환이 그 뒤 일직선상의 몬스터를 꿰뚫습니다. (사거리 +300)',
+    apply: g => g.pierceLen += 300 },
+  { id: 'boomerang', icon: '◗', name: '부메랑', rarity: '고급', max: 2,
+    desc: '부메랑이 주기적으로 날아가 크게 돌아오며 경로의 몬스터를 처치합니다. (+1개)',
+    apply: g => g.boomerangs++ },
+  { id: 'regen',    icon: '♻', name: '재생', rarity: '일반', max: 1,
+    desc: '25초마다 체력을 1 자동 회복합니다.',
+    apply: g => g.regenOn = true },
+  { id: 'luck',     icon: '★', name: '행운', rarity: '일반', max: 2,
+    desc: '보급 상자가 더 자주 나타납니다.',
+    apply: g => g.crateInterval *= 0.65 }
+];
+
+/* ================================================================
+ * 5. Game — 게임 상태, 루프, 스폰, 렌더링
+ * ================================================================ */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const hiddenInput = document.getElementById('hiddenInput');
+
+const C = {
+  bg: '#e9e6df', ink: '#3f3d3a', sub: '#8b8880',
+  faint: 'rgba(63, 61, 58, 0.08)', line: '#d6d2c8',
+  accent: '#a04a4a', chipBg: '#55534e', chipText: '#f5f3ee'
+};
+const FONT = '"Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif';
+
+function resize() {
+  canvas.width = innerWidth * devicePixelRatio;
+  canvas.height = innerHeight * devicePixelRatio;
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+}
+addEventListener('resize', resize);
+resize();
+
+const Game = {
+  running: false,
+  paused: false,          // 전리품 선택 중 일시정지
+  mode: 'ko',
+  enemies: [],
+  effects: [],
+  player: { x: 0, y: 0, hp: 5, maxHp: 5 },
+  score: 0,
+  combo: 0,
+  maxCombo: 0,
+  kills: 0,
+  elapsed: 0,
+  spawnTimer: 0,
+  lastTime: 0,
+  // ── Phase 2: 레벨/강화 상태 ──
+  level: 1,
+  xp: 0,
+  upgradeLevels: {},      // { sentry: 2, ... } 획득 횟수
+  sentries: [],           // [{angle, timer}]
+  blastRadius: 0,
+  speedMult: 1,
+  scoreMult: 1,
+  blades: 0,              // 회전 칼날 개수
+  mines: [],              // [{x, y}]
+  mineTimer: 0,
+  chainJumps: 0,          // 연쇄 광선 횟수
+  shield: { charges: 0, max: 0, timer: 0 },   // 콤보 보호막
+  lifesteal: { need: 0, counter: 0 },
+  xpMult: 1,
+  // ── Phase 3: 보스/연출 ──
+  boss: null,             // {x, y, chunks, chunkIdx, word, jamo, radius, speed, summonTimer}
+  bossTimer: 90,          // 보스 등장까지 남은 시간
+  bossCount: 0,           // 처치한 보스 수 (다음 보스 강화)
+  shake: 0,               // 화면 흔들림 세기
+  freeze: 0,              // 히트스톱 (짧은 시간 정지)
+  bullets: [],            // 플레이어 탄환 (연출용 — 처치는 즉시, 파괴 연출만 지연)
+  hostiles: [],           // 적 탄환 (단어 입력으로 요격)
+  crates: [],             // 보급 상자
+  crateTimer: 25,
+  crateInterval: 30,
+  frostRadius: 0,         // 냉동탄
+  stormLevel: 0,          // 번개 폭풍
+  stormTimer: 16,
+  pierceLen: 0,           // 관통 사격
+  boomerangs: 0,          // 부메랑 개수
+  regenOn: false,
+  regenTimer: 25,
+  rushTimer: 40,          // 무리 러시 이벤트
+  rushPending: 0,
+  feverGlow: 0,           // 피버 타임 배경 전환 (0~1)
+  // ── 타속 통계 ──
+  typedJamo: 0,           // 완성한 단어들의 자모 수 합
+  typeTime: 0,            // 완성한 단어들의 입력 시간 합 (초)
+  wordsDone: 0,
+  missCount: 0,
+
+  mistakes: {},           // 이번 판 틀린 글자 { 'ㅔ>ㅐ': 3 }
+  weakJamo: [],           // 지난 판들의 약점 자모 (다음 판에 더 자주 출제)
+
+  get fever() { return this.combo >= 10; },
+
+  // 뜻 보고 치기: 내 단어장에 뜻이 있고 설정이 켜져 있을 때
+  meaningOf(word) {
+    if (this.mode !== 'custom' || localStorage.getItem('typingGameMeaning') === 'off') return null;
+    return WordBank.meanings.get(word) || null;
+  },
+
+  recordMistake(expected, got) {
+    const k = `${expected}>${got}`;
+    this.mistakes[k] = (this.mistakes[k] || 0) + 1;
+  },
+
+  // 평균 타수 (자모/분). 영어 모드는 WPM(=글자/5/분)으로 환산 표기
+  get cpm() { return this.typeTime > 0 ? Math.round(this.typedJamo / (this.typeTime / 60)) : 0; },
+  get accuracy() {
+    const total = this.wordsDone + this.missCount;
+    return total > 0 ? Math.round(this.wordsDone / total * 100) : 100;
+  },
+  // 초등학생에게 익숙한 "타수"(분당 입력 글자 수)로 통일 — 영어 모드도 동일
+  speedLabel() { return `타수 ${this.cpm}`; },
+
+  start(mode) {
+    this.mode = mode;
+    this.diff = DIFFICULTY[localStorage.getItem('typingGameDiff') || 'normal'];
+    this.enemies = [];
+    this.effects = [];
+    this.score = 0; this.combo = 0; this.maxCombo = 0; this.kills = 0;
+    this.mistakes = {};
+    this.elapsed = 0; this.spawnTimer = 0;
+    this.level = 1; this.xp = 0;
+    this.upgradeLevels = {}; this.sentries = [];
+    this.blastRadius = 0; this.speedMult = 1; this.scoreMult = 1;
+    this.blades = 0; this.mines = []; this.mineTimer = 0; this.chainJumps = 0;
+    this.shield = { charges: 0, max: 0, timer: 0 };
+    this.lifesteal = { need: 0, counter: 0 };
+    this.xpMult = 1;
+    this.boss = null; this.bossTimer = this.diff.bossFirst; this.bossCount = 0;
+    this.shake = 0; this.freeze = 0;
+    this.bullets = []; this.hostiles = []; this.crates = [];
+    this.crateTimer = 25; this.crateInterval = 30;
+    this.frostRadius = 0; this.stormLevel = 0; this.stormTimer = 16;
+    this.pierceLen = 0; this.boomerangs = 0;
+    this.regenOn = false; this.regenTimer = 25;
+    this.rushTimer = 40; this.rushPending = 0;
+    this.feverGlow = 0;
+    this.typedJamo = 0; this.typeTime = 0; this.wordsDone = 0; this.missCount = 0;
+    this.player = { x: innerWidth / 2, y: innerHeight / 2, hp: 5, maxHp: 5 };
+    this.running = true;
+    this.paused = false;
+    Typing.reset();   // 이전 판의 입력 잔상(raw/target) 제거 + 포커스
+    this.lastTime = performance.now();
+    requestAnimationFrame(t => this.loop(t));
+  },
+
+  spawnInterval() { return Math.max(this.diff.spawnMin, this.diff.spawnBase - this.elapsed * this.diff.spawnRamp); },
+  longWordChance() { return Math.min(0.45, this.elapsed * this.diff.longRamp); },
+  xpNeed() { return 25 + (this.level - 1) * 15; },
+
+  // 필드의 모든 단어(몬스터·탄환·상자·보스 어절)와 접두사 충돌이 없는 단어 뽑기
+  pickWord(pool) {
+    const taken = [...this.enemies, ...this.hostiles, ...this.crates].map(o => o.jamo);
+    if (this.boss) taken.push(this.boss.jamo);
+    let candidates = pool.filter(w => {
+      const j = Hangul.decompose(w);
+      return !taken.some(t => Hangul.isPrefix(j, t) || Hangul.isPrefix(t, j));
+    });
+    // 약점 연습: 자주 틀린 자모가 든 단어를 35% 확률로 우선 출제
+    if (this.weakJamo.length && Math.random() < 0.35) {
+      const weak = candidates.filter(w => Hangul.decompose(w).some(j => this.weakJamo.includes(j)));
+      if (weak.length) candidates = weak;
+    }
+    return candidates.length ? candidates[Math.floor(Math.random() * candidates.length)] : null;
+  },
+
+  edgePos(side) {
+    const [w, h] = [innerWidth, innerHeight];
+    return [
+      { x: Math.random() * w, y: -30 }, { x: Math.random() * w, y: h + 30 },
+      { x: -30, y: Math.random() * h }, { x: w + 30, y: Math.random() * h }
+    ][side];
+  },
+
+  spawnEnemy(sideOverride) {
+    const bank = WordBank[this.mode];
+    const isElite = this.elapsed > 60 && sideOverride === undefined && Math.random() < 0.08;
+    const useLong = isElite || Math.random() < this.longWordChance();
+    const word = this.pickWord(useLong ? bank.long : bank.short);
+    if (!word) return;
+
+    const pos = this.edgePos(sideOverride ?? Math.floor(Math.random() * 4));
+    const jamoLen = Hangul.decompose(word).length;
+    const baseSpeed = Math.max(22, 60 - jamoLen * 5) * this.diff.speedMult * (1 + this.elapsed * this.diff.speedRamp);
+
+    // 이동 패턴: 직진 / 지그재그 / 돌진 / 원거리 사수 (시간이 지나며 다양해짐)
+    let move = 'straight';
+    const r = Math.random();
+    if (!isElite) {
+      if (this.elapsed > 40 && !useLong && r < 0.15) move = 'shooter';
+      else if (r < 0.4) move = 'zigzag';
+      else if (r < 0.55 && !useLong) move = 'dash';
+    }
+
+    const shape = isElite ? 'elite'
+      : move === 'shooter' ? 'shooter'
+      : useLong ? ['ring', 'diamond'][Math.floor(Math.random() * 2)]
+      : ['dot', 'triangle'][Math.floor(Math.random() * 2)];
+
+    // 체력: 잡몹 1 / 탱커(긴 단어) 2 / 엘리트 3 — 빠른 타이핑은 데미지 2로 보상
+    const hp = isElite ? 3 : useLong ? 2 : 1;
+    this.enemies.push({
+      word, jamo: Hangul.decompose(word),
+      x: pos.x, y: pos.y, shape, move,
+      speed: isElite ? baseSpeed * 0.55 : baseSpeed,
+      radius: isElite ? 17 : useLong ? 10 : 6,
+      wobble: Math.random() * Math.PI * 2,
+      t: 0, frozenT: 0, shootT: 3 + Math.random() * 3,
+      hp, maxHp: hp, isElite,
+      useLong                        // 단어 교체 시 같은 풀에서 뽑기 위함
+    });
+  },
+
+  // 타이핑으로 몬스터 타격: 단어 1개 = 체력 1칸 (칸 수 = 쳐야 하는 단어 수)
+  hitEnemy(e, seconds) {
+    const wordCPM = seconds > 0 ? (e.jamo.length / (seconds / 60)) : 0;
+    const fast = wordCPM >= this.diff.fastCPM;   // 빠른 입력은 점수로만 보상
+    this.recordWord(e.jamo.length, seconds);
+
+    // 단어 하나 완성 = 콤보·점수 (격추 여부와 무관 — 타이핑 노력의 보상)
+    this.bumpCombo();
+    const mult = this.scoreMult * (1 + Math.floor(this.combo / 5) * 0.5);
+    const pts = Math.round(e.jamo.length * 10 * mult * (fast ? 1.5 : 1));
+    this.score += pts;
+    this.effects.push({ type: 'score', text: fast ? `+${pts} 빠른 입력!` : `+${pts}`, x: e.x, y: e.y - 24, life: 0.8 });
+
+    e.hp -= 1;
+    if (e.hp <= 0) {
+      this.killEnemy(e, { typed: true });
+    } else {
+      // 생존: 새 단어 부여 + 타격 연출
+      const pool = WordBank[this.mode][e.useLong || e.isElite ? 'long' : 'short'];
+      const next = this.pickWord(pool);
+      if (next) { e.word = next; e.jamo = Hangul.decompose(next); }
+      this.effects.push({ type: 'pop', x: e.x, y: e.y, life: 0.25 });
+      this.addShake(3);
+      Sound.bossHit();
+      this.procOnTypedKill(e.x, e.y);
+    }
+  },
+
+  // 자동 무기의 타격: 데미지 1 (죽을 때만 격추 처리)
+  damageEnemy(e, dmg = 1) {
+    e.hp -= dmg;
+    if (e.hp <= 0) this.killEnemy(e, { typed: false });
+    else this.effects.push({ type: 'pop', x: e.x, y: e.y, life: 0.2 });
+  },
+
+  recordWord(jamoLen, seconds) {
+    if (seconds > 0 && seconds < 30) {
+      this.typedJamo += jamoLen;
+      this.typeTime += seconds;
+      this.wordsDone++;
+    }
+  },
+
+  // typed=true → 플레이어가 직접 입력해 격추 (콤보·폭발 발동)
+  // 격추 처리 (콤보·점수는 hitEnemy가 담당 — 여기는 죽음 연출·경험치·드랍만)
+  killEnemy(enemy, { typed = false } = {}) {
+    const idx = this.enemies.indexOf(enemy);
+    if (idx === -1) return;
+    this.enemies.splice(idx, 1);
+    this.kills++;
+
+    if (!typed) {
+      // 자동 무기 격추: 소량 점수
+      const pts = Math.round(enemy.jamo.length * 10 * this.scoreMult);
+      this.score += pts;
+      this.effects.push({ type: 'score', text: `+${pts}`, x: enemy.x, y: enemy.y - 20, life: 0.7 });
+    }
+    this.gainXp(enemy.jamo.length);
+    this.addShake(typed ? 3 : 2);
+
+    if (typed) {
+      // 발사 연출: 탄환이 날아가 도착하는 순간 시체가 산산조각
+      Sound.shoot();
+      this.bullets.push({
+        x: this.player.x, y: this.player.y, tx: enemy.x, ty: enemy.y,
+        corpse: { x: enemy.x, y: enemy.y, shape: enemy.shape, radius: enemy.radius, word: enemy.word, wobble: enemy.wobble }
+      });
+      this.procOnTypedKill(enemy.x, enemy.y);
+    } else {
+      this.spawnDeathFx(enemy);   // 자동 무기는 즉시 파괴 연출
+    }
+
+    // 엘리트는 처치 시 보급 상자를 떨어뜨림
+    if (enemy.isElite) this.spawnCrate({ x: enemy.x, y: enemy.y });
+  },
+
+  addShake(mag) { this.shake = Math.min(18, this.shake + mag); },
+
+  // 콤보 증가 + 5의 배수마다 마일스톤 연출
+  bumpCombo() {
+    this.combo++;
+    this.maxCombo = Math.max(this.maxCombo, this.combo);
+    if (this.combo === 10) {
+      // 피버 타임 돌입!
+      this.effects.push({ type: 'infoText', text: '피버 타임! 오타 없이 계속 달리세요!', life: 1.8 });
+      this.addShake(8);
+      Sound.fever();
+    } else if (this.combo % 5 === 0) {
+      this.effects.push({ type: 'infoText', text: `콤보 x${this.combo}! 점수 배율 상승`, life: 1.2 });
+      Sound.milestone();
+    }
+  },
+
+  // 직접 타이핑 격추 시 발동하는 강화 효과 (일반 몬스터·보스 공용)
+  procOnTypedKill(x, y) {
+    // 폭발 사격: 주변 몬스터 연쇄 격추 (콤보는 오르지 않음)
+    if (this.blastRadius > 0) {
+      this.effects.push({ type: 'blast', x, y, r: this.blastRadius, life: 0.35 });
+      const caught = this.enemies.filter(e => Math.hypot(e.x - x, e.y - y) <= this.blastRadius);
+      for (const e of caught) this.damageEnemy(e);
+    }
+
+    // 연쇄 광선: 가까운 몬스터에게 광선이 튕김
+    if (this.chainJumps > 0) {
+      let from = { x, y };
+      for (let j = 0; j < this.chainJumps; j++) {
+        const next = this.enemies
+          .filter(e => Math.hypot(e.x - from.x, e.y - from.y) <= 260)
+          .sort((a, b) =>
+            Math.hypot(a.x - from.x, a.y - from.y) - Math.hypot(b.x - from.x, b.y - from.y))[0];
+        if (!next) break;
+        this.effects.push({ type: 'laser', x1: from.x, y1: from.y, x2: next.x, y2: next.y, life: 0.25 });
+        from = { x: next.x, y: next.y };
+        this.damageEnemy(next);
+      }
+    }
+
+    // 냉동탄: 격추 지점 주변 몬스터를 얼림
+    if (this.frostRadius > 0) {
+      this.effects.push({ type: 'frostRing', x, y, r: this.frostRadius, life: 0.4 });
+      for (const e of this.enemies) {
+        if (Math.hypot(e.x - x, e.y - y) <= this.frostRadius) e.frozenT = 2;
+      }
+    }
+
+    // 관통 사격: 격추 방향 일직선상의 몬스터를 꿰뚫음
+    if (this.pierceLen > 0) {
+      const dx = x - this.player.x, dy = y - this.player.y;
+      const d = Math.hypot(dx, dy) || 1;
+      const ux = dx / d, uy = dy / d;
+      this.effects.push({ type: 'laser', x1: x, y1: y,
+        x2: x + ux * this.pierceLen, y2: y + uy * this.pierceLen, life: 0.2 });
+      const caught = this.enemies.filter(e => {
+        const px = e.x - x, py = e.y - y;
+        const proj = px * ux + py * uy;
+        return proj > 0 && proj < this.pierceLen && Math.abs(px * uy - py * ux) < e.radius + 17;
+      });
+      for (const e of caught) this.damageEnemy(e);
+    }
+
+    // 흡수: 직접 격추 N마리마다 체력 회복
+    if (this.lifesteal.need > 0) {
+      this.lifesteal.counter++;
+      if (this.lifesteal.counter >= this.lifesteal.need) {
+        this.lifesteal.counter = 0;
+        if (this.player.hp < this.player.maxHp) {
+          this.player.hp++;
+          this.effects.push({ type: 'infoText', text: '체력 +1', life: 1 });
+        }
+      }
+    }
+  },
+
+  /* ── 보스 ── */
+  spawnBoss() {
+    const sentence = WordBank.pickSentence(this.mode);
+    const chunks = sentence.split(' ').filter(Boolean);
+    // 다음 보스일수록 어절 추가·속도 증가
+    for (let i = 0; i < this.bossCount && i < 3; i++) {
+      const extra = WordBank.pickSentence(this.mode).split(' ')[0];
+      if (extra) chunks.push(extra);
+    }
+    // 보스 유형: 돌격형(접근) / 선회형(거리 유지+탄막) / 분열형(느리지만 죽으면 분열)
+    const types = ['charge', 'orbit', 'split'];
+    const type = this.bossCount === 0 ? 'charge' : types[Math.floor(Math.random() * types.length)];
+    const typeName = { charge: '돌격형', orbit: '선회형', split: '분열형' }[type];
+    const baseSpeed = { charge: 13, orbit: 22, split: 9 }[type];
+
+    const angle = Math.random() * Math.PI * 2;
+    const d = Math.max(innerWidth, innerHeight) / 2 + 80;
+    this.boss = {
+      x: this.player.x + Math.cos(angle) * d,
+      y: this.player.y + Math.sin(angle) * d,
+      chunks, chunkIdx: 0,
+      word: chunks[0], jamo: Hangul.decompose(chunks[0]),
+      radius: 34, speed: (baseSpeed + this.bossCount * 2) * this.diff.speedMult,
+      summonTimer: { charge: 8, orbit: 10, split: 6 }[type],
+      isBoss: true, type,
+      orbitDir: Math.random() < 0.5 ? 1 : -1
+    };
+    this.addShake(10);
+    Sound.bossSpawn();
+    this.effects.push({ type: 'infoText', text: `보스 등장! (${typeName})`, life: 1.8 });
+  },
+
+  // 보스의 현재 어절 완성 → 체력 1칸 감소 (빠른 입력은 점수 1.5배)
+  hitBoss(secs = 0) {
+    const b = this.boss;
+    const fast = secs > 0 && (b.jamo.length / (secs / 60)) >= this.diff.fastCPM;
+    this.recordWord(b.jamo.length, secs);
+    this.bumpCombo();
+    const mult = this.scoreMult * (1 + Math.floor(this.combo / 5) * 0.5);
+    const pts = Math.round(b.jamo.length * 10 * mult * (fast ? 1.5 : 1));
+    this.score += pts;
+    this.effects.push({ type: 'score', text: fast ? `+${pts} 빠른 입력!` : `+${pts}`, x: b.x, y: b.y - b.radius - 44, life: 0.7 });
+    this.gainXp(b.jamo.length);
+    this.addShake(6);
+    this.freeze = 0.05;
+    Sound.shoot();
+    Sound.bossHit();
+    this.bullets.push({ x: this.player.x, y: this.player.y, tx: b.x, ty: b.y, corpse: null });
+    this.effects.push({ type: 'pop', x: b.x, y: b.y, life: 0.3 });
+    this.procOnTypedKill(b.x, b.y);
+
+    b.chunkIdx++;
+    if (b.chunkIdx >= b.chunks.length) {
+      // 보스 처치!
+      this.bossCount++;
+      this.score += 300 + this.bossCount * 100;
+      this.kills++;
+      this.addShake(18);
+      this.freeze = 0.18;
+      this.effects.push({ type: 'blast', x: b.x, y: b.y, r: 220, life: 0.5 });
+      this.effects.push({ type: 'infoText', text: '보스 처치! 전리품 획득', life: 1.5 });
+      const caught = this.enemies.filter(e => Math.hypot(e.x - b.x, e.y - b.y) <= 220);
+      for (const e of caught) this.damageEnemy(e);
+      // 분열형: 죽으면서 엘리트 2마리로 갈라짐
+      if (b.type === 'split') {
+        for (let i = 0; i < 2; i++) {
+          const word = this.pickWord(WordBank[this.mode].long);
+          if (!word) continue;
+          this.enemies.push({
+            word, jamo: Hangul.decompose(word),
+            x: b.x + (i ? 80 : -80), y: b.y, shape: 'elite', move: 'straight',
+            speed: 30 * this.diff.speedMult, radius: 17,
+            wobble: Math.random() * Math.PI * 2, t: 0, frozenT: 0, shootT: 99,
+            hp: 3, maxHp: 3, isElite: true, useLong: true
+          });
+        }
+        this.effects.push({ type: 'infoText', text: '보스가 분열했습니다!', life: 1.5 });
+      }
+      this.boss = null;
+      this.bossTimer = this.diff.bossNext;
+      Loot.open();          // 보스 보상
+    } else {
+      b.word = b.chunks[b.chunkIdx];
+      b.jamo = Hangul.decompose(b.word);
+      // 체력 절반 이하 → 분노 페이즈 (빨라지고 소환·탄막 가속)
+      if (!b.enraged && b.chunkIdx >= b.chunks.length / 2) {
+        b.enraged = true;
+        b.speed *= 1.6;
+        this.addShake(10);
+        Sound.bossSpawn();
+        this.effects.push({ type: 'infoText', text: '보스가 분노했습니다!', life: 1.5 });
+      }
+    }
+  },
+
+  gainXp(n) {
+    this.xp += n * this.xpMult;
+    if (this.xp >= this.xpNeed()) {
+      this.xp -= this.xpNeed();
+      this.level++;
+      Loot.open();
+    }
+  },
+
+  onMistype() {
+    this.missCount++;                  // 정확도 통계 (보호막 여부와 무관)
+    // 콤보 보호막: 오타 1회를 대신 흡수
+    if (!Loot.active && this.shield.charges > 0) {
+      this.shield.charges--;
+      this.effects.push({ type: 'infoText', text: '보호막 발동!', life: 1 });
+      Sound.shield();
+      return;
+    }
+    this.combo = 0;
+    Sound.miss();
+    const typed = hiddenInput.value;
+    if (typed) this.effects.push({ type: 'missText', text: typed, life: 0.6 });
+  },
+
+  loop(now) {
+    if (!this.running) return;
+    const dt = Math.min(0.05, (now - this.lastTime) / 1000);
+    this.lastTime = now;
+
+    // 흔들림 감쇠는 일시정지 여부와 무관하게 진행 (전리품 화면에서 떨림 방지)
+    this.shake = Math.max(0, this.shake - dt * 40);
+    // 피버 배경 전환 (부드럽게 fade in/out)
+    this.feverGlow += ((this.fever ? 1 : 0) - this.feverGlow) * Math.min(1, dt * 3);
+    if (!this.paused) this.update(dt);
+    this.render();
+    Keyboard.update();
+    requestAnimationFrame(t => this.loop(t));
+  },
+
+  update(dt) {
+    // 히트스톱: 타격 순간 아주 짧게 세상이 멈춤 (타격감)
+    if (this.freeze > 0) { this.freeze -= dt; return; }
+    this.elapsed += dt;
+
+    // 보스 등장 카운트다운 → 등장 → 이동/소환
+    if (!this.boss) {
+      this.bossTimer -= dt;
+      if (this.bossTimer <= 0) this.spawnBoss();
+    } else {
+      const b = this.boss;
+      const dx = this.player.x - b.x, dy = this.player.y - b.y;
+      const dist = Math.hypot(dx, dy);
+      if (b.type === 'orbit' && dist < 380) {
+        // 선회형: 일정 거리에서 플레이어 주위를 돔 (접촉 대신 탄막이 위협)
+        const a = Math.atan2(b.y - this.player.y, b.x - this.player.x) + b.orbitDir * 0.3 * dt;
+        const r = Math.max(310, dist - b.speed * this.speedMult * dt);
+        b.x = this.player.x + Math.cos(a) * r;
+        b.y = this.player.y + Math.sin(a) * r;
+      } else {
+        b.x += (dx / dist) * b.speed * this.speedMult * dt;
+        b.y += (dy / dist) * b.speed * this.speedMult * dt;
+      }
+      // 보스가 성벽에 닿으면 큰 피해 후 밀려남
+      if (dist < b.radius + 26) {
+        this.player.hp -= 2;
+        Typing.reset();
+        this.combo = 0;
+        this.addShake(14);
+        this.freeze = 0.1;
+        Sound.playerHit();
+        this.effects.push({ type: 'hit', life: 0.3 });
+        b.x -= (dx / dist) * 300;
+        b.y -= (dy / dist) * 300;
+        if (this.player.hp <= 0) return this.gameOver();
+      }
+      // 주기적으로 부하 소환
+      b.summonTimer -= dt;
+      if (b.summonTimer <= 0) {
+        this.spawnEnemy(); this.spawnEnemy();
+        if (b.enraged) this.spawnEnemy();
+        b.summonTimer = b.enraged ? 5 : 8;
+      }
+      // 탄막 발사 (요격 가능한 단어 탄환) — 선회형이 가장 잦음
+      b.volleyTimer = (b.volleyTimer ?? 6) - dt;
+      if (b.volleyTimer <= 0) {
+        const n = (b.type === 'orbit' ? 3 : 2) + (b.enraged ? 1 : 0);
+        for (let i = 0; i < n; i++) this.fireHostile(b.x, b.y, (i - (n - 1) / 2) * 0.35);
+        b.volleyTimer = { charge: b.enraged ? 7 : 11, orbit: b.enraged ? 4 : 6, split: b.enraged ? 9 : 13 }[b.type];
+      }
+    }
+
+    this.spawnTimer -= dt;
+    if (this.spawnTimer <= 0) {
+      this.spawnEnemy();
+      this.spawnTimer = this.spawnInterval();
+    }
+
+    // 적 이동 (패턴별) → 플레이어 접촉 시 피해
+    for (const e of [...this.enemies]) {
+      const dx = this.player.x - e.x, dy = this.player.y - e.y;
+      const dist = Math.hypot(dx, dy);
+      const ux = dx / dist, uy = dy / dist;
+      e.t += dt;
+      if (e.frozenT > 0) e.frozenT -= dt;
+
+      let sp = e.speed * this.speedMult;
+      if (e.frozenT > 0) sp *= 0.35;                        // 냉동 상태
+      if (e.move === 'dash') {
+        const cycle = e.t % 1.4;                            // 멈칫 → 돌진 반복
+        sp *= cycle < 0.8 ? 0.25 : 2.8;
+      }
+      let mx = ux * sp, my = uy * sp;
+      if (e.move === 'zigzag') {                            // 진행 방향에 수직으로 흔들림
+        const sway = Math.sin(e.t * 3.5) * 55;
+        mx += -uy * sway; my += ux * sway;
+      }
+      if (e.move === 'shooter') {                           // 사거리 유지하며 탄환 발사
+        if (dist < 340) { mx = 0; my = 0; }
+        e.shootT -= dt;
+        if (e.shootT <= 0 && dist < 600) {
+          this.fireHostile(e.x, e.y);
+          e.shootT = 6 + Math.random() * 2;
+        }
+      }
+      e.x += mx * dt;
+      e.y += my * dt;
+      e.wobble += dt * 6;
+      if (dist < e.radius + 22) {
+        this.enemies.splice(this.enemies.indexOf(e), 1);
+        this.player.hp--;
+        Typing.reset();
+        this.combo = 0;
+        this.addShake(12);
+        this.freeze = 0.07;
+        Sound.playerHit();
+        this.effects.push({ type: 'hit', life: 0.3 });
+        if (this.player.hp <= 0) return this.gameOver();
+      }
+    }
+
+    // 수호자 드론: 각자 6초마다 가장 가까운 몬스터 자동 격추
+    for (const s of this.sentries) {
+      s.angle += dt * 1.4;
+      s.timer -= dt;
+      if (s.timer <= 0 && this.enemies.length) {
+        const nearest = [...this.enemies].sort((a, b) =>
+          Math.hypot(a.x - this.player.x, a.y - this.player.y) -
+          Math.hypot(b.x - this.player.x, b.y - this.player.y))[0];
+        const sx = this.player.x + Math.cos(s.angle) * 44;
+        const sy = this.player.y + Math.sin(s.angle) * 44;
+        this.effects.push({ type: 'laser', x1: sx, y1: sy, x2: nearest.x, y2: nearest.y, life: 0.15 });
+        this.damageEnemy(nearest);
+        s.timer = 6;
+      }
+    }
+
+    // 회전 칼날: 궤도에 닿은 몬스터 처치
+    for (let i = 0; i < this.blades; i++) {
+      const a = this.elapsed * 2 + i * 2 * Math.PI / this.blades;
+      const bx = this.player.x + Math.cos(a) * 110;
+      const by = this.player.y + Math.sin(a) * 110;
+      for (const e of [...this.enemies]) {
+        if (Math.hypot(e.x - bx, e.y - by) < e.radius + 10) this.damageEnemy(e);
+      }
+    }
+
+    // 지뢰: 주기적으로 설치, 밟으면 소폭발
+    const mineLv = this.upgradeLevels.mine || 0;
+    if (mineLv > 0) {
+      this.mineTimer -= dt;
+      if (this.mineTimer <= 0 && this.mines.length < 6) {
+        this.mines.push({
+          x: 60 + Math.random() * (innerWidth - 120),
+          y: 120 + Math.random() * (innerHeight - 180)
+        });
+        this.mineTimer = 10 - mineLv * 2;
+      }
+      for (const mine of [...this.mines]) {
+        const hit = this.enemies.find(e => Math.hypot(e.x - mine.x, e.y - mine.y) < e.radius + 12);
+        if (hit) {
+          this.mines.splice(this.mines.indexOf(mine), 1);
+          this.effects.push({ type: 'blast', x: mine.x, y: mine.y, r: 70, life: 0.35 });
+          const caught = this.enemies.filter(e => Math.hypot(e.x - mine.x, e.y - mine.y) <= 70);
+          for (const e of caught) this.damageEnemy(e);
+        }
+      }
+    }
+
+    // 콤보 보호막 재충전 (30초)
+    if (this.shield.max > 0 && this.shield.charges < this.shield.max) {
+      this.shield.timer += dt;
+      if (this.shield.timer >= 30) {
+        this.shield.timer = 0;
+        this.shield.charges++;
+        this.effects.push({ type: 'infoText', text: '보호막 충전', life: 1 });
+      }
+    }
+
+    // 플레이어 탄환 (연출): 도착 시 시체를 산산조각
+    for (const bu of [...this.bullets]) {
+      const d = Math.hypot(bu.tx - bu.x, bu.ty - bu.y);
+      const step = 1400 * dt;
+      if (d <= step) {
+        this.bullets.splice(this.bullets.indexOf(bu), 1);
+        if (bu.corpse) this.spawnDeathFx(bu.corpse);
+        else this.effects.push({ type: 'pop', x: bu.tx, y: bu.ty, life: 0.25 });
+        Sound.kill();
+      } else {
+        bu.x += (bu.tx - bu.x) / d * step;
+        bu.y += (bu.ty - bu.y) / d * step;
+      }
+    }
+
+    // 적 탄환: 직선 비행 → 플레이어 명중 시 피해
+    for (const ho of [...this.hostiles]) {
+      ho.x += ho.vx * dt;
+      ho.y += ho.vy * dt;
+      if (Math.hypot(ho.x - this.player.x, ho.y - this.player.y) < 22) {
+        this.hostiles.splice(this.hostiles.indexOf(ho), 1);
+        this.player.hp--;
+        Typing.reset();
+        this.combo = 0;
+        this.addShake(12);
+        this.freeze = 0.07;
+        Sound.playerHit();
+        this.effects.push({ type: 'hit', life: 0.3 });
+        if (this.player.hp <= 0) return this.gameOver();
+      }
+    }
+
+    // 보급 상자: 주기 스폰, 수명 만료 시 소멸
+    this.crateTimer -= dt;
+    if (this.crateTimer <= 0) {
+      this.spawnCrate();
+      this.crateTimer = this.crateInterval * (0.8 + Math.random() * 0.4);
+    }
+    for (const c of [...this.crates]) {
+      c.life -= dt;
+      if (c.life <= 0) this.crates.splice(this.crates.indexOf(c), 1);
+    }
+
+    // 번개 폭풍: 주기적으로 무작위 몬스터 낙뢰
+    if (this.stormLevel > 0) {
+      this.stormTimer -= dt;
+      if (this.stormTimer <= 0) {
+        const targets = [...this.enemies].sort(() => Math.random() - 0.5).slice(0, this.stormLevel + 1);
+        for (const t of targets) {
+          this.effects.push({ type: 'bolt', x: t.x, y: t.y, life: 0.3 });
+          this.damageEnemy(t);
+        }
+        if (targets.length) Sound.bolt();
+        this.stormTimer = 16;
+      }
+    }
+
+    // 재생
+    if (this.regenOn) {
+      this.regenTimer -= dt;
+      if (this.regenTimer <= 0) {
+        this.regenTimer = 25;
+        if (this.player.hp < this.player.maxHp) {
+          this.player.hp++;
+          this.effects.push({ type: 'infoText', text: '재생 +1', life: 1 });
+        }
+      }
+    }
+
+    // 부메랑: elapsed 기반 사이클 (9초마다 3초 비행)
+    for (let i = 0; i < this.boomerangs; i++) {
+      const pos = this.boomerangPos(i);
+      if (!pos) continue;
+      for (const e of [...this.enemies]) {
+        if (Math.hypot(e.x - pos.x, e.y - pos.y) < e.radius + 14) this.damageEnemy(e);
+      }
+    }
+
+    // 피버: 플레이어 주변에서 불씨가 떠오름
+    if (this.fever) {
+      this.sparkTimer = (this.sparkTimer ?? 0) - dt;
+      if (this.sparkTimer <= 0) {
+        const a = Math.random() * Math.PI * 2, r = 40 + Math.random() * 120;
+        this.effects.push({ type: 'spark',
+          x: this.player.x + Math.cos(a) * r, y: this.player.y + Math.sin(a) * r,
+          vx: (Math.random() - 0.5) * 15, vy: -35 - Math.random() * 40, life: 1.1 });
+        this.sparkTimer = 0.12;
+      }
+    }
+
+    // 무리 러시: 경고 후 한 방향에서 떼 스폰
+    this.rushTimer -= dt;
+    if (this.rushTimer <= 0 && this.rushPending <= 0) {
+      this.rushPending = 1.5;
+      this.rushSide = Math.floor(Math.random() * 4);
+      this.effects.push({ type: 'infoText', text: '몬스터 무리가 몰려옵니다!', life: 1.5 });
+      Sound.bossHit();
+      this.rushTimer = 45;
+    }
+    if (this.rushPending > 0) {
+      this.rushPending -= dt;
+      if (this.rushPending <= 0) {
+        for (let i = 0; i < 7; i++) this.spawnEnemy(this.rushSide);
+      }
+    }
+
+    for (const fx of [...this.effects]) {
+      fx.life -= dt;
+      if (fx.type === 'particle' || fx.type === 'spark') { fx.x += fx.vx * dt; fx.y += fx.vy * dt; }
+      if (fx.type === 'shard' || fx.type === 'letter') {
+        fx.x += fx.vx * dt; fx.y += fx.vy * dt;
+        fx.vy += 260 * dt;                                  // 파편은 중력을 받아 떨어짐
+        fx.rot += fx.vrot * dt;
+      }
+      if (fx.life <= 0) this.effects.splice(this.effects.indexOf(fx), 1);
+    }
+  },
+
+  // 부메랑 위치: 나갔다 크게 돌아오는 궤적 (없으면 null)
+  boomerangPos(i) {
+    const period = 9, flight = 3;
+    const t = (this.elapsed + i * period / 2) % period;
+    if (t > flight) return null;
+    const tt = t / flight;
+    const r = Math.sin(Math.PI * tt) * 300;
+    const a = (i * Math.PI) + tt * 3.2 + this.elapsed * 0.1;
+    return { x: this.player.x + Math.cos(a) * r, y: this.player.y + Math.sin(a) * r, spin: tt };
+  },
+
+  // 적 탄환 발사 (짧은 단어가 달린 요격 가능 투사체)
+  fireHostile(x, y, angleOffset = 0) {
+    const word = this.pickWord(WordBank[this.mode].short);
+    if (!word) return;
+    const dx = this.player.x - x, dy = this.player.y - y;
+    const base = Math.atan2(dy, dx) + angleOffset;
+    const sp = 55 * this.diff.speedMult;
+    this.hostiles.push({
+      word, jamo: Hangul.decompose(word), isHostile: true,
+      x, y, vx: Math.cos(base) * sp, vy: Math.sin(base) * sp
+    });
+  },
+
+  spawnCrate(pos) {
+    const word = this.pickWord(WordBank[this.mode].short);
+    if (!word) return;
+    this.crates.push({
+      word, jamo: Hangul.decompose(word), isCrate: true,
+      x: pos?.x ?? 80 + Math.random() * (innerWidth - 160),
+      y: pos?.y ?? 140 + Math.random() * (innerHeight - 220),
+      life: 14
+    });
+  },
+
+  // 적 탄환 요격 (타이핑 방어 — 콤보 인정)
+  interceptHostile(ho, secs = 0) {
+    this.hostiles.splice(this.hostiles.indexOf(ho), 1);
+    this.recordWord(ho.jamo.length, secs);
+    this.bumpCombo();
+    const pts = Math.round(ho.jamo.length * 8 * this.scoreMult);
+    this.score += pts;
+    this.effects.push({ type: 'score', text: `+${pts}`, x: ho.x, y: ho.y - 16, life: 0.7 });
+    this.effects.push({ type: 'pop', x: ho.x, y: ho.y, life: 0.25 });
+    this.gainXp(2);
+    this.addShake(3);
+    Sound.kill();
+  },
+
+  collectCrate(crate, secs = 0) {
+    this.crates.splice(this.crates.indexOf(crate), 1);
+    this.recordWord(crate.jamo.length, secs);
+    this.bumpCombo();
+    Sound.pickup();
+    const roll = Math.random();
+    if (roll < 0.45 && this.player.hp < this.player.maxHp) {
+      this.player.hp++;
+      this.effects.push({ type: 'infoText', text: '보급: 체력 +1', life: 1.2 });
+    } else if (roll < 0.75) {
+      // 폭탄: 상자 주변 대폭발
+      this.effects.push({ type: 'blast', x: crate.x, y: crate.y, r: 280, life: 0.5 });
+      this.addShake(12);
+      const caught = this.enemies.filter(e => Math.hypot(e.x - crate.x, e.y - crate.y) <= 280);
+      for (const e of caught) this.damageEnemy(e);
+      this.effects.push({ type: 'infoText', text: '보급: 폭탄!', life: 1.2 });
+    } else {
+      // 냉동: 모든 몬스터 3초 빙결
+      for (const e of this.enemies) e.frozenT = 3;
+      this.effects.push({ type: 'infoText', text: '보급: 전체 냉동!', life: 1.2 });
+    }
+  },
+
+  // 파괴 연출: 팝 링 + 파편 + 단어 글자 흩날림
+  spawnDeathFx(c) {
+    this.effects.push({ type: 'pop', x: c.x, y: c.y, life: 0.25 });
+    for (let i = 0; i < 8; i++) {
+      const a = Math.random() * Math.PI * 2, s = 60 + Math.random() * 140;
+      this.effects.push({ type: 'shard', x: c.x, y: c.y,
+        vx: Math.cos(a) * s, vy: Math.sin(a) * s - 60,
+        rot: Math.random() * Math.PI, vrot: (Math.random() - 0.5) * 12,
+        size: 3 + Math.random() * 5, life: 0.55 });
+    }
+    if (c.word) {
+      for (let i = 0; i < c.word.length; i++) {
+        const a = -Math.PI / 2 + (Math.random() - 0.5) * 1.6, s = 90 + Math.random() * 90;
+        this.effects.push({ type: 'letter', char: c.word[i],
+          x: c.x + (i - c.word.length / 2) * 14, y: c.y - c.radius - 12,
+          vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+          rot: 0, vrot: (Math.random() - 0.5) * 10, life: 0.6 });
+      }
+    }
+  },
+
+  /* ── 기하 도형 그리기 (몬스터·시체 공용, 호출측이 색을 설정) ── */
+  drawShape(shape, x, y, r) {
+    if (shape === 'dot') {
+      ctx.beginPath(); ctx.arc(x, y, r - 1, 0, Math.PI * 2); ctx.fill();
+    } else if (shape === 'triangle') {
+      ctx.beginPath();
+      ctx.moveTo(x, y - r); ctx.lineTo(x + r, y + r); ctx.lineTo(x - r, y + r);
+      ctx.closePath(); ctx.fill();
+    } else if (shape === 'ring') {
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y, r - 5, 0, Math.PI * 2); ctx.fill();
+    } else if (shape === 'diamond') {
+      ctx.beginPath();
+      ctx.moveTo(x, y - r); ctx.lineTo(x + r, y); ctx.lineTo(x, y + r); ctx.lineTo(x - r, y);
+      ctx.closePath(); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y - r + 4); ctx.lineTo(x + r - 4, y); ctx.lineTo(x, y + r - 4); ctx.lineTo(x - r + 4, y);
+      ctx.closePath(); ctx.fill();
+    } else if (shape === 'shooter') {
+      // 사수: 속이 빈 삼각형 + 중심점
+      ctx.beginPath();
+      ctx.moveTo(x, y - r - 2); ctx.lineTo(x + r + 2, y + r); ctx.lineTo(x - r - 2, y + r);
+      ctx.closePath(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y + r / 3, 2.5, 0, Math.PI * 2); ctx.fill();
+    } else if (shape === 'elite') {
+      // 엘리트: 큰 이중 마름모 + 중심점
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(x, y - r); ctx.lineTo(x + r, y); ctx.lineTo(x, y + r); ctx.lineTo(x - r, y);
+      ctx.closePath(); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y - r + 7); ctx.lineTo(x + r - 7, y); ctx.lineTo(x, y + r - 7); ctx.lineTo(x - r + 7, y);
+      ctx.closePath(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = 2;
+    }
+  },
+
+  drawEnemy(e, isTarget) {
+    const bob = Math.sin(e.wobble) * 2;
+    const x = e.x, y = e.y + bob, r = e.radius;
+    // 빙결 상태는 흐린 회색으로
+    ctx.strokeStyle = ctx.fillStyle = e.frozenT > 0 ? C.sub : C.accent;
+    ctx.lineWidth = 2;
+    this.drawShape(e.shape, x, y, r);
+    // 체력 조각 (체력 2 이상인 몬스터)
+    if (e.maxHp > 1) {
+      const bw = e.maxHp * 14 - 4;
+      for (let i = 0; i < e.maxHp; i++) {
+        ctx.fillStyle = i < e.hp ? C.accent : C.line;
+        ctx.fillRect(x - bw / 2 + i * 14, y + r + 8, 10, 4);
+      }
+      ctx.fillStyle = e.frozenT > 0 ? C.sub : C.accent;
+    }
+    if (isTarget) {
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(x, y, r + 6, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    ctx.font = `600 16px ${FONT}`;
+    const labelY = y - r - 12;
+    const matched = isTarget ? Hangul.charsCovered(e.word, Typing.jamo.length) : 0;
+    const meaning = this.meaningOf(e.word);
+    const done = e.word.slice(0, matched);
+    // 뜻 보고 치기: 단어 대신 초성 힌트(영어는 첫 글자 + 밑줄)를 보여 줌
+    const rest = meaning ? hintOf(e.word, matched) : e.word.slice(matched);
+    if (meaning) {
+      ctx.save();
+      ctx.font = `600 13px ${FONT}`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = isTarget ? C.ink : '#6f6c66';
+      const lines = wrapText(meaning, 15);
+      lines.forEach((ln, i) => ctx.fillText(ln, x, labelY - 20 - (lines.length - 1 - i) * 16));
+      ctx.restore();
+    }
+    const doneW = ctx.measureText(done).width;
+    const totalW = doneW + ctx.measureText(rest).width;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = C.accent;
+    ctx.fillText(done, x - totalW / 2, labelY);
+    ctx.fillStyle = isTarget ? C.ink : C.sub;
+    ctx.fillText(rest, x - totalW / 2 + doneW, labelY);
+    if (isTarget) {
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x - totalW / 2, labelY + 5); ctx.lineTo(x + totalW / 2, labelY + 5);
+      ctx.stroke();
+    }
+  },
+
+  render() {
+    const [w, h] = [innerWidth, innerHeight];
+    const p = this.player;
+    ctx.save();
+    // 화면 흔들림: 감쇠 중인 세기만큼 랜덤 오프셋
+    if (this.shake > 0.5) {
+      ctx.translate((Math.random() - 0.5) * this.shake, (Math.random() - 0.5) * this.shake);
+    }
+    ctx.fillStyle = C.bg;
+    ctx.fillRect(-30, -30, w + 60, h + 60);
+    // 피버: 옅은 테두리 글로우만 (배경색은 그대로 — 눈 피로 방지)
+    const g = this.feverGlow;
+    if (g > 0.05) {
+      ctx.strokeStyle = `rgba(160, 74, 74, ${g * (0.1 + Math.sin(this.elapsed * 5) * 0.04)})`;
+      ctx.lineWidth = 8;
+      ctx.strokeRect(3, 3, w - 6, h - 6);
+    }
+
+    ctx.strokeStyle = C.faint; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 180, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(p.x, p.y, 300, 0, Math.PI * 2); ctx.stroke();
+
+    const hitFx = this.effects.find(f => f.type === 'hit');
+    if (hitFx) {
+      ctx.fillStyle = `rgba(160, 74, 74, ${hitFx.life * 0.4})`;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    for (const fx of this.effects) {
+      if (fx.type === 'laser') {
+        ctx.strokeStyle = `rgba(63, 61, 58, ${fx.life / 0.15 * 0.6})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(fx.x1, fx.y1); ctx.lineTo(fx.x2, fx.y2); ctx.stroke();
+      } else if (fx.type === 'particle') {
+        ctx.fillStyle = C.accent;
+        ctx.globalAlpha = Math.min(1, fx.life * 2.2);
+        ctx.fillRect(fx.x - 2, fx.y - 2, 4, 4);
+        ctx.globalAlpha = 1;
+      } else if (fx.type === 'blast') {
+        // 폭발 범위가 퍼져나가는 링 (life가 0.35보다 길게 시작해도 안전하게 클램프)
+        const prog = Math.max(0, 1 - fx.life / 0.35);
+        ctx.strokeStyle = `rgba(160, 74, 74, ${Math.min(1, fx.life / 0.35) * 0.7})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(fx.x, fx.y, fx.r * prog, 0, Math.PI * 2); ctx.stroke();
+      } else if (fx.type === 'pop') {
+        // 격추 순간 터지는 작은 링
+        const prog = 1 - fx.life / 0.25;
+        ctx.strokeStyle = `rgba(63, 61, 58, ${fx.life / 0.25})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(fx.x, fx.y, 8 + prog * 18, 0, Math.PI * 2); ctx.stroke();
+      } else if (fx.type === 'score') {
+        // 획득 점수가 떠오르며 사라짐
+        ctx.globalAlpha = Math.min(1, fx.life * 2);
+        ctx.fillStyle = C.ink;
+        ctx.font = `700 14px ${FONT}`;
+        ctx.textAlign = 'center';
+        ctx.fillText(fx.text, fx.x, fx.y - (0.7 - fx.life) * 45);
+        ctx.globalAlpha = 1;
+      } else if (fx.type === 'shard') {
+        // 회전하며 흩어지는 파편
+        ctx.save();
+        ctx.translate(fx.x, fx.y);
+        ctx.rotate(fx.rot);
+        ctx.globalAlpha = Math.min(1, fx.life * 2.5);
+        ctx.strokeStyle = C.accent;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(-fx.size, 0); ctx.lineTo(fx.size, 0); ctx.stroke();
+        ctx.restore();
+        ctx.globalAlpha = 1;
+      } else if (fx.type === 'letter') {
+        // 단어의 글자가 흩날림
+        ctx.save();
+        ctx.translate(fx.x, fx.y);
+        ctx.rotate(fx.rot);
+        ctx.globalAlpha = Math.min(1, fx.life * 2);
+        ctx.fillStyle = C.sub;
+        ctx.font = `600 15px ${FONT}`;
+        ctx.textAlign = 'center';
+        ctx.fillText(fx.char, 0, 0);
+        ctx.restore();
+        ctx.globalAlpha = 1;
+      } else if (fx.type === 'spark') {
+        // 피버 불씨: 작은 버건디 마름모가 떠오르며 사라짐
+        ctx.globalAlpha = Math.min(1, fx.life) * 0.7;
+        ctx.fillStyle = C.accent;
+        ctx.beginPath();
+        ctx.moveTo(fx.x, fx.y - 3); ctx.lineTo(fx.x + 2.5, fx.y); ctx.lineTo(fx.x, fx.y + 3); ctx.lineTo(fx.x - 2.5, fx.y);
+        ctx.closePath(); ctx.fill();
+        ctx.globalAlpha = 1;
+      } else if (fx.type === 'bolt') {
+        // 하늘에서 내리꽂는 번개
+        ctx.strokeStyle = `rgba(160, 74, 74, ${fx.life / 0.3})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(fx.x + 14, fx.y - 220);
+        ctx.lineTo(fx.x - 6, fx.y - 90);
+        ctx.lineTo(fx.x + 6, fx.y - 70);
+        ctx.lineTo(fx.x, fx.y);
+        ctx.stroke();
+      } else if (fx.type === 'frostRing') {
+        // 냉동탄 범위 표시
+        ctx.strokeStyle = `rgba(139, 136, 128, ${fx.life / 0.4 * 0.8})`;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath(); ctx.arc(fx.x, fx.y, fx.r * (1 - fx.life / 0.4 * 0.3), 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    // ── 시체 + 플레이어 탄환 (연출) ──
+    for (const bu of this.bullets) {
+      if (bu.corpse) {
+        ctx.strokeStyle = ctx.fillStyle = C.accent;
+        ctx.lineWidth = 2;
+        this.drawShape(bu.corpse.shape, bu.corpse.x, bu.corpse.y, bu.corpse.radius);
+      }
+      // 탄환: 진행 방향을 향한 탄두 + 꼬리 궤적
+      const d = Math.hypot(bu.tx - bu.x, bu.ty - bu.y) || 1;
+      const ux = (bu.tx - bu.x) / d, uy = (bu.ty - bu.y) / d;
+      ctx.strokeStyle = 'rgba(63, 61, 58, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(bu.x - ux * 18, bu.y - uy * 18); ctx.lineTo(bu.x, bu.y); ctx.stroke();
+      ctx.save();
+      ctx.translate(bu.x, bu.y);
+      ctx.rotate(Math.atan2(uy, ux));
+      ctx.fillStyle = C.ink;
+      ctx.beginPath();                                   // 뾰족한 탄두 + 몸통
+      ctx.moveTo(6, 0); ctx.lineTo(1, -2.5); ctx.lineTo(-5, -2.5);
+      ctx.lineTo(-5, 2.5); ctx.lineTo(1, 2.5);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    // ── 적 탄환 (요격 가능한 단어 투사체) ──
+    for (const ho of this.hostiles) {
+      const isTarget = ho === Typing.target;
+      // 가시 돋친 구체 (천천히 회전)
+      ctx.save();
+      ctx.translate(ho.x, ho.y);
+      ctx.rotate(this.elapsed * 2.5);
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let k = 0; k < 8; k++) {
+        const ka = k * Math.PI / 4;
+        ctx.moveTo(Math.cos(ka) * 4, Math.sin(ka) * 4);
+        ctx.lineTo(Math.cos(ka) * 9, Math.sin(ka) * 9);
+      }
+      ctx.stroke();
+      ctx.fillStyle = C.accent;
+      ctx.beginPath(); ctx.arc(0, 0, 4.5, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      if (isTarget) {
+        ctx.strokeStyle = C.ink;
+        ctx.beginPath(); ctx.arc(ho.x, ho.y, 13, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.font = `600 14px ${FONT}`;
+      const matched = isTarget ? Hangul.charsCovered(ho.word, Typing.jamo.length) : 0;
+      const done = ho.word.slice(0, matched), rest = ho.word.slice(matched);
+      const doneW = ctx.measureText(done).width;
+      const totalW = doneW + ctx.measureText(rest).width;
+      ctx.textAlign = 'left';
+      ctx.fillStyle = C.accent;
+      ctx.fillText(done, ho.x - totalW / 2, ho.y - 16);
+      ctx.fillStyle = isTarget ? C.ink : C.sub;
+      ctx.fillText(rest, ho.x - totalW / 2 + doneW, ho.y - 16);
+      ctx.textAlign = 'center';
+    }
+
+    // ── 보급 상자 ──
+    for (const c of this.crates) {
+      const isTarget = c === Typing.target;
+      const blink = c.life < 4 && Math.sin(c.life * 10) > 0;   // 사라지기 직전 깜빡임
+      ctx.globalAlpha = blink ? 0.35 : 1;
+      ctx.fillStyle = '#f2f0ea';
+      ctx.strokeStyle = isTarget ? C.ink : C.sub;
+      ctx.lineWidth = 2;
+      ctx.fillRect(c.x - 12, c.y - 12, 24, 24);
+      ctx.strokeRect(c.x - 12, c.y - 12, 24, 24);
+      ctx.strokeStyle = C.accent;
+      ctx.beginPath(); ctx.moveTo(c.x - 12, c.y); ctx.lineTo(c.x + 12, c.y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(c.x, c.y - 12); ctx.lineTo(c.x, c.y + 12); ctx.stroke();
+      ctx.font = `600 15px ${FONT}`;
+      const matched = isTarget ? Hangul.charsCovered(c.word, Typing.jamo.length) : 0;
+      const done = c.word.slice(0, matched), rest = c.word.slice(matched);
+      const doneW = ctx.measureText(done).width;
+      const totalW = doneW + ctx.measureText(rest).width;
+      ctx.textAlign = 'left';
+      ctx.fillStyle = C.accent;
+      ctx.fillText(done, c.x - totalW / 2, c.y - 22);
+      ctx.fillStyle = isTarget ? C.ink : C.sub;
+      ctx.fillText(rest, c.x - totalW / 2 + doneW, c.y - 22);
+      ctx.textAlign = 'center';
+      ctx.globalAlpha = 1;
+    }
+
+    // ── 부메랑 ──
+    for (let i = 0; i < this.boomerangs; i++) {
+      const pos = this.boomerangPos(i);
+      if (!pos) continue;
+      ctx.save();
+      ctx.translate(pos.x, pos.y);
+      ctx.rotate(this.elapsed * 14);
+      // ㄱ자로 꺾인 두 팔 + 둥근 끝단 = 부메랑 실루엣
+      ctx.strokeStyle = C.ink;
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(0, 3);
+      ctx.lineTo(0, -15);
+      ctx.moveTo(0, 3);
+      ctx.lineTo(14, 9);
+      ctx.stroke();
+      // 중심 이음새 점
+      ctx.fillStyle = C.accent;
+      ctx.beginPath(); ctx.arc(0, 2, 2.2, 0, Math.PI * 2); ctx.fill();
+      ctx.lineCap = 'butt';
+      ctx.restore();
+    }
+
+    // ── 플레이어: 이중 링 + 체력 ──
+    // 피버: 숨쉬는 버건디 오라 링
+    if (g > 0.05) {
+      const breath = 26 + Math.sin(this.elapsed * 4) * 5;
+      ctx.strokeStyle = `rgba(160, 74, 74, ${g * 0.55})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(p.x, p.y, breath, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.strokeStyle = C.ink;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 14, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0.4, Math.PI * 2 - 0.4); ctx.stroke();
+
+    // 수호자 드론 (쿼드콥터: 몸체 + 팔 4개 + 로터)
+    for (const s of this.sentries) {
+      const sx = p.x + Math.cos(s.angle) * 44;
+      const sy = p.y + Math.sin(s.angle) * 44;
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(s.angle);
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5;
+      ctx.beginPath();                                   // 대각선 팔 4개
+      ctx.moveTo(-6, -6); ctx.lineTo(6, 6);
+      ctx.moveTo(-6, 6); ctx.lineTo(6, -6);
+      ctx.stroke();
+      for (const [ax, ay] of [[-6, -6], [6, -6], [-6, 6], [6, 6]]) {   // 로터
+        ctx.beginPath(); ctx.arc(ax, ay, 3.2, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.fillStyle = C.ink;                             // 몸체
+      ctx.fillRect(-3, -3, 6, 6);
+      ctx.fillStyle = C.accent;                          // 카메라 렌즈
+      ctx.beginPath(); ctx.arc(0, 0, 1.4, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    // 회전 칼날 (자전하는 수리검: 4갈래 날 + 중심 링)
+    for (let i = 0; i < this.blades; i++) {
+      const a = this.elapsed * 2 + i * 2 * Math.PI / this.blades;
+      const bx = p.x + Math.cos(a) * 110;
+      const by = p.y + Math.sin(a) * 110;
+      ctx.save();
+      ctx.translate(bx, by);
+      ctx.rotate(this.elapsed * 9 + i);                  // 빠른 자전
+      ctx.fillStyle = C.ink;
+      for (let k = 0; k < 4; k++) {
+        ctx.beginPath();
+        ctx.moveTo(0, -3); ctx.lineTo(2.5, -5); ctx.lineTo(0, -13); ctx.lineTo(-2.5, -5);
+        ctx.closePath(); ctx.fill();
+        ctx.rotate(Math.PI / 2);
+      }
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 1.5;   // 중심 링
+      ctx.beginPath(); ctx.arc(0, 0, 2.5, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
+
+    // 지뢰 (반구 돔 + 뇌관 침 + 깜빡이는 경고등)
+    for (const mine of this.mines) {
+      const mx = mine.x, my = mine.y;
+      ctx.fillStyle = C.accent;
+      ctx.beginPath(); ctx.arc(mx, my + 1, 7, Math.PI, 0); ctx.closePath(); ctx.fill();   // 돔
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(mx - 10, my + 1); ctx.lineTo(mx + 10, my + 1); ctx.stroke();   // 바닥선
+      ctx.beginPath();                                   // 뇌관 침 3개
+      ctx.moveTo(mx - 4, my - 5); ctx.lineTo(mx - 7, my - 9);
+      ctx.moveTo(mx, my - 6); ctx.lineTo(mx, my - 11);
+      ctx.moveTo(mx + 4, my - 5); ctx.lineTo(mx + 7, my - 9);
+      ctx.stroke();
+      ctx.globalAlpha = 0.4 + Math.sin(this.elapsed * 6) * 0.6;   // 경고등 깜빡임
+      ctx.fillStyle = '#f2f0ea';
+      ctx.beginPath(); ctx.arc(mx, my - 2, 1.6, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // 콤보 보호막 (플레이어 위쪽의 호, 충전 수만큼 겹침)
+    for (let i = 0; i < this.shield.charges; i++) {
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 21 + i * 5, -2.4, -0.75); ctx.stroke();
+    }
+
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(p.x - 24, p.y + 30); ctx.lineTo(p.x + 24, p.y + 30); ctx.stroke();
+    ctx.font = `600 14px ${FONT}`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = C.sub;
+    ctx.fillText(`${p.hp} / ${p.maxHp}`, p.x, p.y + 50);
+
+    // ── 입력 중인 텍스트: 플레이어 바로 아래 (입력창 대체) ──
+    const missFx = this.effects.find(f => f.type === 'missText');
+    ctx.font = `800 24px ${FONT}`;
+    if (Typing.raw) {
+      ctx.fillStyle = C.ink;
+      ctx.fillText(Typing.raw, p.x, p.y + 84);
+    } else if (missFx) {
+      // 오타는 버건디로 흔들리며 사라짐
+      const shake = Math.sin(missFx.life * 60) * 4;
+      ctx.globalAlpha = missFx.life / 0.6;
+      ctx.fillStyle = C.accent;
+      ctx.fillText(missFx.text, p.x + shake, p.y + 84);
+      ctx.globalAlpha = 1;
+    } else if (this.elapsed < 8) {
+      ctx.font = `500 15px ${FONT}`;
+      ctx.fillStyle = '#b5b1a6';
+      ctx.fillText(this.mode === 'custom' && WordBank.meanings.size && this.meaningOf([...WordBank.meanings.keys()][0])
+        ? '뜻을 보고 단어를 입력하세요' : '단어를 입력하세요', p.x, p.y + 82);
+    }
+
+    // ── 콤보: 입력 텍스트 아래 ──
+    if (this.combo >= 2) {
+      const mult = 1 + Math.floor(this.combo / 5) * 0.5;
+      ctx.fillStyle = this.fever ? C.accent : C.ink;   // 피버 중엔 버건디
+      ctx.font = `700 19px ${FONT}`;
+      ctx.fillText(`올바른 입력 콤보 x${this.combo}`, p.x, p.y + 118);
+      if (mult > 1) {
+        ctx.fillStyle = C.sub;
+        ctx.font = `500 14px ${FONT}`;
+        ctx.fillText(`점수 x${mult}`, p.x, p.y + 140);
+      }
+      const prog = (this.combo % 5) / 5;
+      ctx.strokeStyle = C.line; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(p.x - 40, p.y + 152); ctx.lineTo(p.x + 40, p.y + 152); ctx.stroke();
+      ctx.strokeStyle = C.ink;
+      ctx.beginPath(); ctx.moveTo(p.x - 40, p.y + 152); ctx.lineTo(p.x - 40 + 80 * prog, p.y + 152); ctx.stroke();
+    }
+
+    // 안내 텍스트 (보호막 발동, 체력 회복 등)
+    const infoFx = this.effects.find(f => f.type === 'infoText');
+    if (infoFx) {
+      ctx.globalAlpha = Math.min(1, infoFx.life);
+      ctx.fillStyle = C.accent;
+      ctx.font = `700 15px ${FONT}`;
+      ctx.textAlign = 'center';
+      ctx.fillText(infoFx.text, p.x, p.y - 40);
+      ctx.globalAlpha = 1;
+    }
+
+    // 적
+    for (const e of this.enemies) this.drawEnemy(e, e === Typing.target);
+
+    // 보스
+    if (this.boss) this.drawBoss();
+
+    // ── 좌상단: 실시간 타속·정확도 ──
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = `600 15px ${FONT}`;
+    ctx.fillStyle = C.sub;
+    ctx.fillText(`${this.speedLabel()} · 정확도 ${this.accuracy}%`, 20, 34);
+
+    // ── 상단 중앙 HUD ──
+    ctx.textAlign = 'center';
+    if (this.boss) {
+      // 보스전: 타이머 대신 안내 문구
+      ctx.fillStyle = C.ink;
+      ctx.font = `800 28px ${FONT}`;
+      ctx.fillText('보스를 처치하세요!', w / 2, 58);
+    } else {
+      ctx.font = `600 12px ${FONT}`;
+      const chipW = 96;
+      ctx.fillStyle = C.chipBg;
+      ctx.fillRect(w / 2 - chipW / 2, 16, chipW, 22);
+      ctx.fillStyle = C.chipText;
+      ctx.fillText('보스 등장까지', w / 2, 31);
+
+      const t = Math.max(0, this.bossTimer);
+      const m = String(Math.floor(t / 60)).padStart(2, '0');
+      const s = String(Math.floor(t % 60)).padStart(2, '0');
+      const cs = String(Math.floor((t % 1) * 100)).padStart(2, '0');
+      ctx.fillStyle = C.ink;
+      ctx.font = `800 34px ${FONT}`;
+      ctx.fillText(`${m}:${s}:${cs}`, w / 2, 72);
+      // 보스 등장 임박 경고 (깜빡임)
+      if (t < 5 && Math.sin(this.elapsed * 8) > 0) {
+        ctx.fillStyle = C.accent;
+        ctx.font = `800 18px ${FONT}`;
+        ctx.fillText('보스 접근 중!', w / 2, 132);
+      }
+    }
+
+    ctx.fillStyle = C.sub;
+    ctx.font = `600 15px ${FONT}`;
+    ctx.fillText(`레벨 ${this.level} · 점수 ${this.score}`, w / 2, 96);
+
+    // 경험치 바 (Glyphica의 레벨 진행 바)
+    const xpProg = this.xp / this.xpNeed();
+    ctx.strokeStyle = C.line; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(w / 2 - 85, 108); ctx.lineTo(w / 2 + 85, 108); ctx.stroke();
+    ctx.strokeStyle = C.ink;
+    ctx.beginPath(); ctx.moveTo(w / 2 - 85, 108); ctx.lineTo(w / 2 - 85 + 170 * xpProg, 108); ctx.stroke();
+
+    // 피버 타임 배너 (두근거리는 펄스)
+    if (g > 0.3) {
+      const pulse = 1 + Math.sin(this.elapsed * 7) * 0.07;
+      ctx.save();
+      ctx.translate(w / 2, 142);
+      ctx.scale(pulse, pulse);
+      ctx.globalAlpha = g;
+      ctx.fillStyle = C.accent;
+      ctx.font = `800 24px ${FONT}`;
+      ctx.fillText('FEVER TIME!', 0, 0);
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.restore();   // 화면 흔들림 원복
+  },
+
+  /* ── 보스 그리기: 작은 원 무리가 도는 큰 덩어리 (레퍼런스 보스) ── */
+  drawBoss() {
+    const b = this.boss, t = this.elapsed;
+    ctx.strokeStyle = b.enraged ? C.accent : C.ink;   // 분노 시 버건디
+    ctx.lineWidth = 2;
+    // 유형별 무리 형태: 돌격형=원 / 선회형=삼각형 / 분열형=마름모
+    for (let i = 0; i < 10; i++) {
+      const a = t * 0.8 + i * Math.PI * 2 / 10;
+      const ex = b.x + Math.cos(a) * b.radius;
+      const ey = b.y + Math.sin(a) * b.radius;
+      ctx.beginPath();
+      if (b.type === 'orbit') {
+        ctx.moveTo(ex, ey - 9); ctx.lineTo(ex + 8, ey + 7); ctx.lineTo(ex - 8, ey + 7);
+        ctx.closePath();
+      } else if (b.type === 'split') {
+        ctx.moveTo(ex, ey - 9); ctx.lineTo(ex + 8, ey); ctx.lineTo(ex, ey + 9); ctx.lineTo(ex - 8, ey);
+        ctx.closePath();
+      } else {
+        ctx.arc(ex, ey, 9, 0, Math.PI * 2);
+      }
+      ctx.stroke();
+    }
+    // 눈
+    ctx.fillStyle = C.ink;
+    ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = C.accent;
+    ctx.beginPath(); ctx.arc(b.x + 2, b.y - 2, 2.5, 0, Math.PI * 2); ctx.fill();
+
+    // 체력 조각 바 (남은 어절 수)
+    const total = b.chunks.length, left = total - b.chunkIdx;
+    const bw = Math.max(70, total * 14), seg = bw / total;
+    for (let i = 0; i < total; i++) {
+      ctx.fillStyle = i < left ? C.accent : C.line;
+      ctx.fillRect(b.x - bw / 2 + i * seg, b.y + b.radius + 16, seg - 2, 5);
+    }
+
+    // 현재 어절 (크게) + 남은 문장 미리보기 (작게)
+    const isTarget = Typing.target === b;
+    const labelY = b.y - b.radius - 26;
+    ctx.font = `700 22px ${FONT}`;
+    const matched = isTarget ? Hangul.charsCovered(b.word, Typing.jamo.length) : 0;
+    const done = b.word.slice(0, matched), rest = b.word.slice(matched);
+    const doneW = ctx.measureText(done).width;
+    const totalW = doneW + ctx.measureText(rest).width;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = C.accent;
+    ctx.fillText(done, b.x - totalW / 2, labelY);
+    ctx.fillStyle = C.ink;
+    ctx.fillText(rest, b.x - totalW / 2 + doneW, labelY);
+    ctx.strokeStyle = C.accent; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(b.x - totalW / 2, labelY + 6); ctx.lineTo(b.x + totalW / 2, labelY + 6);
+    ctx.stroke();
+    ctx.textAlign = 'center';
+    const preview = b.chunks.slice(b.chunkIdx + 1).join(' ');
+    if (preview) {
+      ctx.font = `500 13px ${FONT}`;
+      ctx.fillStyle = C.sub;
+      ctx.fillText(preview, b.x, labelY - 24);
+    }
+  },
+
+  gameOver() {
+    this.running = false;
+    document.getElementById('finalScore').textContent = this.score;
+    document.getElementById('finalStats').innerHTML =
+      `평균 <b>${this.speedLabel()}</b> · 정확도 <b>${this.accuracy}%</b> · 입력한 단어 <b>${this.wordsDone}</b>개<br>` +
+      `레벨 <b>${this.level}</b> · 보스 처치 <b>${this.bossCount}</b> · 물리친 몬스터 <b>${this.kills}</b>마리 · 최고 콤보 <b>x${this.maxCombo}</b> · 버틴 시간 <b>${Math.floor(this.elapsed)}초</b>`;
+    document.getElementById('finalStats').appendChild(this.weakReport());
+    Keyboard.update();
+    document.getElementById('gameOverScreen').classList.remove('hidden');
+  },
+
+  // 틀린 글자 분석 카드 (사용자 입력이 섞이므로 textContent로만 구성)
+  weakReport() {
+    const box = document.createElement('div');
+    box.className = 'weak';
+    const ttl = document.createElement('div');
+    ttl.className = 'ttl';
+    box.appendChild(ttl);
+    const top = Object.entries(this.mistakes).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    if (!top.length) { this.weakJamo = []; ttl.textContent = '틀린 글자가 없어요. 완벽해요!'; return box; }
+    ttl.textContent = '자주 틀린 글자';
+    for (const [k, n] of top) {
+      const [exp, got] = k.split('>');
+      const line = document.createElement('div');
+      const b = document.createElement('b');
+      b.textContent = exp;
+      const g = document.createElement('b');
+      g.textContent = got;
+      const info = Keyboard.lookup(exp);
+      line.append(b, ' 자리에 ', g, ` 입력 (${n}번)` + (info ? ` · ${exp}: ${info.finger}${info.shift ? ' + Shift' : ''} [${info.key.toUpperCase()}]` : ''));
+      box.appendChild(line);
+    }
+    // 다음 판 약점 연습 대상
+    this.weakJamo = [...new Set(top.map(([k]) => k.split('>')[0]))];
+    const note = document.createElement('div');
+    note.textContent = `다시 하기를 누르면 ${this.weakJamo.join(', ')}이(가) 든 단어가 더 자주 나와요.`;
+    box.appendChild(note);
+    return box;
+  }
+};
+
+/* ================================================================
+ * 6. Loot — 전리품 카드 선택 (레벨업 시 일시정지 + 3택)
+ * ================================================================ */
+const Loot = {
+  cards: [],          // [{def, word, jamo, el}]
+
+  open() {
+    if (this.active) return;   // 보스 처치+레벨업이 겹쳐도 한 번만
+    Game.paused = true;
+    Typing.reset();
+    this.rerolled = false;
+    this.buildCards();
+    document.getElementById('lootScreen').classList.remove('hidden');
+    Sound.loot();
+    hiddenInput.focus();
+  },
+
+  buildCards() {
+    // 아직 최대 레벨이 아닌 강화 중 3개 무작위 (부족하면 있는 만큼)
+    const available = UPGRADES.filter(u => (Game.upgradeLevels[u.id] || 0) < u.max);
+    const picked = [...available].sort(() => Math.random() - 0.5).slice(0, 3);
+    let words = WordBank.pickDistinct(Game.mode, picked.length);
+    // 단어장이 작아 서로 겹치지 않는 단어가 모자라면 기본 낱말로 대신
+    if (words.length < picked.length) words = WordBank.pickDistinct(Game.mode === 'en' ? 'en' : 'ko', picked.length);
+
+    const wrap = document.getElementById('lootCards');
+    wrap.innerHTML = '';
+    this.cards = picked.map((def, i) => {
+      const word = words[i];
+      const owned = Game.upgradeLevels[def.id] || 0;
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = `
+        <div class="card-icon">${def.icon}</div>
+        <div class="card-name">${def.name}</div>
+        <div class="card-rarity ${def.rarity !== '일반' ? 'rare' : ''}">${def.rarity}${owned ? ` · 보유 ${owned}` : ''}</div>
+        <div class="card-desc">${def.desc}</div>
+        <div class="card-word"><span class="done"></span><span class="rest"></span></div>`;
+      el.querySelector('.rest').textContent = word;   // 사용자 단어는 textContent로 (링크 단어장 XSS 방지)
+      wrap.appendChild(el);
+      return { def, word, jamo: Hangul.decompose(word), el };
+    });
+  },
+
+  // 다른 선택지 뽑기 (전리품당 1회, 스페이스)
+  reroll() {
+    if (!this.active || this.rerolled) return;
+    this.rerolled = true;
+    Typing.reset();
+    this.buildCards();
+    Sound.pickup();
+  },
+
+  // 입력이 바뀔 때마다 카드 단어와 접두사 대조 (Typing에서 호출)
+  onInput(jamo) {
+    let anyPrefix = false;
+    for (const c of this.cards) {
+      const matched = Hangul.isPrefix(jamo, c.jamo) ? Hangul.charsCovered(c.word, jamo.length) : 0;
+      if (matched > 0 || (jamo.length && Hangul.isPrefix(jamo, c.jamo))) anyPrefix = true;
+      c.el.querySelector('.done').textContent = c.word.slice(0, matched);
+      c.el.querySelector('.rest').textContent = c.word.slice(matched);
+    }
+    const complete = this.cards.findIndex(c => jamo.length === c.jamo.length && Hangul.isPrefix(jamo, c.jamo));
+    if (complete !== -1) { this.choose(complete); return; }
+    if (jamo.length && !anyPrefix) { Game.onMistype(); Typing.reset(); }
+  },
+
+  choose(i) {
+    const { def } = this.cards[i];
+    Game.upgradeLevels[def.id] = (Game.upgradeLevels[def.id] || 0) + 1;
+    def.apply(Game);
+    document.getElementById('lootScreen').classList.add('hidden');
+    this.cards = [];
+    Typing.reset();
+    Game.paused = false;
+    hiddenInput.focus();
+  },
+
+  get active() { return this.cards.length > 0; }
+};
+
+/* ================================================================
+ * 7. Typing — 입력 관리 (IME 대응 자모 접두사 매칭)
+ * ================================================================ */
+const Typing = {
+  raw: '',
+  jamo: [],
+  target: null,
+  attemptStart: null,     // 이번 단어 입력을 시작한 시각 (타속 측정)
+
+  onInput() {
+    if (!Game.running) return;
+    this.raw = hiddenInput.value;
+    this.jamo = Hangul.decompose(this.raw);
+    if (this.jamo.length && this.attemptStart === null) this.attemptStart = performance.now();
+
+    // 전리품 화면이 열려 있으면 카드 선택에 입력을 라우팅
+    if (Loot.active) { Loot.onInput(this.jamo); return; }
+
+    if (!this.jamo.length) { this.target = null; return; }
+
+    // 몬스터·적 탄환·보급 상자·보스 모두 타겟 후보
+    const field = [...Game.enemies, ...Game.hostiles, ...Game.crates];
+    if (Game.boss) field.push(Game.boss);
+    let candidates = field.filter(e => Hangul.isPrefix(this.jamo, e.jamo));
+    const exact = candidates.find(e => e.jamo.length === this.jamo.length);
+    if (exact) {
+      this.target = exact;   // 정확히 완성된 단어가 있으면 그쪽 우선 (접두사가 겹치는 단어 대비)
+    } else if (this.target && candidates.includes(this.target)) {
+      // 타겟 유지
+    } else if (candidates.length) {
+      candidates.sort((a, b) =>
+        Math.hypot(a.x - Game.player.x, a.y - Game.player.y) -
+        Math.hypot(b.x - Game.player.x, b.y - Game.player.y));
+      this.target = candidates[0];
+    } else {
+      // 틀린 글자 분석: 노리던 단어와 처음 어긋난 자모를 기록
+      const t = this.target;
+      if (t) {
+        let i = 0;
+        while (i < this.jamo.length && this.jamo[i] === t.jamo[i]) i++;
+        if (t.jamo[i] && this.jamo[i]) Game.recordMistake(t.jamo[i], this.jamo[i]);
+      }
+      Game.onMistype();
+      this.reset();
+      return;
+    }
+
+    if (this.jamo.length === this.target.jamo.length) {
+      const t = this.target;
+      const secs = this.attemptStart ? (performance.now() - this.attemptStart) / 1000 : 0;
+      if (t.isBoss) Game.hitBoss(secs);
+      else if (t.isHostile) Game.interceptHostile(t, secs);
+      else if (t.isCrate) Game.collectCrate(t, secs);
+      else Game.hitEnemy(t, secs);
+      this.reset();
+    }
+  },
+
+  reset() {
+    this.raw = '';
+    this.jamo = [];
+    this.target = null;
+    this.attemptStart = null;
+    hiddenInput.value = '';
+    // IME 조합 중이던 상태를 강제로 끊는 트릭 (blur 없이는 조합 버퍼가 남음)
+    hiddenInput.blur();
+    hiddenInput.focus();
+  }
+};
+
+hiddenInput.addEventListener('input', () => Typing.onInput());
+hiddenInput.addEventListener('keydown', e => {
+  if (e.key === ' ' && Loot.active) {
+    e.preventDefault();
+    Loot.reroll();                     // 전리품 화면: 스페이스 = 다른 선택지 1회
+    Loot.onInput([]);
+    return;
+  }
+  if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    Typing.reset();
+    if (Loot.active) Loot.onInput([]);
+  }
+});
+document.addEventListener('click', () => { if (Game.running) hiddenInput.focus(); });
+
+/* ================================================================
+ * 8. UI — 시작/게임오버/단어장 편집
+ * ================================================================ */
+const startScreen = document.getElementById('startScreen');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const wordEditor = document.getElementById('wordEditor');
+const customWordsInput = document.getElementById('customWordsInput');
+
+document.querySelectorAll('[data-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.dataset.mode;
+    if (mode === 'custom' && !WordBank.loadCustom()) {
+      alert('저장된 단어장이 없어요. 먼저 "단어장 만들기"에서 단어를 저장해 주세요!');
+      return;
+    }
+    startScreen.classList.add('hidden');
+    Game.start(mode);
+  });
+});
+
+// 난이도 선택 (localStorage에 저장, 기본 보통)
+const diffBtns = document.querySelectorAll('[data-diff]');
+function syncDiffButtons() {
+  const cur = localStorage.getItem('typingGameDiff') || 'normal';
+  diffBtns.forEach(b => b.classList.toggle('active', b.dataset.diff === cur));
+}
+diffBtns.forEach(b => b.addEventListener('click', () => {
+  localStorage.setItem('typingGameDiff', b.dataset.diff);
+  syncDiffButtons();
+}));
+syncDiffButtons();
+
+// ── 단어장 링크 공유: URL 해시에 base64url(UTF-8)로 인코딩 ──
+const WordLink = {
+  encode(s) {
+    const bytes = new TextEncoder().encode(s);
+    let bin = '';
+    for (const b of bytes) bin += String.fromCharCode(b);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  },
+  decode(s) {
+    const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/'));
+    return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+  }
+};
+
+// 링크로 접속: #w=... 를 해석해 선생님 단어장 모드로 안내
+(() => {
+  const m = location.hash.match(/#w=([A-Za-z0-9_-]+)/);
+  if (!m) return;
+  try {
+    WordBank.linkWords = WordLink.decode(m[1]);
+    const notice = document.querySelector('#startScreen p');
+    notice.innerHTML = '선생님이 보내준 <b>단어장이 준비됐어요!</b><br>[내 단어장]을 눌러 시작하세요.';
+    // 내 단어장 버튼을 주 버튼으로 강조
+    document.querySelector('[data-mode="ko"]').classList.remove('primary');
+    document.querySelector('[data-mode="custom"]').classList.add('primary');
+  } catch (e) { /* 잘못된 링크는 조용히 무시 */ }
+})();
+
+// ── 엑셀 템플릿/업로드 (SheetJS는 필요할 때만 동적 로드) ──
+async function loadSheetJS() {
+  if (window.XLSX) return;
+  await new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+    s.onload = res;
+    s.onerror = () => rej(new Error('엑셀 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'));
+    document.head.appendChild(s);
+  });
+}
+
+// 워크북의 모든 셀에서 단어 추출 (헤더 '단어'는 제외)
+function wordsFromWorkbook(wb) {
+  const out = [];
+  for (const name of wb.SheetNames) {
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1 });
+    const pairMode = rows.length && rows[0].some(c => String(c ?? '').trim() === '뜻');
+    for (const row of rows) {
+      if (pairMode) {
+        // 1열 = 단어, 2열 = 뜻 (뜻이 있으면 "단어=뜻")
+        const w = String(row[0] ?? '').trim(), m = String(row[1] ?? '').trim().replace(/,/g, ' ');
+        if (w && w !== '단어') out.push(m && m !== '뜻' ? `${w}=${m}` : w);
+        continue;
+      }
+      for (const cell of row) {
+        const w = String(cell ?? '').trim();
+        if (w && w !== '단어') out.push(w);
+      }
+    }
+  }
+  return [...new Set(out)];   // 중복 제거
+}
+
+document.getElementById('templateBtn').addEventListener('click', async () => {
+  try {
+    await loadSheetJS();
+    const ws = XLSX.utils.aoa_to_sheet([['단어', '뜻'],
+      ['광합성', '식물이 빛을 받아 양분을 만드는 일'], ['증산작용', '잎의 기공으로 물이 빠져나가는 일'],
+      ['잎맥', ''], ['뿌리털', ''],
+      ['식물은 빛으로 양분을 만든다', ''],
+      ['(위 예시를 지우고 단어를 한 줄에 하나씩 적어 주세요)', ''],
+      ['(뜻 칸은 비워도 돼요. 뜻을 적으면 "뜻 보고 치기"로 연습해요)', ''],
+      ['(띄어쓰기가 있는 문장을 넣으면 보스 전투 문장이 됩니다)', '']]);
+    ws['!cols'] = [{ wch: 30 }, { wch: 40 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '단어장');
+    XLSX.writeFile(wb, '타자게임_단어장_템플릿.xlsx');
+  } catch (e) { alert(e.message); }
+});
+
+document.getElementById('uploadBtn').addEventListener('click', () => {
+  document.getElementById('excelFile').click();
+});
+
+document.getElementById('excelFile').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    await loadSheetJS();
+    const wb = XLSX.read(await file.arrayBuffer());
+    const words = wordsFromWorkbook(wb)
+      .filter(w => !w.startsWith('('));   // 템플릿 안내 문구 제외
+    if (!words.length) { alert('엑셀에서 단어를 찾지 못했어요. 템플릿을 확인해 주세요.'); return; }
+    customWordsInput.value = words.join(', ');
+    alert(`단어 ${words.length}개를 불러왔어요! "학생용 링크 만들기" 또는 "이 컴퓨터에 저장"을 눌러 주세요.`);
+  } catch (err) {
+    alert(err.message || '파일을 읽지 못했어요. .xlsx 형식인지 확인해 주세요.');
+  } finally {
+    e.target.value = '';   // 같은 파일 재업로드 허용
+  }
+});
+
+document.getElementById('linkBtn').addEventListener('click', () => {
+  const raw = customWordsInput.value.trim();
+  const wordCount = raw.split(/[,\n]/).map(w => w.trim()).filter(w => w && !w.includes(' ')).length;
+  if (wordCount < 3) { alert('단어(문장 제외)를 3개 이상 입력해 주세요!'); return; }
+  showLink(buildLink(raw));
+});
+
+const soundBtn = document.getElementById('soundBtn');
+soundBtn.textContent = `효과음: ${Sound.enabled ? '켬' : '끔'}`;
+soundBtn.addEventListener('click', () => {
+  soundBtn.textContent = `효과음: ${Sound.toggle() ? '켬' : '끔'}`;
+});
+
+// ── 여러 단어장 저장/관리 ──
+const WordSets = {
+  load() {
+    try { return JSON.parse(localStorage.getItem('typingGameWordSets')) || []; }
+    catch (e) { return []; }
+  },
+  save(sets) { localStorage.setItem('typingGameWordSets', JSON.stringify(sets)); },
+  // 예전 단일 저장 방식에서 이전
+  migrate() {
+    const legacy = localStorage.getItem('typingGameWords');
+    if (legacy && !this.load().length) this.save([{ name: '기본 단어장', words: legacy }]);
+  }
+};
+WordSets.migrate();
+
+function buildLink(raw) {
+  const entries = raw.split(/[,\n]/).map(w => w.trim()).filter(Boolean);
+  return location.origin + location.pathname + '#w=' + WordLink.encode(entries.join(','));
+}
+
+function showLink(url) {
+  const out = document.getElementById('linkOut');
+  out.style.display = 'block';
+  out.value = url;
+  document.getElementById('linkHint').style.display = 'block';
+  out.focus(); out.select();
+  try { navigator.clipboard.writeText(url); } catch (e) { /* 선택된 상태라 수동 복사 가능 */ }
+}
+
+function renderSetList() {
+  const wrap = document.getElementById('setList');
+  wrap.innerHTML = '';
+  for (const set of WordSets.load()) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:8px 12px;';
+    const label = document.createElement('span');
+    const count = set.words.split(/[,\n]/).filter(w => w.trim()).length;
+    label.textContent = `${set.name} (${count}개)`;   // 사용자 입력 → textContent로 안전하게
+    label.style.cssText = 'flex:1; font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+    row.appendChild(label);
+    const mkBtn = (text, cls, fn) => {
+      const b = document.createElement('button');
+      b.className = `btn mini ${cls}`;
+      b.textContent = text;
+      b.addEventListener('click', fn);
+      row.appendChild(b);
+    };
+    mkBtn('불러오기', 'sub', () => {
+      document.getElementById('setName').value = set.name;
+      customWordsInput.value = set.words;
+      localStorage.setItem('typingGameWords', set.words);   // 활성 단어장으로 지정
+    });
+    mkBtn('링크 복사', 'primary', () => showLink(buildLink(set.words)));
+    mkBtn('삭제', 'sub', () => {
+      if (!confirm(`'${set.name}' 단어장을 삭제할까요?`)) return;
+      WordSets.save(WordSets.load().filter(s => s.name !== set.name));
+      renderSetList();
+    });
+    wrap.appendChild(row);
+  }
+}
+
+document.getElementById('editBtn').addEventListener('click', () => {
+  customWordsInput.value = localStorage.getItem('typingGameWords') || '';
+  renderSetList();
+  wordEditor.classList.toggle('open');
+});
+
+document.getElementById('saveWordsBtn').addEventListener('click', () => {
+  const name = document.getElementById('setName').value.trim() || '이름 없는 단어장';
+  const raw = customWordsInput.value.trim();
+  if (!raw.split(/[,\n]/).some(w => w.trim() && !w.includes(' '))) {
+    alert('단어를 1개 이상 입력해 주세요!');
+    return;
+  }
+  const sets = WordSets.load().filter(s => s.name !== name);   // 같은 이름은 덮어쓰기
+  sets.unshift({ name, words: raw });
+  WordSets.save(sets);
+  localStorage.setItem('typingGameWords', raw);   // 방금 저장한 것이 활성 단어장
+  renderSetList();
+  alert(`'${name}' 단어장이 저장되었어요! 이제 "내 단어장" 모드로 게임할 수 있어요.\n\n(주의: 지금 이 컴퓨터의 이 브라우저에만 저장됩니다. 다른 곳에서도 쓰려면 "학생용 링크 만들기"로 링크를 만들어 두세요!)`);
+});
+
+document.getElementById('retryBtn').addEventListener('click', () => {
+  gameOverScreen.classList.add('hidden');
+  Game.start(Game.mode);
+});
+
+document.getElementById('menuBtn').addEventListener('click', () => {
+  gameOverScreen.classList.add('hidden');
+  startScreen.classList.remove('hidden');
+});
+/* ================================================================
+ * 9-0. Keyboard — 화면 키보드 손가락 안내 (두벌식 / 영문 QWERTY)
+ * ================================================================ */
+const Keyboard = (() => {
+  const ROWS = [['q','w','e','r','t','y','u','i','o','p'], ['a','s','d','f','g','h','j','k','l'], ['z','x','c','v','b','n','m']];
+  const KO = { q:'ㅂ',w:'ㅈ',e:'ㄷ',r:'ㄱ',t:'ㅅ',y:'ㅛ',u:'ㅕ',i:'ㅑ',o:'ㅐ',p:'ㅔ',a:'ㅁ',s:'ㄴ',d:'ㅇ',f:'ㄹ',g:'ㅎ',
+               h:'ㅗ',j:'ㅓ',k:'ㅏ',l:'ㅣ',z:'ㅋ',x:'ㅌ',c:'ㅊ',v:'ㅍ',b:'ㅠ',n:'ㅜ',m:'ㅡ' };
+  const KO_SHIFT = { q:'ㅃ',w:'ㅉ',e:'ㄸ',r:'ㄲ',t:'ㅆ',o:'ㅒ',p:'ㅖ' };
+  const FINGER = { q:0,a:0,z:0, w:1,s:1,x:1, e:2,d:2,c:2, r:3,f:3,v:3,t:3,g:3,b:3,
+                   y:4,h:4,n:4,u:4,j:4,m:4, i:5,k:5, o:6,l:6, p:7 };
+  const NAMES = ['왼손 새끼손가락','왼손 약손가락','왼손 가운뎃손가락','왼손 집게손가락',
+                 '오른손 집게손가락','오른손 가운뎃손가락','오른손 약손가락','오른손 새끼손가락'];
+  const REV = {};
+  for (const k in KO) REV[KO[k]] = { key: k, shift: false };
+  for (const k in KO_SHIFT) REV[KO_SHIFT[k]] = { key: k, shift: true };
+  for (const row of ROWS) for (const k of row) REV[k] = { key: k, shift: false };
+
+  const el = document.getElementById('kbd');
+  const keyEls = {};
+  let lang = 'ko', lastSig = '';
+
+  function build() {
+    el.innerHTML = '';
+    ROWS.forEach((row, ri) => {
+      const r = document.createElement('div');
+      r.className = 'row';
+      if (ri === 2) r.appendChild(Object.assign(document.createElement('div'), { className: 'key wide f0', textContent: 'Shift', id: 'kShiftL' }));
+      for (const k of row) {
+        const d = document.createElement('div');
+        d.className = `key f${FINGER[k]}` + (k === 'f' || k === 'j' ? ' home' : '');
+        keyEls[k] = d;
+        r.appendChild(d);
+      }
+      if (ri === 2) r.appendChild(Object.assign(document.createElement('div'), { className: 'key wide f7', textContent: 'Shift', id: 'kShiftR' }));
+      el.appendChild(r);
+    });
+    const tip = document.createElement('div');
+    tip.className = 'tip';
+    el.appendChild(tip);
+    label();
+  }
+  function label() {
+    for (const k in keyEls) {
+      const d = keyEls[k];
+      d.textContent = '';
+      d.append(lang === 'ko' ? KO[k] : k.toUpperCase());
+      const sm = document.createElement('small');
+      sm.textContent = lang === 'ko' ? (KO_SHIFT[k] ? `${KO_SHIFT[k]} ${k.toUpperCase()}` : k.toUpperCase()) : '';
+      if (sm.textContent) d.appendChild(sm);
+    }
+  }
+
+  // 지금 쳐야 할 다음 자모: 입력 중인 단어의 다음 글자, 없으면 성벽에 가장 가까운 단어의 첫 글자
+  function nextJamo() {
+    if (Typing.target && Typing.jamo.length) return Typing.target.jamo[Typing.jamo.length] || null;
+    const field = [...Game.enemies, ...Game.hostiles, ...Game.crates];
+    if (Game.boss) field.push(Game.boss);
+    let best = null, bd = Infinity;
+    for (const e of field) {
+      const d = Math.hypot(e.x - Game.player.x, e.y - Game.player.y);
+      if (d < bd) { bd = d; best = e; }
+    }
+    return best ? best.jamo[0] : null;
+  }
+
+  function lookup(j) {
+    const r = REV[j];
+    return r ? { ...r, finger: NAMES[FINGER[r.key]] } : null;
+  }
+
+  function update() {
+    const on = localStorage.getItem('typingGameKbd') !== 'off' && Game.running && !Game.paused;
+    el.classList.toggle('show', on);
+    if (!on) { lastSig = ''; return; }
+    const j = nextJamo();
+    const info = j && lookup(j);
+    if (info) {
+      const want = /[a-z]/.test(j) ? 'en' : 'ko';
+      if (want !== lang) { lang = want; label(); }
+    }
+    const sig = info ? `${info.key}${info.shift}${lang}` : 'none';
+    if (sig === lastSig) return;
+    lastSig = sig;
+    for (const k in keyEls) keyEls[k].classList.toggle('on', !!info && info.key === k);
+    const left = info && FINGER[info.key] <= 3;
+    document.getElementById('kShiftL').classList.toggle('on', !!info && info.shift && !left);
+    document.getElementById('kShiftR').classList.toggle('on', !!info && info.shift && left);
+    const tip = el.querySelector('.tip');
+    tip.textContent = '';
+    if (info) {
+      const s = document.createElement('span');
+      s.textContent = j;
+      tip.append('다음 글자 ', s, ` · ${info.finger}` + (info.shift ? ` + ${left ? '오른손' : '왼손'} 새끼손가락으로 Shift` : ''));
+    }
+  }
+
+  function fit() {
+    const w = 10 * 38 + 24, h = 3 * 38 + 40;
+    const sc = Math.min(1, (innerWidth - 32) / w, innerHeight * 0.28 / h);
+    el.style.setProperty('--kbd-scale', sc.toFixed(3));
+  }
+  addEventListener('resize', fit);
+  build(); fit();
+  return { update, lookup };
+})();
+
+// 시작 화면 설정 토글 (키보드 안내 / 뜻 보고 치기)
+function bindToggle(id, key, label) {
+  const b = document.getElementById(id);
+  const sync = () => { b.textContent = `${label}: ${localStorage.getItem(key) === 'off' ? '끔' : '켬'}`; };
+  b.addEventListener('click', () => {
+    localStorage.setItem(key, localStorage.getItem(key) === 'off' ? 'on' : 'off');
+    sync();
+  });
+  sync();
+}
+bindToggle('kbdBtn', 'typingGameKbd', '키보드 안내');
+bindToggle('meaningBtn', 'typingGameMeaning', '뜻 보고 치기');
+
+/* ================================================================
+ * 9. v2 — 단어장 자동 생성 · 우리 반 배포
+ * ================================================================ */
+const splitEntries = raw => String(raw || '').split(/[,\n]/).map(w => w.trim()).filter(Boolean);
+
+function appendEntries(entries) {
+  const cur = splitEntries(customWordsInput.value);
+  const merged = [...new Set([...cur, ...entries])];
+  customWordsInput.value = merged.join(', ');
+  return merged.length - cur.length;
+}
+
+// 작은 목록 한 줄 (이름 + 메타 + 버튼들) — 사용자 텍스트는 모두 textContent
+function listItem(name, meta, tag) {
+  const row = document.createElement('div');
+  row.className = 'ed-item';
+  const label = document.createElement('span');
+  label.className = 'name';
+  if (tag) {
+    const t = document.createElement('span');
+    t.className = 'ed-tag'; t.textContent = tag;
+    label.appendChild(t);
+  }
+  label.appendChild(document.createTextNode(name + ' '));
+  const m = document.createElement('span');
+  m.className = 'meta'; m.textContent = meta;
+  label.appendChild(m);
+  row.appendChild(label);
+  row.addBtn = (text, cls, fn) => {
+    const b = document.createElement('button');
+    b.className = `btn mini ${cls}`;
+    b.textContent = text;
+    b.addEventListener('click', e => { e.stopPropagation(); fn(); });
+    row.appendChild(b);
+    return b;
+  };
+  return row;
+}
+
+// ── ① 자동 생성: 교과 DB + 저장한 단어장 + 배포 단어장에서 검색 ──
+const Generator = {
+  sources() {
+    const out = [];
+    for (const c of window.CURRICULUM || []) {
+      out.push({
+        tag: '교과', title: `${c.s} ${c.g}학년 · ${c.u}`, setName: `${c.g}학년 ${c.s} · ${c.u}`,
+        subject: c.s, grade: c.g, unit: c.u, keys: c.k || '',
+        entries: [...c.w.split(/\s+/).filter(Boolean), ...(c.b || [])]
+      });
+    }
+    for (const set of WordSets.load()) {
+      out.push({ tag: '내 단어장', title: set.name, setName: set.name, subject: '', grade: null,
+                 unit: set.name, keys: '', entries: splitEntries(set.words) });
+    }
+    for (const set of (window.CLASS_WORDSETS.sets || [])) {
+      out.push({ tag: '우리 반', title: String(set.name), setName: String(set.name), subject: '', grade: null,
+                 unit: String(set.name), keys: '', entries: splitEntries(set.words) });
+    }
+    return out;
+  },
+
+  search(q) {
+    const gradeM = q.match(/([1-6])\s*학년/) || q.match(/(?:^|\s)([1-6])(?=\s|$)/);
+    const grade = gradeM ? +gradeM[1] : null;
+    const tokens = q.replace(/[1-6]\s*학년/g, ' ').split(/[\s,·]+/)
+      .map(t => t.replace(/(과목|단원)$/, '')).filter(t => t && !/^[1-6]$/.test(t));
+    const score = (it, t) => {
+      const T = t.toLowerCase();
+      if (it.subject && (T === it.subject || T.startsWith(it.subject))) return 5;
+      if (it.unit.toLowerCase().includes(T)) return 4;
+      if (it.keys.toLowerCase().split(/\s+/).some(k => k.includes(T) || (k.length > 1 && T.includes(k)))) return 3;
+      if (it.entries.some(w => w.toLowerCase().includes(T))) return 1;
+      return 0;
+    };
+    let items = this.sources().filter(it => !grade || it.grade === grade || it.grade === null && tokens.length);
+    if (!tokens.length) return grade ? items.filter(it => it.grade === grade) : [];
+    const scored = items.map(it => ({ it, s: tokens.map(t => score(it, t)) }));
+    // 모든 낱말이 맞는 단원 우선, 없으면 하나라도 맞는 단원
+    let hits = scored.filter(x => x.s.every(v => v > 0));
+    if (!hits.length) hits = scored.filter(x => x.s.some(v => v > 0));
+    return hits.map(x => ({ ...x.it, total: x.s.reduce((a, b) => a + b, 0) }))
+      .sort((a, b) => b.total - a.total || (a.grade || 9) - (b.grade || 9))
+      .slice(0, 30);
+  },
+
+  render() {
+    const q = document.getElementById('genQuery').value.trim();
+    const wrap = document.getElementById('genResults');
+    wrap.innerHTML = '';
+    if (!q) return;
+    const results = this.search(q);
+    if (!results.length) {
+      const p = document.createElement('small');
+      p.textContent = '맞는 단원을 찾지 못했어요. 과목 이름(국어·수학·사회·과학·영어)이나 단원의 핵심 낱말로 다시 찾아보거나, ②에 직접 입력해 주세요.';
+      wrap.appendChild(p);
+      return;
+    }
+    for (const r of results) {
+      const preview = r.entries.filter(w => !w.includes(' ')).slice(0, 5).join(', ');
+      const row = listItem(r.title, `${r.entries.length}개 · ${preview}…`, r.tag);
+      row.style.cursor = 'pointer';
+      const add = () => {
+        const added = appendEntries(r.entries);
+        const nameEl = document.getElementById('setName');
+        const name = nameEl.value.trim();
+        if (!name) nameEl.value = r.setName;
+        else if (!name.includes(r.unit)) nameEl.value = `${name} + ${r.unit}`;
+        btn.textContent = added ? `+${added}개 추가됨` : '이미 들어 있음';
+        Sound.pickup();
+      };
+      const btn = row.addBtn('추가', 'primary', add);
+      row.addEventListener('click', add);
+      wrap.appendChild(row);
+    }
+  }
+};
+document.getElementById('genBtn').addEventListener('click', () => Generator.render());
+document.getElementById('genQuery').addEventListener('keydown', e => { if (e.key === 'Enter') Generator.render(); });
+document.getElementById('clearWordsBtn').addEventListener('click', () => {
+  if (customWordsInput.value.trim() && !confirm('입력한 단어를 모두 지울까요?')) return;
+  customWordsInput.value = '';
+  document.getElementById('setName').value = '';
+});
+
+// ── ③ 우리 반 배포: 배포 목록 편집 → class-wordsets.js 내려받기 ──
+const Deploy = {
+  KEY: 'typingGameDeploy',
+  load() {
+    try {
+      const v = JSON.parse(localStorage.getItem(this.KEY));
+      if (Array.isArray(v)) return v;
+    } catch (e) { /* 손상된 값은 무시 */ }
+    return (window.CLASS_WORDSETS.sets || []).map(s => ({ name: String(s.name), words: String(s.words) }));
+  },
+  save(list) { localStorage.setItem(this.KEY, JSON.stringify(list)); this.render(); },
+
+  render() {
+    const wrap = document.getElementById('deployList');
+    wrap.innerHTML = '';
+    const list = this.load();
+    const info = document.createElement('small');
+    const live = window.CLASS_WORDSETS;
+    info.textContent = `지금 학생들에게 배포된 단어장: ${(live.sets || []).length}개` +
+      (live.updated ? ` (${live.updated} 배포)` : '') + ` · 아래는 다음에 배포할 목록 ${list.length}개`;
+    wrap.appendChild(info);
+    list.forEach((set, i) => {
+      const row = listItem(set.name, `${splitEntries(set.words).length}개`);
+      if (i > 0) row.addBtn('위로', 'sub', () => {
+        [list[i - 1], list[i]] = [list[i], list[i - 1]];
+        this.save(list);
+      });
+      row.addBtn('편집', 'sub', () => {
+        document.getElementById('setName').value = set.name;
+        customWordsInput.value = set.words;
+        customWordsInput.focus();
+      });
+      row.addBtn('빼기', 'sub', () => {
+        list.splice(i, 1);
+        this.save(list);
+      });
+      wrap.appendChild(row);
+    });
+  },
+
+  add() {
+    const name = document.getElementById('setName').value.trim() || '이름 없는 단어장';
+    const raw = customWordsInput.value.trim();
+    const wordCount = splitEntries(raw).filter(w => !w.includes(' ')).length;
+    if (wordCount < 3) { alert('단어(문장 제외)를 3개 이상 넣어 주세요!'); return; }
+    const list = this.load().filter(s => s.name !== name);   // 같은 이름은 새 내용으로 교체
+    list.push({ name, words: splitEntries(raw).join(', ') });
+    this.save(list);
+    alert(`'${name}'을(를) 배포 목록에 넣었어요.\n[배포 파일 내려받기]를 눌러 GitHub에 올리면 학생들에게 나타납니다.`);
+  },
+
+  download() {
+    const list = this.load();
+    if (!list.length && !confirm('배포 목록이 비어 있어요. 빈 목록으로 배포하면 학생 화면에서 우리 반 단어장이 사라집니다. 계속할까요?')) return;
+    const d = new Date();
+    const payload = {
+      updated: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
+      sets: list
+    };
+    const text = '/* 우리 반 배포 단어장 — 타자 서바이벌 선생님 메뉴에서 만든 파일입니다.\n' +
+      ' * GitHub 저장소의 class-wordsets.js를 이 파일로 덮어쓰면 모든 학생에게 적용됩니다. */\n' +
+      'window.CLASS_WORDSETS = ' + JSON.stringify(payload, null, 2) + ';\n';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
+    a.download = 'class-wordsets.js';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+};
+document.getElementById('deployAddBtn').addEventListener('click', () => Deploy.add());
+document.getElementById('deployDownloadBtn').addEventListener('click', () => Deploy.download());
+document.getElementById('editBtn').addEventListener('click', () => {
+  if (wordEditor.classList.contains('open')) Deploy.render();
+});
+
+// ── 학생 시작 화면: 우리 반 단어장 버튼 ──
+function renderClassSets() {
+  const sets = (window.CLASS_WORDSETS.sets || []).filter(s => s && s.name && s.words);
+  const box = document.getElementById('classSets');
+  const btns = document.getElementById('classSetBtns');
+  btns.innerHTML = '';
+  for (const set of sets) {
+    const b = document.createElement('button');
+    b.className = 'btn sub';
+    b.textContent = String(set.name);
+    b.addEventListener('click', () => {
+      if (!WordBank.loadCustom(String(set.words))) { alert('이 단어장에 단어가 없어요.'); return; }
+      startScreen.classList.add('hidden');
+      Game.start('custom');
+    });
+    btns.appendChild(b);
+  }
+  box.classList.toggle('show', sets.length > 0);
+}
+
+// 배포 파일은 캐시를 피해 항상 최신본을 불러옴 (선생님이 올린 직후에도 반영되도록)
+(() => {
+  const s = document.createElement('script');
+  s.src = 'class-wordsets.js?t=' + Date.now();
+  s.onload = s.onerror = () => {
+    renderClassSets();
+    if (wordEditor.classList.contains('open')) Deploy.render();
+  };
+  document.head.appendChild(s);
+})();
+</script>
+
+</body>
+</html>
