@@ -6,9 +6,9 @@ window.ADMIN_CONFIG = {
   "dir": "typing-game",
   "branch": "main",
   "secret": {
-    "salt": "1yCPGJj6Xs0g2IuyHFtNrA==",
-    "iv": "gPEpRnZpVJ0ZB+z8",
+    "salt": "NuKY4hnH0gm0upFPT5eeHw==",
+    "iv": "dE0HtGBVrHSmT2AV",
     "iter": 310000,
-    "data": "a9C7HR+wqIk+OflwVZtkPIwnEZOcqsTE1F4xa+ht40OrBfxnwihiRugqmRBxmhUvRsO/lPdyBsANRV9+VGbZJP07AxWraoqGhnbDgNice84f1b9xOk8msicLoQ4WhGHQ7+/9KtmyLo5AiLP+nw=="
+    "data": "VztDbIdlUk5j+NWFseVTlSV8ZZCCQrTqPo88uVxRz/OFb22ROhYuOIZgn1n8iDW8mrCcBh6NAfJJzpnzmgSkUMsM8kQ4lsoIZo8Z/9GCNkS0buNisL+ZIcmREDYEsMQf5i9N7VqIr3ChQ+bG5A=="
   }
 };
