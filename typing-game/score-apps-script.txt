@@ -12,6 +12,8 @@
  *  5. 나오는 "웹 앱 URL"(https://script.google.com/macros/s/…/exec)을 복사해
  *     게임의 [선생님 메뉴 → ④ 우리 반 학습 설정 → 점수 공유 주소]에 붙여 넣고 [학생들에게 배포하기]를 누릅니다.
  *
+ * 코드를 고친 뒤에는 [배포] → [배포 관리] → 연필(수정) → 버전: [새 버전] → [배포] 를 눌러야 반영됩니다. (주소는 그대로)
+ *
  * 기록은 이 시트의 "scores" 탭에 쌓입니다. 새 학기에는 2행부터 지우면 순위가 초기화됩니다.
  */
 const SHEET = 'scores';
@@ -38,11 +40,24 @@ function doGet(e) {
   for (let i = Math.max(0, rows.length - 3000); i < rows.length; i++) {
     const r = rows[i];
     if (p.set && String(r[1]) !== p.set) continue;
-    out.push({ t: r[0] instanceof Date ? r[0].getTime() : 0, set: String(r[1]), name: String(r[2]), score: Number(r[3]) || 0,
+    out.push({ t: time_(r[0]), set: String(r[1]), name: String(r[2]), score: Number(r[3]) || 0,
                cpm: Number(r[4]) || 0, acc: Number(r[5]) || 0, level: Number(r[6]) || 0, title: String(r[7]),
                combo: Number(r[8]) || 0, time: Number(r[9]) || 0 });
   }
   return json_({ ok: true, rows: out });
+}
+
+// 시간 칸 → 밀리초. Date 객체·날짜 문자열(예: 2026. 11. 23 오전 9:05:00)·시트 일련번호 모두 처리
+function time_(v) {
+  if (Object.prototype.toString.call(v) === '[object Date]') return v.getTime() || 0;
+  if (typeof v === 'number') return Math.round((v - 25569) * 86400000);   // 시트 날짜 일련번호
+  const s = String(v || '');
+  const m = s.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})\D*?\s*(오전|오후|AM|PM)?\s*(?:(\d{1,2}):(\d{2})(?::(\d{2}))?)?/i);
+  if (!m) return new Date(s).getTime() || 0;
+  let h = Number(m[5] || 0);
+  if (/오후|PM/i.test(m[4] || '') && h < 12) h += 12;
+  if (/오전|AM/i.test(m[4] || '') && h === 12) h = 0;
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), h, Number(m[6] || 0), Number(m[7] || 0)).getTime();
 }
 
 function sheet_() {

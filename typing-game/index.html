@@ -3277,6 +3277,8 @@ const Scores = {
 
   // 같은 이름은 최고 기록 하나만, 점수 높은 순
   rank(rows, period) {
+    // 점수 서버가 시간을 못 보내 주면(t=0) 기간을 거르지 않고 전체로 보여 줌 — 기록이 통째로 사라져 보이지 않도록
+    if (rows.length && rows.every(r => !r.t)) period = 'all';
     const now = new Date();
     const start = period === 'today' ? new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
       : period === 'week' ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7)).getTime() : 0;
@@ -3412,6 +3414,7 @@ const Board = {
       live.textContent = '● 실시간';
       const d = new Date();
       status.append(live, ` · ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')} 갱신 (10초마다)`);
+      if (rows.length && rows.every(r => !r.t)) status.append(' · ⚠ 점수 서버가 기록 시간을 보내지 않아 기간과 상관없이 전체 기록으로 보여요 (선생님: 점수 서버 코드를 새로 붙여 넣고 새 버전으로 배포해 주세요)');
     } catch (e) {
       status.textContent = '순위를 불러오지 못했어요. 인터넷 연결이나 점수 공유 주소를 확인해 주세요.';
     }
