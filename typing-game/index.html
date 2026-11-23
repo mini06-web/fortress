@@ -2362,7 +2362,7 @@ document.querySelectorAll('[data-mode]').forEach(btn => {
       return;
     }
     startScreen.classList.add('hidden');
-    Game.start(mode, { ko: '한글 낱말', en: '영어 단어' }[mode] || null);
+    Game.start(mode, mode === 'custom' ? customSetKey() : ({ ko: '한글 낱말', en: '영어 단어' }[mode] || null));
   });
 });
 
@@ -2377,6 +2377,22 @@ diffBtns.forEach(b => b.addEventListener('click', () => {
   syncDiffButtons();
 }));
 syncDiffButtons();
+
+// "내 단어장"으로 시작한 판의 순위판 이름 — 같은 단어 목록이면 어느 컴퓨터에서든 같은 이름이 되도록
+function customSetKey() {
+  const raw = WordBank.linkWords ?? localStorage.getItem('typingGameWords') ?? '';
+  const norm = r => String(r).split(/[,\n]/).map(w => w.trim()).filter(Boolean).join(',');
+  const words = norm(raw);
+  if (!words) return null;
+  const cls = (window.CLASS_WORDSETS.sets || []).find(st => st && st.words && norm(st.words) === words);
+  if (cls) return String(cls.name);
+  const mine = WordSets.load().find(st => st && st.words && norm(st.words) === words);
+  if (mine && !WordBank.linkWords) return `내 단어장 · ${mine.name}`.slice(0, 60);
+  let h = 0;
+  for (const ch of words) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+  const head = words.split(',').slice(0, 3).map(w => w.split('=')[0]).join('·');
+  return `선생님 단어장 · ${head} #${h.toString(36).slice(0, 4)}`.slice(0, 60);
+}
 
 // ── 단어장 링크 공유: URL 해시에 base64url(UTF-8)로 인코딩 ──
 const WordLink = {
@@ -2953,6 +2969,7 @@ function renderClassSets() {
   s.onload = s.onerror = () => {
     renderClassSets();
     ClassSettings.apply();
+    Scores.flushPending();
     if (wordEditor.classList.contains('open')) { Deploy.render(); ClassSettings.fillForm(); }
   };
   document.head.appendChild(s);
@@ -3279,6 +3296,20 @@ const Scores = {
     document.getElementById('playerName').value = this.name();
   },
 
+  // 보내지 못한 기록 보관함 — 다음 판이 끝날 때나 다음에 접속할 때 다시 보냄
+  PENDING: 'typingGamePendingScores',
+  pending() { try { return JSON.parse(localStorage.getItem(this.PENDING)) || []; } catch (e) { return []; } },
+  setPending(list) { try { localStorage.setItem(this.PENDING, JSON.stringify(list.slice(-30))); } catch (e) { /* 저장 불가 */ } },
+  async flushPending() {
+    if (!this.url()) return;
+    const list = this.pending();
+    const left = [];
+    for (const rec of list) {
+      try { await this.call(rec); } catch (e) { left.push(rec); }
+    }
+    if (left.length !== list.length) this.setPending(left);
+  },
+
   async onGameOver(g) {
     const titles = titlesFor(g);
     const tbox = document.getElementById('finalTitle');
@@ -3295,27 +3326,60 @@ const Scores = {
     const boardBtn = document.getElementById('overBoardBtn');
     boardBtn.style.display = 'none';
     if (!this.url() || !g.setKey || g.score <= 0) return;
-    const name = this.name();
+    const rec = { action: 'submit', set: g.setKey, score: g.score, cpm: g.cpm, acc: g.accuracy,
+                  level: g.level, title: titles.join(' · '), combo: g.maxCombo, time: Math.floor(g.elapsed) };
     const line = document.createElement('div');
     line.className = 'rank-line';
     rankEl.appendChild(line);
-    if (!name) { line.textContent = '처음 화면에서 이름을 넣으면 우리 반 순위에 기록돼요.'; return; }
+    const name = this.name();
+    if (name) return this.submit({ ...rec, name }, line, boardBtn);
+    // 이름이 없으면 기록을 버리지 않고 이 자리에서 이름을 받아 보냄
+    line.textContent = '이름을 넣으면 이번 판이 우리 반 순위에 기록돼요. ';
+    const inp = document.createElement('input');
+    inp.className = 'ed-input';
+    inp.maxLength = 12;
+    inp.placeholder = '예: 3번 김민지';
+    inp.style.cssText = 'width:150px; margin:6px 6px 0 0;';
+    const btn = document.createElement('button');
+    btn.className = 'btn primary mini';
+    btn.textContent = '기록하기';
+    const go = () => {
+      const v = inp.value.trim().slice(0, 12);
+      if (!v) { inp.focus(); return; }
+      try { localStorage.setItem('typingGameName', v); } catch (e) { /* 저장 불가 */ }
+      document.getElementById('playerName').value = v;
+      this.submit({ ...rec, name: v }, line, boardBtn);
+    };
+    btn.addEventListener('click', go);
+    inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') go(); });
+    line.append(document.createElement('br'), inp, btn);
+  },
+
+  async submit(rec, line, boardBtn) {
     line.textContent = '우리 반 순위에 기록하는 중…';
     try {
-      await this.call({ action: 'submit', set: g.setKey, name, score: g.score, cpm: g.cpm, acc: g.accuracy,
-                        level: g.level, title: titles.join(' · '), combo: g.maxCombo, time: Math.floor(g.elapsed) });
-      const { rows } = await this.call({ action: 'list', set: g.setKey });
+      await this.call(rec);
+    } catch (e) {
+      this.setPending([...this.pending(), rec]);
+      line.textContent = '지금은 기록을 보내지 못했어요. 이 컴퓨터에 보관해 두었다가 다음 판이 끝날 때 다시 보낼게요.';
+      return;
+    }
+    this.flushPending();
+    try {
+      const { rows } = await this.call({ action: 'list', set: rec.set });
       const list = this.rank(rows, 'today');
-      const i = list.findIndex(r => r.name === name);
+      const i = list.findIndex(r => r.name === rec.name);
       const mine = list[i];
       line.textContent = '';
+      if (i < 0) { line.textContent = '기록했어요! 순위판에서 확인해 보세요.'; boardBtn.style.display = ''; return; }
       const b = document.createElement('b');
       b.textContent = `${i + 1}위`;
-      line.append(`오늘 '${g.setKey}' 우리 반 `, b, ` / ${list.length}명`);
-      if (mine && mine.score > g.score) line.append(` (내 최고 ${mine.score}점)`);
+      line.append(`오늘 '${rec.set}' 우리 반 `, b, ` / ${list.length}명`);
+      if (mine && mine.score > rec.score) line.append(` (내 최고 ${mine.score}점)`);
       boardBtn.style.display = '';
     } catch (e) {
-      line.textContent = '기록을 보내지 못했어요. 인터넷 연결을 확인해 주세요.';
+      line.textContent = '기록했어요! (순위는 잠시 뒤 순위판에서 확인해 주세요)';
+      boardBtn.style.display = '';
     }
   }
 };
